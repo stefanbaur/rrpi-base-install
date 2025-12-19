@@ -5,7 +5,7 @@
   - Approximately 15 GB free space in /tmp
   - The rpi-imager tool (which can be downloaded from `https://downloads.raspberrypi.com/imager/imager_latest_amd64.AppImage`)
 # Required steps:
-  - ONLY when using a Compute Module with onboard eMMC flash, please follow the additional directions from: https://www.jeffgeerling.com/blog/2020/how-flash-raspberry-pi-os-compute-module-4-emmc-usbboot>
+  - ONLY when using a Compute Module with onboard eMMC flash, please follow the additional directions from: https://www.jeffgeerling.com/blog/2020/how-flash-raspberry-pi-os-compute-module-4-emmc-usbboot
     - Put the switch/jumper on your CM baseboard in the proper position to flash the eMMC
     - Connect the CM to the CM baseboard, if you have not already done so
     - Connect the CM baseboard to your computer
