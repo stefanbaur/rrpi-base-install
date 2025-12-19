@@ -20,7 +20,7 @@
   - Select your Raspberry Pi Model (Pi 4 or Pi 5, or the corresponding entry for a Compute Module 4 or 5), click "NEXT"
   - Select the proper Raspberry Pi OS version - do NOT use the default image, rather, pick: "Raspberry Pi OS (other)" -> "Raspberry Pi OS Lite (64-bit)" (Note that depending on the size of your screen and the rpi-imager window, you may have to scroll down to reach that selection), click "NEXT"
   - Select the destination media (rpi-imager should be smart enough to show only removable media, i.e. your microSD card or USB flash stick), click "NEXT"
-  - Eenter a suitable, unique hostname (e.g. grnp-donny-duck, grnp-daisy-duck), click "NEXT"
+  - Enter a suitable, unique hostname (e.g. grnp-donny-duck, grnp-daisy-duck), click "NEXT"
   - Select your country's capital, time zone, and keyboard (you can type the first letter to speed up scrolling, but only the first), click "NEXT"
   - Choose a username that will be common across all the devices you intend to manage, choose a random password with at least 16 characters and make sure to store it in a safe place. (The `base_install.sh` script will make sure remote logins using this password will not be permitted, but still, please don't choose something generic and easy to guess like "raspberry".), click "NEXT"
   - Blank all the fields regarding Wifi, click "NEXT"
