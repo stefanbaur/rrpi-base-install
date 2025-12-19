@@ -1,0 +1,2 @@
+templates/autostart.sh merge=ours
+templates/ENV?-custom-install.sh merge=ours
