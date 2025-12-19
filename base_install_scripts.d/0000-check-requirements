@@ -20,8 +20,8 @@ if ! [ -x /usr/bin/qemu-aarch64-static ] ||  \
 	echo "Updating package lists ..."
 	apt-get update
 	echo "Now fetching and installing packages ..."
-	apt-get -d -y install qemu-user-static parted dosfstools install uuid && \
-	apt-get -y install qemu-user-static parted dosfstools install uuid || exit 1
+	apt-get -d -y install qemu-user-static parted dosfstools uuid && \
+	apt-get -y install qemu-user-static parted dosfstools uuid || exit 1
 fi
 
 exit 0
