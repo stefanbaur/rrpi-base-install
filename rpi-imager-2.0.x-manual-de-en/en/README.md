@@ -64,4 +64,4 @@ Wait until it has finished.
 Wait until verification has finished.
 21. Once the message "Write complete!" appears, verify the settings once more.\
 ![image](./imager21.png "Write Complete Screen")\
-Click "Finish" and remove the media. (If you want to apply further customisations before booting, re-insert it right away.)
+Click "FINISH" and remove the media. (If you want to apply further customisations before booting, re-insert it right away.)
