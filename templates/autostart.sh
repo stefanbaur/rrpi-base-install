@@ -36,8 +36,9 @@ if [ $(grep $(cat /etc/ssh/banner) /data/reboot.log | wc -l) -eq 1 ] ; then #run
 			touch /data/ENV1-could-not-perform-reboot #runonce
 		fi #runonce
 	elif grep -q "^ENV2" /etc/ssh/banner; then #runonce
-		# as we already downloaded the required packages during the chroot phase, we can install sl without needing internet access #runonce
-		apt install -y sl 2>&1 | tee /data/$(cat /etc/ssh/banner)-apt.log > /dev/tty8 #runonce
+		# as we already downloaded the required packages during the chroot phase, we can install p910nd without needing internet access #runonce
+		apt install -y p910nd 2>&1 | tee /data/$(cat /etc/ssh/banner)-apt.log > /dev/tty8 #runonce
+		sed -e 's/^P910ND_NUM.*$/P910ND_NUM="0"/' -e 's/^P910ND_OPTS.*$/P910ND_OPTS=" -b -f /dev/usb/lp0"/' -e 's/^P910ND_START.*$/P910ND_START=1' -i /etc/default/p910nd #runonce
 		apt clean 2>&1 | tee /data/$(cat /etc/ssh/banner)-apt.log > /dev/tty8 #runonce
 		apt autopurge -y 2>&1 | tee /data/$(cat /etc/ssh/banner)-apt.log > /dev/tty8 #runonce
 		mount /dev/disk/by-label/bootfs /mnt #runonce
@@ -50,8 +51,9 @@ if [ $(grep $(cat /etc/ssh/banner) /data/reboot.log | wc -l) -eq 1 ] ; then #run
 			touch /data/ENV2-could-not-perform-reboot #runonce
 		fi #runonce
 	elif grep -q "^ENV3" /etc/ssh/banner; then #runonce
-		# as we already downloaded the required packages during the chroot phase, we can install sl without needing internet access #runonce
-		apt install -y sl 2>&1 | tee /data/$(cat /etc/ssh/banner)-apt.log > /dev/tty8 #runonce
+		# as we already downloaded the required packages during the chroot phase, we can install p910nd without needing internet access #runonce
+		apt install -y p910nd 2>&1 | tee /data/$(cat /etc/ssh/banner)-apt.log > /dev/tty8 #runonce
+		sed -e 's/^P910ND_NUM.*$/P910ND_NUM="0"/' -e 's/^P910ND_OPTS.*$/P910ND_OPTS=" -b -f /dev/usb/lp0"/' -e 's/^P910ND_START.*$/P910ND_START=1' -i /etc/default/p910nd #runonce
 		apt clean 2>&1 | tee /data/$(cat /etc/ssh/banner)-apt.log > /dev/tty8 #runonce
 		apt autopurge -y 2>&1 | tee /data/$(cat /etc/ssh/banner)-apt.log > /dev/tty8 #runonce
 		mount /dev/disk/by-label/bootfs /mnt #runonce
