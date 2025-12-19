@@ -52,3 +52,12 @@
 
 # Customization
 Please see the README.md files in the folders `templates` and `custom` for details on how to add your own packages and scripts.
+If you're still confused:
+1. Check out the branch `example`, where you can find four harmless, silly little example scripts.
+2. Build an image based on the `example` branch, and boot it on the Pi. It will cycle through several reboots, starting with ENV1 (twice), ENV2 (twice), ENV3 (twice), and finally reboot a last time to settle in ENV2.
+3. In ENV2, log in using the account data you provided in the rpi-image and try executing `sl` (a deliberate misspelling of `ls`).
+4. Switch to ENV3, using the command `sudo reboot 3`
+5. In ENV3, repeat step 3.
+6. Switch to ENV1, using the command `sudo reboot 1`
+7. Try repeating step 3 here - the expected result is a `command not found`.
+8. Examine the files `templates/ENV*` and finally `templates/autostart.sh` in the `example` branch (not on the Pi, as `autostart.sh` is self-modifying), and you should have an epiphany.
