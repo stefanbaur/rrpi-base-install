@@ -44,7 +44,7 @@ if [ $(grep $(cat /etc/ssh/banner) /data/reboot.log | wc -l) -eq 1 ] ; then #run
 		sed -e "s#^boot_partition=2#boot_partition=3#" -i /mnt/autoboot.txt #runonce
 		umount /dev/disk/by-label/bootfs #runonce
 		echo "Current date: $(date)" | tee -a /data/reboot.log >/dev/tty8 #runonce
-		if /sbin/shutdown -r 1 2>&1 tee /data/reboot.log > /dev/tty8; then #runonce
+		if /sbin/shutdown -r 1 2>&1 | tee /data/reboot.log > /dev/tty8; then #runonce
 			touch /data/ENV2-stage-complete #runonce
 		else #runonce
 			touch /data/ENV2-could-not-perform-reboot #runonce
