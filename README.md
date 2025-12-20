@@ -3,7 +3,7 @@
   - A Debian Bookworm system (or newer) - derivatives like Devuan and Ubuntu should work, too, as long as they are at least based on Debian Bookworm
   - A microSD card or USB flash memory stick, or a Compute Module with onboard eMMC flash, at least 32 GB in size
   - Approximately 15 GB free space in a temporary directory (defaults to `/tmp` but can be overridden in a `base_install_custom.conf` file)
-  - The rpi-imager tool (which can be downloaded from `https://downloads.raspberrypi.com/imager/imager_latest_amd64.AppImage`)
+  - The rpi-imager tool (which can be downloaded from `https://github.com/raspberrypi/rpi-imager/releases/` - please use at least version 2.0.2, either as AppImage or `*.deb`)
   - **Only when using a Compute Module with onboard eMMC flash:**
     - Connect the CM to the CM baseboard, if you have not already done so
     - Execute the following commands *once* to prepare the connection:\
@@ -21,8 +21,12 @@
   - connect your media (microSD card/USB flash stick) to your computer
   - Make sure you are either using "pristine" media straight out of the original packaging, or wipe the entire media with zeroes - else `base_install.sh` might detect traces of previous partitions/file systems on it and abort.
   - Start rpi-imager:
-    - `chmod +x imager_latest_amd64.AppImage`
-    - `sudo imager_latest_amd64.AppImage`
+    - When using the AppImage:
+      - Don't forget you need to run `chmod +x imager_name_here.AppImage` first!
+      - `sudo imager_name_here.AppImage`
+    - When using a `*.deb` package:
+      - `sudo apt install ./file_name_here.deb`
+      - `sudo rpi-imager`
   - Follow our [imager setup instructions](./rpi-imager-2.0.x-manual/README.md "Instructions")
   - Remove the removable media and re-insert it after a good 10-15 seconds, if you haven't already done so (if you are using a CM with onboard eMMC flash, this means you need to re-run `sudo ./rpiboot`, as explained above)
   - Review the default settings in `base_install.conf`, if you need to make any changes, save them as `base_install_custom.conf` so they won't get overwritten by a `git pull`
