@@ -20,6 +20,7 @@ if [ $(grep $(cat /etc/ssh/banner) /data/reboot.log | wc -l) -eq 1 ] ; then #run
 	chvt 8 #runonce
 	# remove cloud-init #runonce
 	apt purge cloud-init -y 2>&1 | tee -a /data/$(cat /etc/ssh/banner)-apt.log >/dev/tty8 #runonce
+	mv /etc/ssh/sshd_config.d/50-cloud-init.conf /etc/ssh/sshd_config.d/50-disable-password-auth.conf #runonce
 	# do not use apt autopurge -y or apt clean here, or you might wipe the overlayfs packages we already downloaded during the chroot phase #runonce
 	# enable overlay file system #runonce
 	raspi-config nonint enable_overlayfs 2>&1 | tee -a /data/$(cat /etc/ssh/banner)-apt.log >/dev/tty8 #runonce
