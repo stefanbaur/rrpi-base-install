@@ -10,6 +10,6 @@ sed -e 's/^ssh-/    - ssh-/g' -i $MOUNTPOINT/boot/firmware/user-data
 
 # disable password authentication in case rpi-imager "forgot" to add
 # the parameter (add parameter disabling it after the "enable_ssh: true" line)
-if ! grep -q '^enable_ssh: true' $MOUNTPOINT/boot/firmware/user-data ; then
+if ! grep -q '^ssh_pwauth' $MOUNTPOINT/boot/firmware/user-data ; then
 	sed -e '/enable_ssh: true/a ssh_pwauth: false' -i $MOUNTPOINT/boot/firmware/user-data
 fi
