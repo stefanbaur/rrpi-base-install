@@ -2,7 +2,7 @@
 # Prerequisites:
   - A Debian Bookworm system (or newer) - derivatives like Devuan and Ubuntu should work, too, as long as they are at least based on Debian Bookworm
   - A microSD card or USB flash memory stick, or a Compute Module with onboard eMMC flash, at least 32 GB in size
-  - Approximately 15 GB free space in /tmp
+  - Approximately 15 GB free space in a temporary directory (defaults to `/tmp` but can be overridden in a `base_install_custom.conf` file)
   - The rpi-imager tool (which can be downloaded from `https://downloads.raspberrypi.com/imager/imager_latest_amd64.AppImage`)
 # Required steps:
   - ONLY when using a Compute Module with onboard eMMC flash, please follow the additional directions from: https://www.jeffgeerling.com/blog/2020/how-flash-raspberry-pi-os-compute-module-4-emmc-usbboot
