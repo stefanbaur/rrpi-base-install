@@ -4,23 +4,31 @@
   - A microSD card or USB flash memory stick, or a Compute Module with onboard eMMC flash, at least 32 GB in size
   - Approximately 15 GB free space in a temporary directory (defaults to `/tmp` but can be overridden in a `base_install_custom.conf` file)
   - The rpi-imager tool (which can be downloaded from `https://downloads.raspberrypi.com/imager/imager_latest_amd64.AppImage`)
-# Required steps:
-  - ONLY when using a Compute Module with onboard eMMC flash, please follow the additional directions from: https://www.jeffgeerling.com/blog/2020/how-flash-raspberry-pi-os-compute-module-4-emmc-usbboot
-    - Put the switch/jumper on your CM baseboard in the proper position to flash the eMMC
+  - **Only when using a Compute Module with onboard eMMC flash:**
     - Connect the CM to the CM baseboard, if you have not already done so
-    - Connect the CM baseboard to your computer
-    - Run `rpiboot` (if it's throwing errors and the connection seems unstable/your image writing process ends prematurely, try `rpiboot -d mass-storage-gadget64`)
-  - ONLY when NOT using a Compute Module with onboard eMMC flash: connect your media (microSD card/USB flash stick) to your computer
+    - Execute the following commands *once* to prepare the connection:\
+      `sudo apt install git make gcc pkg-config libusb-1.0-0-dev`\
+      `git clone --depth=1 https://github.com/raspberrypi/usbboot`\
+      `cd usbboot`\
+      `make`
+    - Keep your shell open in this directory
+    - Whenever the instructions below prompt you to connect/(re)insert your media:
+      - run the command `sudo ./rpiboot`
+      - make sure the jumper/switch on your baseboard is in the proper position for flashing the eMMC
+      - plug the USB cable into the baseboard, then into the host
+      - watch the messages in the console window - if it's throwing errors and/or the connection seems unstable/your image writing process ends prematurely, try `sudo ./rpiboot -d mass-storage-gadget64`
+# Required steps:
+  - connect your media (microSD card/USB flash stick) to your computer
   - Make sure you are either using "pristine" media straight out of the original packaging, or wipe the entire media with zeroes - else `base_install.sh` might detect traces of previous partitions/file systems on it and abort.
   - Start rpi-imager:
     - `chmod +x imager_latest_amd64.AppImage`
     - `sudo imager_latest_amd64.AppImage`
   - Follow our [imager setup instructions](./rpi-imager-2.0.x-manual/README.md "Instructions")
-  - Remove the removable media and re-insert it after a good 10-15 seconds, if you haven't already done so (if you are using a CM with flash, this means you need to re-run `rpiboot`)
+  - Remove the removable media and re-insert it after a good 10-15 seconds, if you haven't already done so (if you are using a CM with onboard eMMC flash, this means you need to re-run `sudo ./rpiboot`, as explained above)
   - Review the default settings in `base_install.conf`, if you need to make any changes, save them as `base_install_custom.conf` so they won't get overwritten by a `git pull`
   - Review the templates in the `templates` folder; if you need to make any changes, save them in the `custom` folder so they won't get overwritten by a `git pull`
   - Run `sudo ./base_install.sh 2>&1 | tee base_install.log`
-  - When `base_install.sh` has finished its work, remove the media and boot your Pi from it (note that it will reboot several times until the installation is complete)
+  - When `base_install.sh` has finished its work, remove the media (in case of a CM with onboard eMMC flash, remove the USB cable and don't forget to move the jumper/switch back to the default, non-flashing position) and boot your Pi from it (note that it will reboot several times until the installation is complete)
 
 # Result
   - The above steps, combined with the `base_install.sh` script in this directory, will set you up with three boot environments you can choose from.
