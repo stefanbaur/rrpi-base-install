@@ -15,7 +15,7 @@
   - Start rpi-imager:
     - `chmod +x imager_latest_amd64.AppImage`
     - `sudo imager_latest_amd64.AppImage`
-  - Follow our [imager setup instructions](./rpi-imager-2.0.x-manual-de-en/README.md "Instructions")
+  - Follow our [imager setup instructions](./rpi-imager-2.0.x-manual/README.md "Instructions")
   - Remove the removable media and re-insert it after a good 10-15 seconds, if you haven't already done so (if you are using a CM with flash, this means you need to re-run `rpiboot`)
   - Review the default settings in `base_install.conf`, if you need to make any changes, save them as `base_install_custom.conf` so they won't get overwritten by a `git pull`
   - Review the templates in the `templates` folder; if you need to make any changes, save them in the `custom` folder so they won't get overwritten by a `git pull`
