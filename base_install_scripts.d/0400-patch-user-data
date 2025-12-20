@@ -21,3 +21,11 @@ if ! grep -q '^ssh_pwauth' $MOUNTPOINT/boot/firmware/user-data ; then
 else
 	echo "SSH Password login disabled already, not patching ..."
 fi
+
+# make sure our hostname is being set as requested
+if ! grep -q '^preserve_hostname: true' $MOUNTPOINT/boot/firmware/user-data ; then
+	echo "'preserve_hostname: true' was set in user-data, removing ..."
+	sed -e '/^preserve_hostname: true/d' -i $MOUNTPOINT/boot/firmware/user-data
+else
+	echo "No 'preserve_hostname: true' found, so no need to patch ..."
+fi
