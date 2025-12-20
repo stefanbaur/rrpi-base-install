@@ -6,7 +6,7 @@ echo "Patching cloud-init's user-data file .."
 # (this may happen with authorized_keys files instead of id_*.pub files,
 # as authorized_keys may contain multiple keys, but the imager currently
 # fails to handle those)
-if grep -q '^ssh-'; then
+if grep -q '^ssh-' $MOUNTPOINT/boot/firmware/user-data ; then
 	echo "SSH Key(s) found at beginning of a line in user-data, patching ..."
 	sed -e 's/^ssh-/    - ssh-/g' -i $MOUNTPOINT/boot/firmware/user-data
 else
