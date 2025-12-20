@@ -6,10 +6,18 @@ echo "Patching cloud-init's user-data file .."
 # (this may happen with authorized_keys files instead of id_*.pub files,
 # as authorized_keys may contain multiple keys, but the imager currently
 # fails to handle those)
-sed -e 's/^ssh-/    - ssh-/g' -i $MOUNTPOINT/boot/firmware/user-data
+if grep -q '^ssh-'; then
+	echo "SSH Key(s) found at beginning of a line in user-data, patching ..."
+	sed -e 's/^ssh-/    - ssh-/g' -i $MOUNTPOINT/boot/firmware/user-data
+else
+	echo "SSH Key(s) seem[s] to be in their proper position, not patching ..."
+fi
 
 # disable password authentication in case rpi-imager "forgot" to add
 # the parameter (add parameter disabling it after the "enable_ssh: true" line)
 if ! grep -q '^ssh_pwauth' $MOUNTPOINT/boot/firmware/user-data ; then
+	echo "No 'ssh_pwauth: false' entry found in user-data, patching ..."
 	sed -e '/enable_ssh: true/a ssh_pwauth: false' -i $MOUNTPOINT/boot/firmware/user-data
+else
+	echo "SSH Password login disabled already, not patching ..."
 fi
