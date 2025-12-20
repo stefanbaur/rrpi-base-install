@@ -3,21 +3,42 @@
 # make sure apt/dpkg don't try to pop up any dialog boxes
 export DEBIAN_FRONTEND=noninteractive
 
+chvt 8 #runonce
+clear >/dev/tty8 # runonce
+
 # test if cloud-init is still running #runonce
 echo "Checking/waiting for cloud-init to finish - $(date)" >>/data/reboot.log #runonce
-cloud-init status --wait #runonce
-echo "cloud-init complete - $(date)" >>/data/reboot.log #runonce
 
-# switch to console #8 and show that we're not yet ready if the banner is not set yet
-while ! test -s /etc/ssh/banner; do chvt 8; clear >/dev/tty8 ; echo "banner not set yet $(date)" >/dev/tty8 ; sleep 10; done
-chvt 1
+# this is supposedly the proper way to do it, but fails hard.
+# cloud-init status --wait | tee -a /data/reboot.log  #runonce
+
+while ! ps --no-header -C cloud-init >/dev/null; do  #runonce
+	echo "Waiting for cloud-init to start - $(date) ..." | tee -a /data/reboot.log #runonce
+	sleep 5 #runonce
+done #runonce
+
+while ps --no-header -C cloud-init >/dev/null; do  #runonce
+	echo "Waiting for cloud-init to finish - $(date) ..." | tee -a /data/reboot.log #runonce
+	sleep 5 #runonce
+done #runonce
+
+# show that we're not yet ready if the banner is not set yet
+while ! grep "^ENV" /etc/ssh/banner; do
+	chvt 8
+	clear >/dev/tty8
+	echo "banner not set yet $(date)" >/dev/tty8
+	sleep 10
+done
+
+echo "$(cat /etc/ssh/banner) - cloud-init complete - $(date)" >>/data/reboot.log #runonce
 
 # log our ENV and date
 echo "$(cat /etc/ssh/banner) - bootup complete - $(date)">>/data/reboot.log
 
-# if this is the first regular reboot then remove cloud-init and set reboot cycle to ENV2 #runonce
-if [ $(grep $(cat /etc/ssh/banner) /data/reboot.log | wc -l) -eq 1 ] ; then #runonce
-	chvt 8 #runonce
+# if cloud-init has completed for this ENV, remove cloud-init and check for further tasks #runonce
+if grep -q "^$(cat/etc/ssh/banner) - cloud-init complete" ; then #runonce
+	# make sure "PasswordAuthentication no" remains set even after cloud-init purge
+	mv /etc/ssh/sshd_config.d/50-cloud-init.conf /etc/ssh/sshd_config.d/50-disable-password-auth.conf #runonce
 	# remove cloud-init #runonce
 	apt purge cloud-init -y 2>&1 | tee -a /data/$(cat /etc/ssh/banner)-apt.log >/dev/tty8 #runonce
 	# do not use apt autopurge -y or apt clean here, or you might wipe the overlayfs packages we already downloaded during the chroot phase #runonce
@@ -69,3 +90,5 @@ if [ $(grep $(cat /etc/ssh/banner) /data/reboot.log | wc -l) -eq 1 ] ; then #run
 		fi #runonce
 	fi #runonce
 fi #runonce
+
+chvt 1 #runonce
