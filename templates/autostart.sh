@@ -96,7 +96,7 @@ if grep -q "^$MY_ENV - cloud-init complete" /data/reboot.log ; then
 		# as we already downloaded the required packages during the chroot phase, we can install p910nd without needing internet access
 		apt install -y p910nd 2>&1 | tee /data/$MY_ENV-apt.log
 		# set sane defaults for p910nd and configure it for autostart on boot
-		sed -e 's/^P910ND_NUM.*$/P910ND_NUM="0"/' -e 's#^P910ND_OPTS.*$#P910ND_OPTS=" -b -f /dev/usb/lp0"#' -e 's/^P910ND_START.*$/P910ND_START=1' -i /etc/default/p910nd
+		sed -e 's/^P910ND_NUM.*$/P910ND_NUM="0"/' -e 's#^P910ND_OPTS.*$#P910ND_OPTS=" -b -f /dev/usb/lp0"#' -e 's/^P910ND_START.*$/P910ND_START=1/' -i /etc/default/p910nd
 		# now clean up apt, as we're done installing packages
 		apt clean 2>&1 | tee /data/$MY_ENV-apt.log
 		apt autopurge -y 2>&1 | tee /data/$MY_ENV-apt.log
@@ -118,7 +118,7 @@ if grep -q "^$MY_ENV - cloud-init complete" /data/reboot.log ; then
 		# as we already downloaded the required packages during the chroot phase, we can install p910nd without needing internet access
 		apt install -y p910nd 2>&1 | tee /data/$MY_ENV-apt.log
 		# set sane defaults for p910nd and configure it for autostart on boot
-		sed -e 's/^P910ND_NUM.*$/P910ND_NUM="0"/' -e 's#^P910ND_OPTS.*$#P910ND_OPTS=" -b -f /dev/usb/lp0"#' -e 's/^P910ND_START.*$/P910ND_START=1' -i /etc/default/p910nd
+		sed -e 's/^P910ND_NUM.*$/P910ND_NUM="0"/' -e 's#^P910ND_OPTS.*$#P910ND_OPTS=" -b -f /dev/usb/lp0"#' -e 's/^P910ND_START.*$/P910ND_START=1/' -i /etc/default/p910nd
 		# now clean up apt, as we're done installing packages
 		apt clean 2>&1 | tee /data/$MY_ENV-apt.log
 		apt autopurge -y 2>&1 | tee /data/$MY_ENV-apt.log
