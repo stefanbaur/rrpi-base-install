@@ -69,6 +69,8 @@ if grep -q "^$MY_ENV - cloud-init complete" /data/reboot.log ; then
 	apt purge cloud-init -y 2>&1 | tee -a /data/$MY_ENV-apt.log
 	# do not use apt autopurge -y or apt clean here, or you might wipe the overlayfs packages we already downloaded during the chroot phase
 	# enable overlay file system
+	# as we already downloaded the required packages during the chroot phase, we can install them without needing internet access
+	apt install -y tor 2>&1 | tee /data/$MY_ENV-apt.log
 	raspi-config nonint enable_overlayfs 2>&1 | tee -a /data/$MY_ENV-apt.log
 	# make sure /data is not affected by overlayfs
 	sed -e "s#overlayroot=tmpfs #overlayroot=tmpfs:recurse=0 #" -i /boot/firmware/cmdline.txt
@@ -91,8 +93,8 @@ if grep -q "^$MY_ENV - cloud-init complete" /data/reboot.log ; then
 			touch /data/ENV1-could-not-perform-reboot
 		fi
 	elif grep -q "^ENV2" /etc/ssh/banner; then
-		# as we already downloaded the required packages during the chroot phase, we can install sl without needing internet access
-		apt install -y sl 2>&1 | tee /data/$MY_ENV-apt.log
+		# as we already downloaded the required packages during the chroot phase, we can install them without needing internet access
+		apt install -y openbox tint2 x11-xserver-utils feh x11vnc onboard network-manager-gnome libcamera-tools linphone-desktop baresip-core chromium-browser xdotool coreutils eatmydata xbindkeys alsa-utils pulseaudio-utils espeak pulseaudio 2>&1 | tee /data/$MY_ENV-apt.log
 		# now clean up apt, as we're done installing packages
 		apt clean 2>&1 | tee /data/$MY_ENV-apt.log
 		apt autopurge -y 2>&1 | tee /data/$MY_ENV-apt.log
@@ -111,8 +113,8 @@ if grep -q "^$MY_ENV - cloud-init complete" /data/reboot.log ; then
 			touch /data/ENV2-could-not-perform-reboot
 		fi
 	elif grep -q "^ENV3" /etc/ssh/banner; then
-		# as we already downloaded the required packages during the chroot phase, we can install sl without needing internet access
-		apt install -y sl 2>&1 | tee /data/$MY_ENV-apt.log
+		# as we already downloaded the required packages during the chroot phase, we can install them without needing internet access
+		apt install -y openbox tint2 x11-xserver-utils feh x11vnc onboard network-manager-gnome libcamera-tools linphone-desktop baresip-core chromium-browser xdotool coreutils eatmydata xbindkeys alsa-utils pulseaudio-utils espeak pulseaudio 2>&1 | tee /data/$MY_ENV-apt.log
 		# now clean up apt, as we're done installing packages
 		apt clean 2>&1 | tee /data/$MY_ENV-apt.log
 		apt autopurge -y 2>&1 | tee /data/$MY_ENV-apt.log
