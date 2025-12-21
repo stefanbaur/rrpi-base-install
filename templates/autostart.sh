@@ -65,6 +65,8 @@ if grep -q "^$MY_ENV - cloud-init complete" /data/reboot.log ; then
 	# this block gets executed in all ENVs
 	# make sure "PasswordAuthentication no" remains set even after cloud-init purge
 	mv /etc/ssh/sshd_config.d/50-cloud-init.conf /etc/ssh/sshd_config.d/50-disable-password-auth.conf
+	# add additional eth interfaces to bridge, if present
+	sed -e "s/bridge_ports eth0/bridge ports $(ip a l | awk '$2~/eth/ && !/\@/ { print $2 }' | tr -s '\n:' '  ')/" -i /etc/network/interfaces
 	# remove cloud-init
 	apt purge cloud-init -y 2>&1 | tee -a /data/$MY_ENV-apt.log
 	# do not use apt autopurge -y or apt clean here, or you might wipe the overlayfs packages we already downloaded during the chroot phase
