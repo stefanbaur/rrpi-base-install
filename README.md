@@ -60,3 +60,7 @@ If you're still confused:
 6. Switch to ENV1, using the command `sudo reboot 1`
 7. Try repeating step 3 here - the expected result is a `command not found`.
 8. Examine the files `templates/ENV*` and finally `templates/autostart.sh` in the `example` branch (not on the Pi, as `autostart.sh` is self-modifying), and you should have an epiphany.
+
+Shield: [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
+
+This work is licensed under the [GNU Public License, Version 3.0](https://www.gnu.org/licenses/gpl-3.0)
