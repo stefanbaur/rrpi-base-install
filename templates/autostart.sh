@@ -1,92 +1,150 @@
 #!/bin/bash
 
+# show that we're not yet ready if the banner is not set yet
+chvt 8
+clear >/dev/tty8
+while ! ([ -f /etc/ssh/banner ] && grep "^ENV" /etc/ssh/banner) ; do
+	echo "banner not set yet $(date)"
+	sleep 10
+done
+chvt 1
+
+# set ENV vars once banner is available
+MY_ENV=$(cat /etc/ssh/banner)
+MY_ENV_NUMBER=$(sed -e 's/^ENV([1-3]).*$/$1/' /etc/ssh/banner)
+
+# log our ENV and date
+echo "$MY_ENV - booted and reached /data/autostart.sh - $(date)" | tee -a /data/reboot.log
+
+### begin-of-runonce ###
+
+# copy all output to log file as well as debug console
+exec > >(tee "/data/setup.log" >/dev/tty8) 2>&1
+
+# switch to debug console and clear it
+chvt 8
+clear
+
 # make sure apt/dpkg don't try to pop up any dialog boxes
 export DEBIAN_FRONTEND=noninteractive
 
-chvt 8 #runonce
-clear >/dev/tty8 # runonce
+# test if cloud-init is still running
+echo "$MY_ENV - checking/waiting for cloud-init to finish - $(date)" | tee -a /data/reboot.log
 
-# test if cloud-init is still running #runonce
-echo "Checking/waiting for cloud-init to finish - $(date)" >>/data/reboot.log #runonce
-
-# this is supposedly the proper way to do it, but fails hard.
-# cloud-init status --wait | tee -a /data/reboot.log  #runonce
-
-while ! ps --no-header -C cloud-init >/dev/null; do  #runonce
-	echo "Waiting for cloud-init to start - $(date) ..." | tee -a /data/reboot.log #runonce
-	sleep 5 #runonce
-done #runonce
-
-while ps --no-header -C cloud-init >/dev/null; do  #runonce
-	echo "Waiting for cloud-init to finish - $(date) ..." | tee -a /data/reboot.log #runonce
-	sleep 5 #runonce
-done #runonce
-
-# show that we're not yet ready if the banner is not set yet
-while ! grep "^ENV" /etc/ssh/banner; do
-	chvt 8
-	clear >/dev/tty8
-	echo "banner not set yet $(date)" >/dev/tty8
-	sleep 10
+# checking for the presence of this file is one of the officially supported methods
+# to determine if cloud-init has finished - and the only one that works. 
+while ! [ -s /var/lib/cloud/instance/boot-finished ] ; do
+	echo "$MY_ENV - cloud init not done yet - $(date)" | tee -a /data/reboot.log
+	date >> /data/cloud-init-processes.log
+	pstree -p >> /data/cloud-init-processes.log
+	ps ax >> /data/cloud-init-processes.log
+	# this is because sometimes, cloud-init is too dumb to live and claims /boot/firmware/meta-data and/or 
+	# /boot/firmware/user-data could not be found - EVEN THOUGH THE FILES ARE RIGHT WHERE THEY BELONG
+	#if grep -q "FAIL: no local data found" /var/log/cloud-init.log || grep -q " failed$" /var/log/cloud-init-output.log ; then
+	#if ((grep "No such file" /var/log/cloud-init.log | grep -q "user-data") || grep -q " failed$" /var/log/cloud-init-output.log) ; then
+	if (grep "No such file" /var/log/cloud-init.log | grep -q "user-data") ; then
+		# in that case, we copy and zero the logfiles ...
+		cp /var/log/cloud-init.log /data/$MY_ENV-FAIL-$(date +%F_%T|tr ':' '-')-cloud-init.log
+		echo "" > /var/log/cloud-init.log
+		cp /var/log/cloud-init-output.log /data/$MY_ENV-FAIL-$(date +%F_%T|tr ':' '-')-cloud-init-output.log
+	        echo "" > /var/log/cloud-init-output.log
+		# ... log the error in our own logfile ...
+		echo "$MY_ENV - FAILURE TO RUN CLOUD-INIT, REBOOTING - $(date)" | tee -a /data/reboot.log
+		# ... and trigger an immediate reboot into current ENV, because rebooting and running cloud-init again seems to fix it
+		/sbin/reboot $MY_ENV_NUMBER
+	fi
+	sleep 5
 done
 
-echo "$(cat /etc/ssh/banner) - cloud-init complete - $(date)" >>/data/reboot.log #runonce
+# log that we're done
+echo "$MY_ENV - cloud-init complete - $(date)" | tee -a /data/reboot.log
 
-# log our ENV and date
-echo "$(cat /etc/ssh/banner) - bootup complete - $(date)">>/data/reboot.log
+# if cloud-init has completed for this ENV, remove cloud-init and check for further tasks
+if grep -q "^$MY_ENV - cloud-init complete" /data/reboot.log ; then
 
-# if cloud-init has completed for this ENV, remove cloud-init and check for further tasks #runonce
-if grep -q "^$(cat/etc/ssh/banner) - cloud-init complete" ; then #runonce
+	# this block gets executed in all ENVs
 	# make sure "PasswordAuthentication no" remains set even after cloud-init purge
-	mv /etc/ssh/sshd_config.d/50-cloud-init.conf /etc/ssh/sshd_config.d/50-disable-password-auth.conf #runonce
-	# remove cloud-init #runonce
-	apt purge cloud-init -y 2>&1 | tee -a /data/$(cat /etc/ssh/banner)-apt.log >/dev/tty8 #runonce
-	# do not use apt autopurge -y or apt clean here, or you might wipe the overlayfs packages we already downloaded during the chroot phase #runonce
-	# enable overlay file system #runonce
-	raspi-config nonint enable_overlayfs 2>&1 | tee -a /data/$(cat /etc/ssh/banner)-apt.log >/dev/tty8 #runonce
-	# make sure /data is not affected by overlayfs #runonce
-	sed -e "s#overlayroot=tmpfs #overlayroot=tmpfs:recurse=0 #" -i /boot/firmware/cmdline.txt #runonce
-	if grep -q "^ENV1" /etc/ssh/banner; then #runonce
-		apt clean 2>&1 | tee -a /data/$(cat /etc/ssh/banner)-apt.log > /dev/tty8 #runonce
-		apt autopurge -y 2>&1 | tee -a /data/$(cat /etc/ssh/banner)-apt.log > /dev/tty8 #runonce
-		sed -e "s#^boot_partition=1#boot_partition=2#" -i /boot/firmware/autoboot.txt #runonce
-		echo "Current date: $(date)" | tee -a /data/reboot.log >/dev/tty8 #runonce
-		if /sbin/shutdown -r 1 1 2>&1 | tee -a /data/reboot.log >/dev/tty8; then #runonce
-			touch /data/ENV1-stage-complete #runonce
-		else #runonce
-			touch /data/ENV1-could-not-perform-reboot #runonce
-		fi #runonce
-	elif grep -q "^ENV2" /etc/ssh/banner; then #runonce
-		# as we already downloaded the required packages during the chroot phase, we can install sl without needing internet access #runonce
-		apt install -y sl 2>&1 | tee /data/$(cat /etc/ssh/banner)-apt.log > /dev/tty8 #runonce
-		apt clean 2>&1 | tee /data/$(cat /etc/ssh/banner)-apt.log > /dev/tty8 #runonce
-		apt autopurge -y 2>&1 | tee /data/$(cat /etc/ssh/banner)-apt.log > /dev/tty8 #runonce
-		mount /dev/disk/by-label/bootfs /mnt #runonce
-		sed -e "s#^boot_partition=2#boot_partition=3#" -i /mnt/autoboot.txt #runonce
-		umount /dev/disk/by-label/bootfs #runonce
-		echo "Current date: $(date)" | tee -a /data/reboot.log >/dev/tty8 #runonce
-		if /sbin/shutdown -r 1 2>&1 | tee /data/reboot.log > /dev/tty8; then #runonce
-			touch /data/ENV2-stage-complete #runonce
-		else #runonce
-			touch /data/ENV2-could-not-perform-reboot #runonce
-		fi #runonce
-	elif grep -q "^ENV3" /etc/ssh/banner; then #runonce
-		# as we already downloaded the required packages during the chroot phase, we can install sl without needing internet access #runonce
-		apt install -y sl 2>&1 | tee /data/$(cat /etc/ssh/banner)-apt.log > /dev/tty8 #runonce
-		apt clean 2>&1 | tee /data/$(cat /etc/ssh/banner)-apt.log > /dev/tty8 #runonce
-		apt autopurge -y 2>&1 | tee /data/$(cat /etc/ssh/banner)-apt.log > /dev/tty8 #runonce
-		mount /dev/disk/by-label/bootfs /mnt #runonce
-		sed -e "s#^boot_partition=3#boot_partition=2#" -i /mnt/autoboot.txt #runonce
-		umount /dev/disk/by-label/bootfs #runonce
-		touch /data/ENV3-stage-complete #runonce
-		echo "Current date: $(date)" | tee -a /data/reboot.log >/dev/tty8 #runonce
-		# this line removes all lines ending with #runonce from this autostart.sh file #runonce
-		if sed -e "/#runonce$/d" -i /data/autostart.sh && /sbin/shutdown -r 1 1 2>&1 | tee -a /data/reboot.log >/dev/tty8; then #runonce
-			touch /data/ENV3-runonce-removed #runonce
-		else #runonce
-			touch /data/ENV3-could-not-remove-runonce #runonce
-		fi #runonce
-	fi #runonce
-fi #runonce
+	mv /etc/ssh/sshd_config.d/50-cloud-init.conf /etc/ssh/sshd_config.d/50-disable-password-auth.conf
+	# remove cloud-init
+	apt purge cloud-init -y 2>&1 | tee -a /data/$MY_ENV-apt.log
+	# do not use apt autopurge -y or apt clean here, or you might wipe the overlayfs packages we already downloaded during the chroot phase
+	# enable overlay file system
+	raspi-config nonint enable_overlayfs 2>&1 | tee -a /data/$MY_ENV-apt.log
+	# make sure /data is not affected by overlayfs
+	sed -e "s#overlayroot=tmpfs #overlayroot=tmpfs:recurse=0 #" -i /boot/firmware/cmdline.txt
 
-chvt 1 #runonce
+	# the following blocks are ENV-specific
+	if grep -q "^ENV1" /etc/ssh/banner; then
+		# now clean up apt, as we're in ENV1 and don't want to install any extra packages here
+		apt clean 2>&1 | tee -a /data/$MY_ENV-apt.log
+		apt autopurge -y 2>&1 | tee -a /data/$MY_ENV-apt.log
+		# set the boot partition for next boot 1->2
+		sed -e "s#^boot_partition=1#boot_partition=2#" -i /boot/firmware/autoboot.txt
+		# perform a reboot
+		if /sbin/reboot 2>&1 | tee -a /data/reboot.log ; then
+			# log success
+			echo "$MY_ENV - stage complete - $(date)" | tee -a /data/reboot.log
+			touch /data/ENV1-stage-complete
+		else
+			# log failure
+			echo "$MY_ENV - could not perform reboot - $(date)" | tee -a /data/reboot.log
+			touch /data/ENV1-could-not-perform-reboot
+		fi
+	elif grep -q "^ENV2" /etc/ssh/banner; then
+		# as we already downloaded the required packages during the chroot phase, we can install sl without needing internet access
+		apt install -y sl 2>&1 | tee /data/$MY_ENV-apt.log
+		# now clean up apt, as we're done installing packages
+		apt clean 2>&1 | tee /data/$MY_ENV-apt.log
+		apt autopurge -y 2>&1 | tee /data/$MY_ENV-apt.log
+		# set the boot partition for next boot 2->3 (as we're in ENV2, we need to mount ENV1's bootfs for that)
+		mount /dev/disk/by-label/bootfs /mnt
+		sed -e "s#^boot_partition=2#boot_partition=3#" -i /mnt/autoboot.txt
+		umount /dev/disk/by-label/bootfs
+		# perform a reboot
+		if /sbin/reboot 2>&1 | tee -a /data/reboot.log ; then
+			# log success
+			echo "$MY_ENV - stage complete - $(date)" | tee -a /data/reboot.log
+			touch /data/ENV2-stage-complete
+		else
+			# log failure
+			echo "$MY_ENV - could not perform reboot - $(date)" | tee -a /data/reboot.log
+			touch /data/ENV2-could-not-perform-reboot
+		fi
+	elif grep -q "^ENV3" /etc/ssh/banner; then
+		# as we already downloaded the required packages during the chroot phase, we can install sl without needing internet access
+		apt install -y sl 2>&1 | tee /data/$MY_ENV-apt.log
+		# now clean up apt, as we're done installing packages
+		apt clean 2>&1 | tee /data/$MY_ENV-apt.log
+		apt autopurge -y 2>&1 | tee /data/$MY_ENV-apt.log
+		# set the boot partition for next boot 3->2 (as we're in ENV3, we need to mount ENV1's bootfs for that)
+		mount /dev/disk/by-label/bootfs /mnt
+		sed -e "s#^boot_partition=3#boot_partition=2#" -i /mnt/autoboot.txt
+		umount /dev/disk/by-label/bootfs
+		# log success
+		echo "$MY_ENV - stage complete - $(date)" | tee -a /data/reboot.log
+		touch /data/ENV3-stage-complete
+		# this line removes all lines below the one starting with ### begin-of-runonce ### from this autostart.sh file
+		if sed '/^### begin-of-runonce ###/q' -i /data/autostart.sh ; then
+			# log success
+			echo "$MY_ENV - runonce removed - $(date)" | tee -a /data/reboot.log
+			touch /data/ENV3-runonce-removed
+			# cleanup unless we detected a failure
+			if ! grep -q "FAILURE TO RUN" /data/reboot.log ; then
+				rm /data/cloud-init-processes.log
+				rm /data/setup.log
+				for ENVFILE in /data/ENV?-stage-complete ; do
+					if [ -f $ENVFILE ] && ! [ -s $ENVFILE ] ; then
+						rm $ENVFILE
+					fi
+				done
+			fi
+			# perform a reboot
+			/sbin/reboot 2>&1 | tee -a /data/reboot.log
+			echo "$MY_ENV - reboot triggered - $(date)" | tee -a /data/reboot.log
+		else
+			# log failure
+			echo "$MY_ENV - could not remove runonce - $(date)" | tee -a /data/reboot.log
+			touch /data/ENV3-could-not-remove-runonce
+		fi
+	fi
+fi
