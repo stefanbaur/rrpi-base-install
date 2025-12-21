@@ -1,0 +1,8 @@
+#!/bin/bash
+
+cat >$MOUNTPOINT/etc/issue.d/IP.issue <IPISSUE
+My br0 IP address is \4{br0} \6{br0}
+My eth0 IP address is \4{eth0} \6{eth0}
+My wlan0 IP address is \4{wlan0} \6{wlan0}
+
+IPISSUE
