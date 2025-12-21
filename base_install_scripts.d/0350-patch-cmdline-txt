@@ -1,0 +1,3 @@
+#!/bin/bash
+
+sed -e 's/ resize//g' -i $MOUNTPOINT/boot/firmware/cmdline.txt
