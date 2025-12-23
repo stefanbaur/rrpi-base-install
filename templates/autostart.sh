@@ -99,8 +99,8 @@ if grep -q "^$MY_ENV - cloud-init complete" /data/reboot.log ; then
 		# as we already downloaded the required packages during the chroot phase, we can install them without needing internet access
 		apt-get install -y openbox tint2 x11-xserver-utils feh x11vnc onboard network-manager-gnome libcamera-tools linphone-cli linphone-common baresip baresip-x11 baresip-gtk baresip-gstreamer baresip-ffmpeg chromium chromium-sandbox chromium-l10n xdotool coreutils eatmydata xbindkeys alsa-utils pulseaudio-utils espeak pulseaudio 2>&1 | tee /data/$MY_ENV-apt.log
 		# now clean up apt, as we're done installing packages
-		apt-get clean 2>&1 | tee /data/$MY_ENV-apt.log
-		apt-get autopurge -y 2>&1 | tee /data/$MY_ENV-apt.log
+		apt-get clean 2>&1 | tee -a /data/$MY_ENV-apt.log
+		apt-get autopurge -y 2>&1 | tee -a /data/$MY_ENV-apt.log
 		# set the boot partition for next boot 2->3 (as we're in ENV2, we need to mount ENV1's bootfs for that)
 		mount /dev/disk/by-label/bootfs /mnt
 		sed -e "s#^boot_partition=2#boot_partition=3#" -i /mnt/autoboot.txt
@@ -119,8 +119,8 @@ if grep -q "^$MY_ENV - cloud-init complete" /data/reboot.log ; then
 		# as we already downloaded the required packages during the chroot phase, we can install them without needing internet access
 		apt-get install -y openbox tint2 x11-xserver-utils feh x11vnc onboard network-manager-gnome libcamera-tools linphone-cli linphone-common baresip baresip-x11 baresip-gtk baresip-gstreamer baresip-ffmpeg chromium chromium-sandbox chromium-l10n xdotool coreutils eatmydata xbindkeys alsa-utils pulseaudio-utils espeak pulseaudio 2>&1 | tee /data/$MY_ENV-apt.log
 		# now clean up apt, as we're done installing packages
-		apt-get clean 2>&1 | tee /data/$MY_ENV-apt.log
-		apt-get autopurge -y 2>&1 | tee /data/$MY_ENV-apt.log
+		apt-get clean 2>&1 | tee -a /data/$MY_ENV-apt.log
+		apt-get autopurge -y 2>&1 | tee -a /data/$MY_ENV-apt.log
 		# set the boot partition for next boot 3->2 (as we're in ENV3, we need to mount ENV1's bootfs for that)
 		mount /dev/disk/by-label/bootfs /mnt
 		sed -e "s#^boot_partition=3#boot_partition=2#" -i /mnt/autoboot.txt
