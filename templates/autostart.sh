@@ -68,8 +68,8 @@ if grep -q "^$MY_ENV - cloud-init complete" /data/reboot.log ; then
 	# add additional eth interfaces to bridge, if present
 	sed -e "s/bridge_ports eth0/bridge_ports $(ip a l | awk '$2~/eth/ && !/\@/ { print $2 }' | tr -s '\n:' '  ')/" -i /etc/network/interfaces
 	# remove cloud-init
-	apt purge cloud-init -y 2>&1 | tee -a /data/$MY_ENV-apt.log
-	# do not use apt autopurge -y or apt clean here, or you might wipe the overlayfs packages we already downloaded during the chroot phase
+	apt-get purge cloud-init -y 2>&1 | tee -a /data/$MY_ENV-apt.log
+	# do not use apt-get autopurge -y or apt-get clean here, or you might wipe the overlayfs packages we already downloaded during the chroot phase
 	# enable overlay file system
 	raspi-config nonint enable_overlayfs 2>&1 | tee -a /data/$MY_ENV-apt.log
 	# make sure /data is not affected by overlayfs
@@ -78,8 +78,8 @@ if grep -q "^$MY_ENV - cloud-init complete" /data/reboot.log ; then
 	# the following blocks are ENV-specific
 	if grep -q "^ENV1" /etc/ssh/banner; then
 		# now clean up apt, as we're in ENV1 and don't want to install any extra packages here
-		apt clean 2>&1 | tee -a /data/$MY_ENV-apt.log
-		apt autopurge -y 2>&1 | tee -a /data/$MY_ENV-apt.log
+		apt-get clean 2>&1 | tee -a /data/$MY_ENV-apt.log
+		apt-get autopurge -y 2>&1 | tee -a /data/$MY_ENV-apt.log
 		# set the boot partition for next boot 1->2
 		sed -e "s#^boot_partition=1#boot_partition=2#" -i /boot/firmware/autoboot.txt
 		# perform a reboot
@@ -94,12 +94,12 @@ if grep -q "^$MY_ENV - cloud-init complete" /data/reboot.log ; then
 		fi
 	elif grep -q "^ENV2" /etc/ssh/banner; then
 		# as we already downloaded the required packages during the chroot phase, we can install p910nd without needing internet access
-		apt install -y p910nd 2>&1 | tee /data/$MY_ENV-apt.log
+		apt-get install -y p910nd 2>&1 | tee /data/$MY_ENV-apt.log
 		# set sane defaults for p910nd and configure it for autostart on boot
 		sed -e 's/^P910ND_NUM.*$/P910ND_NUM="0"/' -e 's#^P910ND_OPTS.*$#P910ND_OPTS=" -b -f /dev/usb/lp0"#' -e 's/^P910ND_START.*$/P910ND_START=1/' -i /etc/default/p910nd
 		# now clean up apt, as we're done installing packages
-		apt clean 2>&1 | tee -a /data/$MY_ENV-apt.log
-		apt autopurge -y 2>&1 | tee -a /data/$MY_ENV-apt.log
+		apt-get clean 2>&1 | tee -a /data/$MY_ENV-apt.log
+		apt-get autopurge -y 2>&1 | tee -a /data/$MY_ENV-apt.log
 		# set the boot partition for next boot 2->3 (as we're in ENV2, we need to mount ENV1's bootfs for that)
 		mount /dev/disk/by-label/bootfs /mnt
 		sed -e "s#^boot_partition=2#boot_partition=3#" -i /mnt/autoboot.txt
@@ -116,12 +116,12 @@ if grep -q "^$MY_ENV - cloud-init complete" /data/reboot.log ; then
 		fi
 	elif grep -q "^ENV3" /etc/ssh/banner; then
 		# as we already downloaded the required packages during the chroot phase, we can install p910nd without needing internet access
-		apt install -y p910nd 2>&1 | tee /data/$MY_ENV-apt.log
+		apt-get install -y p910nd 2>&1 | tee /data/$MY_ENV-apt.log
 		# set sane defaults for p910nd and configure it for autostart on boot
 		sed -e 's/^P910ND_NUM.*$/P910ND_NUM="0"/' -e 's#^P910ND_OPTS.*$#P910ND_OPTS=" -b -f /dev/usb/lp0"#' -e 's/^P910ND_START.*$/P910ND_START=1/' -i /etc/default/p910nd
 		# now clean up apt, as we're done installing packages
-		apt clean 2>&1 | tee -a /data/$MY_ENV-apt.log
-		apt autopurge -y 2>&1 | tee -a /data/$MY_ENV-apt.log
+		apt-get clean 2>&1 | tee -a /data/$MY_ENV-apt.log
+		apt-get autopurge -y 2>&1 | tee -a /data/$MY_ENV-apt.log
 		# set the boot partition for next boot 3->2 (as we're in ENV3, we need to mount ENV1's bootfs for that)
 		mount /dev/disk/by-label/bootfs /mnt
 		sed -e "s#^boot_partition=3#boot_partition=2#" -i /mnt/autoboot.txt
