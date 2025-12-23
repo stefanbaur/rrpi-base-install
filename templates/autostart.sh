@@ -106,7 +106,7 @@ if grep -q "^$MY_ENV - cloud-init complete" /data/reboot.log ; then
 	echo "Tor hostname: $(cat /data/tor/hidden_non-anonymous_SSH_server/hostname)" > /etc/issue.d/Tor.issue
  	touch /data/tor_SSH_hostname
  	chmod 644 /data/tor_SSH_hostname
- 	cat /data/tor/hidden_services/SSH_server/hostname > /data/tor_SSH_hostname
+ 	cat /data/tor/hidden_non-anonymous_SSH_server/hostname > /data/tor_SSH_hostname
 	echo "ssh://$(getent passwd | awk -F':' '$2=="x" && $3=="1000" && $4=="1000" { print $1 }')@$(cat /data/tor_SSH_hostname)" | qrencode -t ANSI256 >> /etc/issue.d/Tor.issue
 	raspi-config nonint enable_overlayfs 2>&1 | tee -a /data/$MY_ENV-apt.log
 	# make sure /data is not affected by overlayfs
