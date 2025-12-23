@@ -66,8 +66,8 @@ if grep -q "^$MY_ENV - cloud-init complete" /data/reboot.log ; then
 	# make sure "PasswordAuthentication no" remains set even after cloud-init purge
 	mv /etc/ssh/sshd_config.d/50-cloud-init.conf /etc/ssh/sshd_config.d/50-disable-password-auth.conf
 	# remove cloud-init
-	apt purge cloud-init -y 2>&1 | tee -a /data/$MY_ENV-apt.log
-	# do not use apt autopurge -y or apt clean here, or you might wipe the overlayfs packages we already downloaded during the chroot phase
+	apt-get purge cloud-init -y 2>&1 | tee -a /data/$MY_ENV-apt.log
+	# do not use apt-get autopurge -y or apt-get clean here, or you might wipe the overlayfs packages we already downloaded during the chroot phase
 	# enable overlay file system
 	raspi-config nonint enable_overlayfs 2>&1 | tee -a /data/$MY_ENV-apt.log
 	# make sure /data is not affected by overlayfs
@@ -76,8 +76,8 @@ if grep -q "^$MY_ENV - cloud-init complete" /data/reboot.log ; then
 	# the following blocks are ENV-specific
 	if grep -q "^ENV1" /etc/ssh/banner; then
 		# now clean up apt, as we're in ENV1 and don't want to install any extra packages here
-		apt clean 2>&1 | tee -a /data/$MY_ENV-apt.log
-		apt autopurge -y 2>&1 | tee -a /data/$MY_ENV-apt.log
+		apt-get clean 2>&1 | tee -a /data/$MY_ENV-apt.log
+		apt-get autopurge -y 2>&1 | tee -a /data/$MY_ENV-apt.log
 		# set the boot partition for next boot 1->2
 		if grep -q "^[default]$" /boot/firmware/autoboot.txt ; then
 			sed ':start;N;s/^\[default\]\nboot_partition=1/[default]\nboot_partition=2/;t start;P;D' -i /boot/firmware/autoboot.txt
@@ -96,10 +96,10 @@ if grep -q "^$MY_ENV - cloud-init complete" /data/reboot.log ; then
 		fi
 	elif grep -q "^ENV2" /etc/ssh/banner; then
 		# as we already downloaded the required packages during the chroot phase, we can install sl without needing internet access
-		apt install -y sl 2>&1 | tee /data/$MY_ENV-apt.log
+		apt-get install -y sl 2>&1 | tee /data/$MY_ENV-apt.log
 		# now clean up apt, as we're done installing packages
-		apt clean 2>&1 | tee /data/$MY_ENV-apt.log
-		apt autopurge -y 2>&1 | tee /data/$MY_ENV-apt.log
+		apt-get clean 2>&1 | tee /data/$MY_ENV-apt.log
+		apt-get autopurge -y 2>&1 | tee /data/$MY_ENV-apt.log
 		# set the boot partition for next boot 2->3 (as we're in ENV2, we need to mount ENV1's bootfs for that)
 		mount /dev/disk/by-label/bootfs /mnt
 		if grep -q "^[default]$" /mnt/autoboot.txt ; then
@@ -120,10 +120,10 @@ if grep -q "^$MY_ENV - cloud-init complete" /data/reboot.log ; then
 		fi
 	elif grep -q "^ENV3" /etc/ssh/banner; then
 		# as we already downloaded the required packages during the chroot phase, we can install sl without needing internet access
-		apt install -y sl 2>&1 | tee /data/$MY_ENV-apt.log
+		apt-get install -y sl 2>&1 | tee /data/$MY_ENV-apt.log
 		# now clean up apt, as we're done installing packages
-		apt clean 2>&1 | tee /data/$MY_ENV-apt.log
-		apt autopurge -y 2>&1 | tee /data/$MY_ENV-apt.log
+		apt-get clean 2>&1 | tee /data/$MY_ENV-apt.log
+		apt-get autopurge -y 2>&1 | tee /data/$MY_ENV-apt.log
 		# set the boot partition for next boot 3->2 (as we're in ENV3, we need to mount ENV1's bootfs for that)
 		mount /dev/disk/by-label/bootfs /mnt
 		if grep -q "^[default]$" /mnt/autoboot.txt ; then
