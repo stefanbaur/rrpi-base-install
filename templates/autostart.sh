@@ -103,7 +103,7 @@ if grep -q "^$MY_ENV - cloud-init complete" /data/reboot.log ; then
 		echo "Waiting for Tor hidden service hostname to be generated ..."
 		sleep 5
 	done
-	echo "Tor hostname: $(cat /data/tor/hidden_non-anonymous_SSH_server/hostname)" > /etc/issue.d/Tor.issue
+	echo "My Tor hostname is: $(cat /data/tor/hidden_non-anonymous_SSH_server/hostname)" > /etc/issue.d/Tor.issue
  	touch /data/tor_SSH_hostname
  	chmod 644 /data/tor_SSH_hostname
  	cat /data/tor/hidden_non-anonymous_SSH_server/hostname > /data/tor_SSH_hostname
