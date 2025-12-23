@@ -84,14 +84,10 @@ if grep -q "^$MY_ENV - cloud-init complete" /data/reboot.log ; then
 		mkdir /var/lib/tor
 	fi
 	# for some silly reason, we cannot simply move the directory and set it in the config
-	# bacause tor erroneously believes /data is mounted read-only - but once we bind-mount it,
+	# because tor erroneously believes /data is mounted read-only - but once we bind-mount it,
 	# tor is happy, so let's do it this way
 	mount --bind /data/tor /var/lib/tor
 	grep "^/data/tor" || echo -e "/data/tor\t/var/lib/tor\tnone\tdefaults,bind\t0\t1" >> /etc/fstab
-	#mkdir -p /data/tor/hidden_services
-	#chown debian-tor:debian-tor /data/tor/hidden_services
-	#sed -e '/^DataDirectory/d' -i /etc/tor/torrc
-	#echo -e "\nDataDirectory /data/tor" >> /etc/tor/torrc
 	echo -e "# Hidden Service SSH_Server" >> /etc/tor/torrc
 	echo -e "HiddenServiceDir /var/lib/tor/hidden_non-anonymous_SSH_server" >> /etc/tor/torrc
 	echo -e "HiddenServicePort 22" >> /etc/tor/torrc
