@@ -98,8 +98,8 @@ if grep -q "^$MY_ENV - cloud-init complete" /data/reboot.log ; then
 		# as we already downloaded the required packages during the chroot phase, we can install sl without needing internet access
 		apt-get install -y sl 2>&1 | tee /data/$MY_ENV-apt.log
 		# now clean up apt, as we're done installing packages
-		apt-get clean 2>&1 | tee /data/$MY_ENV-apt.log
-		apt-get autopurge -y 2>&1 | tee /data/$MY_ENV-apt.log
+		apt-get clean 2>&1 | tee -a /data/$MY_ENV-apt.log
+		apt-get autopurge -y 2>&1 | tee -a /data/$MY_ENV-apt.log
 		# set the boot partition for next boot 2->3 (as we're in ENV2, we need to mount ENV1's bootfs for that)
 		mount /dev/disk/by-label/bootfs /mnt
 		if grep -q "^[default]$" /mnt/autoboot.txt ; then
@@ -122,8 +122,8 @@ if grep -q "^$MY_ENV - cloud-init complete" /data/reboot.log ; then
 		# as we already downloaded the required packages during the chroot phase, we can install sl without needing internet access
 		apt-get install -y sl 2>&1 | tee /data/$MY_ENV-apt.log
 		# now clean up apt, as we're done installing packages
-		apt-get clean 2>&1 | tee /data/$MY_ENV-apt.log
-		apt-get autopurge -y 2>&1 | tee /data/$MY_ENV-apt.log
+		apt-get clean 2>&1 | tee -a /data/$MY_ENV-apt.log
+		apt-get autopurge -y 2>&1 | tee -a /data/$MY_ENV-apt.log
 		# set the boot partition for next boot 3->2 (as we're in ENV3, we need to mount ENV1's bootfs for that)
 		mount /dev/disk/by-label/bootfs /mnt
 		if grep -q "^[default]$" /mnt/autoboot.txt ; then
