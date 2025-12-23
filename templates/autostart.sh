@@ -70,7 +70,7 @@ if grep -q "^$MY_ENV - cloud-init complete" /data/reboot.log ; then
 	# do not use apt-get autopurge -y or apt-get clean here, or you might wipe the overlayfs packages we already downloaded during the chroot phase
 	# enable overlay file system
 	# as we already downloaded the required packages during the chroot phase, we can install them without needing internet access
-	apt-get install -y tor 2>&1 | tee /data/$MY_ENV-apt.log
+	apt-get install -y tor rsyslog qrencode 2>&1 | tee -a /data/$MY_ENV-apt.log
 	raspi-config nonint enable_overlayfs 2>&1 | tee -a /data/$MY_ENV-apt.log
 	# make sure /data is not affected by overlayfs
 	sed -e "s#overlayroot=tmpfs #overlayroot=tmpfs:recurse=0 #" -i /boot/firmware/cmdline.txt
