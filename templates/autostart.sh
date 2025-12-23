@@ -87,7 +87,7 @@ if grep -q "^$MY_ENV - cloud-init complete" /data/reboot.log ; then
 	# bacause tor erroneously believes /data is mounted read-only - but once we bind-mount it,
 	# tor is happy, so let's do it this way
 	mount --bind /data/tor /var/lib/tor
-	grep "^/data/tor" || echo "/data/tor\t/var/lib/tor\tnone\tdefaults,bind\t0\t1" >> /etc/fstab
+	grep "^/data/tor" || echo -e "/data/tor\t/var/lib/tor\tnone\tdefaults,bind\t0\t1" >> /etc/fstab
 	#mkdir -p /data/tor/hidden_services
 	#chown debian-tor:debian-tor /data/tor/hidden_services
 	#sed -e '/^DataDirectory/d' -i /etc/tor/torrc
