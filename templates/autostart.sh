@@ -71,6 +71,9 @@ if grep -q "^$MY_ENV - cloud-init complete" /data/reboot.log ; then
 	# enable overlay file system
 	# as we already downloaded the required packages during the chroot phase, we can install them without needing internet access
 	apt-get install -y tor rsyslog qrencode 2>&1 | tee -a /data/$MY_ENV-apt.log
+	# configure rsyslog
+	sed -e 's#/var/log/syslog#/data/syslog#' -i /etc/rsyslog.conf
+	/usr/sbin/service rsyslog restart
 	raspi-config nonint enable_overlayfs 2>&1 | tee -a /data/$MY_ENV-apt.log
 	# make sure /data is not affected by overlayfs
 	sed -e "s#overlayroot=tmpfs #overlayroot=tmpfs:recurse=0 #" -i /boot/firmware/cmdline.txt
