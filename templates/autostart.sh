@@ -40,8 +40,6 @@ while ! [ -s /var/lib/cloud/instance/boot-finished ] ; do
 	ps ax >> /data/cloud-init-processes.log
 	# this is because sometimes, cloud-init is too dumb to live and claims /boot/firmware/meta-data and/or 
 	# /boot/firmware/user-data could not be found - EVEN THOUGH THE FILES ARE RIGHT WHERE THEY BELONG
-	#if grep -q "FAIL: no local data found" /var/log/cloud-init.log || grep -q " failed$" /var/log/cloud-init-output.log ; then
-	#if ((grep "No such file" /var/log/cloud-init.log | grep -q "user-data") || grep -q " failed$" /var/log/cloud-init-output.log) ; then
 	if (grep "No such file" /var/log/cloud-init.log | grep -q -e "user-data" -e "meta-data") ; then
 		# in that case, we copy and zero the logfiles ...
 		cp /var/log/cloud-init.log /data/$MY_ENV-FAIL-$(date +%F_%T|tr ':' '-')-cloud-init.log
