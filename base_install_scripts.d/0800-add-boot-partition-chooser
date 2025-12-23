@@ -2,5 +2,32 @@
 
 echo "Adding boot partition chooser (autoboot.txt) to first partition ..."
 # add boot partition chooser config file
-echo "[all]" >> $MOUNTPOINT/boot/firmware/autoboot.txt
-echo "boot_partition=1" >> $MOUNTPOINT/boot/firmware/autoboot.txt
+
+# optional header - only required for GPIO_FORCE_ENV1 mode
+if [ -n "$GPIO_FORCE_ENV1" ] ; then
+	cat >> $MOUNTPOINT/boot/firmware/autoboot.txt <<GPIODEFINE
+# define GPIO as input, and activate the built-in pull-up resistor
+gpio=${GPIO_FORCE_ENV1}=ip,pu
+
+GPIODEFINE
+fi
+
+# this part is always required
+cat >> $MOUNTPOINT/boot/firmware/autoboot.txt <<AUTOBOOT
+# Default
+[default]
+boot_partition=2
+[all]
+AUTOBOOT
+
+# optional footer - only required for GPIO_FORCE_ENV1 mode
+if [ -n "$GPIO_FORCE_ENV1" ] ; then
+	cat >> $MOUNTPOINT/boot/firmware/autoboot.txt <<SETENV1BOOT
+
+# Rescue Environment - booted when GPIO is connected to ground
+[gpio${GPIO_FORCE_ENV1}=0]
+boot_partition=1
+[all]
+
+SETENV1BOOT
+fi
