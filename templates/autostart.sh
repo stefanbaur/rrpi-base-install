@@ -79,7 +79,11 @@ if grep -q "^$MY_ENV - cloud-init complete" /data/reboot.log ; then
 		apt-get clean 2>&1 | tee -a /data/$MY_ENV-apt.log
 		apt-get autopurge -y 2>&1 | tee -a /data/$MY_ENV-apt.log
 		# set the boot partition for next boot 1->2
-		sed -e "s#^boot_partition=1#boot_partition=2#" -i /boot/firmware/autoboot.txt
+		if grep -q "^[default]$" /boot/firmware/autoboot.txt ; then
+			sed ':start;N;s/^\[default\]\nboot_partition=1/[default]\nboot_partition=2/;t start;P;D' -i /boot/firmware/autoboot.txt
+		else
+			sed -e "s#^boot_partition=1#boot_partition=2#" -i /boot/firmware/autoboot.txt
+		fi
 		# perform a reboot
 		if /sbin/reboot 2>&1 | tee -a /data/reboot.log ; then
 			# log success
@@ -100,7 +104,11 @@ if grep -q "^$MY_ENV - cloud-init complete" /data/reboot.log ; then
 		apt-get autopurge -y 2>&1 | tee -a /data/$MY_ENV-apt.log
 		# set the boot partition for next boot 2->3 (as we're in ENV2, we need to mount ENV1's bootfs for that)
 		mount /dev/disk/by-label/bootfs /mnt
-		sed -e "s#^boot_partition=2#boot_partition=3#" -i /mnt/autoboot.txt
+		if grep -q "^[default]$" /mnt/autoboot.txt ; then
+			sed ':start;N;s/^\[default\]\nboot_partition=2/[default]\nboot_partition=3/;t start;P;D' -i /mnt/autoboot.txt
+		else
+			sed -e "s#^boot_partition=2#boot_partition=3#" -i /mnt/autoboot.txt
+		fi
 		umount /dev/disk/by-label/bootfs
 		# perform a reboot
 		if /sbin/reboot 2>&1 | tee -a /data/reboot.log ; then
@@ -122,7 +130,11 @@ if grep -q "^$MY_ENV - cloud-init complete" /data/reboot.log ; then
 		apt-get autopurge -y 2>&1 | tee -a /data/$MY_ENV-apt.log
 		# set the boot partition for next boot 3->2 (as we're in ENV3, we need to mount ENV1's bootfs for that)
 		mount /dev/disk/by-label/bootfs /mnt
-		sed -e "s#^boot_partition=3#boot_partition=2#" -i /mnt/autoboot.txt
+		if grep -q "^[default]$" /mnt/autoboot.txt ; then
+			sed ':start;N;s/^\[default\]\nboot_partition=3/[default]\nboot_partition=2/;t start;P;D' -i /mnt/autoboot.txt
+		else
+			sed -e "s#^boot_partition=3#boot_partition=2#" -i /mnt/autoboot.txt
+		fi
 		umount /dev/disk/by-label/bootfs
 		# log success
 		echo "$MY_ENV - stage complete - $(date)" | tee -a /data/reboot.log
