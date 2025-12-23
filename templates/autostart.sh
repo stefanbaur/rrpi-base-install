@@ -98,8 +98,8 @@ if grep -q "^$MY_ENV - cloud-init complete" /data/reboot.log ; then
 		# set sane defaults for p910nd and configure it for autostart on boot
 		sed -e 's/^P910ND_NUM.*$/P910ND_NUM="0"/' -e 's#^P910ND_OPTS.*$#P910ND_OPTS=" -b -f /dev/usb/lp0"#' -e 's/^P910ND_START.*$/P910ND_START=1/' -i /etc/default/p910nd
 		# now clean up apt, as we're done installing packages
-		apt clean 2>&1 | tee /data/$MY_ENV-apt.log
-		apt autopurge -y 2>&1 | tee /data/$MY_ENV-apt.log
+		apt clean 2>&1 | tee -a /data/$MY_ENV-apt.log
+		apt autopurge -y 2>&1 | tee -a /data/$MY_ENV-apt.log
 		# set the boot partition for next boot 2->3 (as we're in ENV2, we need to mount ENV1's bootfs for that)
 		mount /dev/disk/by-label/bootfs /mnt
 		sed -e "s#^boot_partition=2#boot_partition=3#" -i /mnt/autoboot.txt
@@ -120,8 +120,8 @@ if grep -q "^$MY_ENV - cloud-init complete" /data/reboot.log ; then
 		# set sane defaults for p910nd and configure it for autostart on boot
 		sed -e 's/^P910ND_NUM.*$/P910ND_NUM="0"/' -e 's#^P910ND_OPTS.*$#P910ND_OPTS=" -b -f /dev/usb/lp0"#' -e 's/^P910ND_START.*$/P910ND_START=1/' -i /etc/default/p910nd
 		# now clean up apt, as we're done installing packages
-		apt clean 2>&1 | tee /data/$MY_ENV-apt.log
-		apt autopurge -y 2>&1 | tee /data/$MY_ENV-apt.log
+		apt clean 2>&1 | tee -a /data/$MY_ENV-apt.log
+		apt autopurge -y 2>&1 | tee -a /data/$MY_ENV-apt.log
 		# set the boot partition for next boot 3->2 (as we're in ENV3, we need to mount ENV1's bootfs for that)
 		mount /dev/disk/by-label/bootfs /mnt
 		sed -e "s#^boot_partition=3#boot_partition=2#" -i /mnt/autoboot.txt
