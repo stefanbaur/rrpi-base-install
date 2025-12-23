@@ -93,13 +93,70 @@ if grep -q "^$MY_ENV - cloud-init complete" /data/reboot.log ; then
 			touch /data/ENV1-could-not-perform-reboot
 		fi
 	elif grep -q "^ENV2" /etc/ssh/banner; then
+		# set sane defaults for xinetd and udev
+		mkdir -p /etc/xinetd.d/
+		COUNT=0
+		while [ $COUNT -lt 4 ]; do 
+			cat >/etc/xinetd.d/p910${COUNT}d <<P910ND_TEMPLATE
+service p910${COUNT}d
+{
+        disable         = no
+        socket_type     = stream
+        protocol        = tcp
+        port            = 910${COUNT}
+        user            = root
+        wait            = no
+        server          = /usr/sbin/p910nd
+        server_args     = -b -f /dev/persistent_lp/lp${COUNT}
+}
+P910ND_TEMPLATE
+			sed -e "\#910${COUNT}/tcp#d" -i /etc/services
+			echo -e "p910${COUNT}d\t910${COUNT}/tcp\t# TCP RAW print service" >>/etc/services
+			COUNT=$((COUNT+1))
+		done
+		cat > /etc/udev/rules.d/050_persistent_printer_mappings.rules <<UDEVRULES
+# do not act upon removal
+ACTION=="remove", GOTO="persistent_printer_end"
+# get USB ID
+SUBSYSTEMS=="usb", IMPORT{builtin}="usb_id"
+# no printer, then no action required
+ENV{ID_TYPE}!="printer", GOTO="persistent_printer_end"
+
+# get PATH ID
+IMPORT{builtin}="path_id"
+
+## Pi 3B+
+# Pi3B+
+# upper right
+ENV{ID_PATH}=="platform-3f980000.usb-usb-0:1.3:1.0",SYMLINK+="persistent_lp/lp2"
+# lower right
+ENV{ID_PATH}=="platform-3f980000.usb-usb-0:1.2:1.0",SYMLINK+="persistent_lp/lp3"
+# upper left
+ENV{ID_PATH}=="platform-3f980000.usb-usb-0:1.1.2:1.0",SYMLINK+="persistent_lp/lp0"
+# lower left
+ENV{ID_PATH}=="platform-3f980000.usb-usb-0:1.1.3:1.0",SYMLINK+="persistent_lp/lp1"
+
+## Pi 4B
+# USB3
+# upper right
+ENV{ID_PATH}=="platform-fd500000.pcie-pci-0000:01:00.0-usbv3-0:1:1.0",SYMLINK+="persistent_lp/lp2"
+# lower right
+ENV{ID_PATH}=="platform-fd500000.pcie-pci-0000:01:00.0-usbv3-0:2:1.0",SYMLINK+="persistent_lp/lp3"
+# USB2 and below
+# upper right
+ENV{ID_PATH}=="platform-fd500000.pcie-pci-0000:01:00.0-usb-0:1.1:1.0",SYMLINK+="persistent_lp/lp2"
+# lower right
+ENV{ID_PATH}=="platform-fd500000.pcie-pci-0000:01:00.0-usb-0:1.2:1.0",SYMLINK+="persistent_lp/lp3"
+# upper left
+ENV{ID_PATH}=="platform-fd500000.pcie-pci-0000:01:00.0-usb-0:1.3:1.0",SYMLINK+="persistent_lp/lp0"
+# lower left
+ENV{ID_PATH}=="platform-fd500000.pcie-pci-0000:01:00.0-usb-0:1.4:1.0",SYMLINK+="persistent_lp/lp1"
+UDEVRULES
 		# as we already downloaded the required packages during the chroot phase, we can install p910nd without needing internet access
-		apt install -y p910nd 2>&1 | tee /data/$MY_ENV-apt.log
-		# set sane defaults for p910nd and configure it for autostart on boot
-		sed -e 's/^P910ND_NUM.*$/P910ND_NUM="0"/' -e 's#^P910ND_OPTS.*$#P910ND_OPTS=" -b -f /dev/usb/lp0"#' -e 's/^P910ND_START.*$/P910ND_START=1/' -i /etc/default/p910nd
+		apt install -y p910nd xinetd 2>&1 | tee /data/$MY_ENV-apt.log
 		# now clean up apt, as we're done installing packages
-		apt clean 2>&1 | tee /data/$MY_ENV-apt.log
-		apt autopurge -y 2>&1 | tee /data/$MY_ENV-apt.log
+		apt clean 2>&1 | tee -a /data/$MY_ENV-apt.log
+		apt autopurge -y 2>&1 | tee -a /data/$MY_ENV-apt.log
 		# set the boot partition for next boot 2->3 (as we're in ENV2, we need to mount ENV1's bootfs for that)
 		mount /dev/disk/by-label/bootfs /mnt
 		sed -e "s#^boot_partition=2#boot_partition=3#" -i /mnt/autoboot.txt
@@ -115,13 +172,70 @@ if grep -q "^$MY_ENV - cloud-init complete" /data/reboot.log ; then
 			touch /data/ENV2-could-not-perform-reboot
 		fi
 	elif grep -q "^ENV3" /etc/ssh/banner; then
+		# set sane defaults for xinetd and udev
+		mkdir -p /etc/xinetd.d/
+		COUNT=0
+		while [ $COUNT -lt 4 ]; do 
+			cat >/etc/xinetd.d/p910${COUNT}d <<P910ND_TEMPLATE
+service p910${COUNT}d
+{
+        disable         = no
+        socket_type     = stream
+        protocol        = tcp
+        port            = 910${COUNT}
+        user            = root
+        wait            = no
+        server          = /usr/sbin/p910nd
+        server_args     = -b -f /dev/persistent_lp/lp${COUNT}
+}
+P910ND_TEMPLATE
+			sed -e "\#910${COUNT}/tcp#d" -i /etc/services
+			echo -e "p910${COUNT}d\t910${COUNT}/tcp\t# TCP RAW print service" >>/etc/services
+			COUNT=$((COUNT+1))
+		done
+		cat > /etc/udev/rules.d/050_persistent_printer_mappings.rules <<UDEVRULES
+# do not act upon removal
+ACTION=="remove", GOTO="persistent_printer_end"
+# get USB ID
+SUBSYSTEMS=="usb", IMPORT{builtin}="usb_id"
+# no printer, then no action required
+ENV{ID_TYPE}!="printer", GOTO="persistent_printer_end"
+
+# get PATH ID
+IMPORT{builtin}="path_id"
+
+## Pi 3B+
+# Pi3B+
+# upper right
+ENV{ID_PATH}=="platform-3f980000.usb-usb-0:1.3:1.0",SYMLINK+="persistent_lp/lp2"
+# lower right
+ENV{ID_PATH}=="platform-3f980000.usb-usb-0:1.2:1.0",SYMLINK+="persistent_lp/lp3"
+# upper left
+ENV{ID_PATH}=="platform-3f980000.usb-usb-0:1.1.2:1.0",SYMLINK+="persistent_lp/lp0"
+# lower left
+ENV{ID_PATH}=="platform-3f980000.usb-usb-0:1.1.3:1.0",SYMLINK+="persistent_lp/lp1"
+
+## Pi 4B
+# USB3
+# upper right
+ENV{ID_PATH}=="platform-fd500000.pcie-pci-0000:01:00.0-usbv3-0:1:1.0",SYMLINK+="persistent_lp/lp2"
+# lower right
+ENV{ID_PATH}=="platform-fd500000.pcie-pci-0000:01:00.0-usbv3-0:2:1.0",SYMLINK+="persistent_lp/lp3"
+# USB2 and below
+# upper right
+ENV{ID_PATH}=="platform-fd500000.pcie-pci-0000:01:00.0-usb-0:1.1:1.0",SYMLINK+="persistent_lp/lp2"
+# lower right
+ENV{ID_PATH}=="platform-fd500000.pcie-pci-0000:01:00.0-usb-0:1.2:1.0",SYMLINK+="persistent_lp/lp3"
+# upper left
+ENV{ID_PATH}=="platform-fd500000.pcie-pci-0000:01:00.0-usb-0:1.3:1.0",SYMLINK+="persistent_lp/lp0"
+# lower left
+ENV{ID_PATH}=="platform-fd500000.pcie-pci-0000:01:00.0-usb-0:1.4:1.0",SYMLINK+="persistent_lp/lp1"
+UDEVRULES
 		# as we already downloaded the required packages during the chroot phase, we can install p910nd without needing internet access
-		apt install -y p910nd 2>&1 | tee /data/$MY_ENV-apt.log
-		# set sane defaults for p910nd and configure it for autostart on boot
-		sed -e 's/^P910ND_NUM.*$/P910ND_NUM="0"/' -e 's#^P910ND_OPTS.*$#P910ND_OPTS=" -b -f /dev/usb/lp0"#' -e 's/^P910ND_START.*$/P910ND_START=1/' -i /etc/default/p910nd
+		apt install -y p910nd xinetd 2>&1 | tee -a /data/$MY_ENV-apt.log
 		# now clean up apt, as we're done installing packages
-		apt clean 2>&1 | tee /data/$MY_ENV-apt.log
-		apt autopurge -y 2>&1 | tee /data/$MY_ENV-apt.log
+		apt clean 2>&1 | tee -a /data/$MY_ENV-apt.log
+		apt autopurge -y 2>&1 | tee -a /data/$MY_ENV-apt.log
 		# set the boot partition for next boot 3->2 (as we're in ENV3, we need to mount ENV1's bootfs for that)
 		mount /dev/disk/by-label/bootfs /mnt
 		sed -e "s#^boot_partition=3#boot_partition=2#" -i /mnt/autoboot.txt
