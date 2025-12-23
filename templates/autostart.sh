@@ -74,6 +74,40 @@ if grep -q "^$MY_ENV - cloud-init complete" /data/reboot.log ; then
 	# configure rsyslog
 	sed -e 's#/var/log/syslog#/data/syslog#' -i /etc/rsyslog.conf
 	/usr/sbin/service rsyslog restart
+	# configure hidden tor service
+	/usr/sbin/service tor stop
+	if [ -d /data/tor ] ; then
+		# this is for ENV2 and ENV3, so we keep the same hostname across all ENVs
+		rm -rf /var/lib/tor
+	else
+		mv /var/lib/tor /data
+		mkdir /var/lib/tor
+	fi
+	# for some silly reason, we cannot simply move the directory and set it in the config
+	# bacause tor erroneously believes /data is mounted read-only - but once we bind-mount it,
+	# tor is happy, so let's do it this way
+	mount --bind /data/tor /var/lib/tor
+	grep "^/data/tor" || echo "/data/tor\t/var/lib/tor\tnone\tdefaults,bind\t0\t1" >> /etc/fstab
+	#mkdir -p /data/tor/hidden_services
+	#chown debian-tor:debian-tor /data/tor/hidden_services
+	#sed -e '/^DataDirectory/d' -i /etc/tor/torrc
+	#echo -e "\nDataDirectory /data/tor" >> /etc/tor/torrc
+	echo -e "# Hidden Service SSH_Server" >> /etc/tor/torrc
+	echo -e "HiddenServiceDir /var/lib/tor/hidden_non-anonymous_SSH_server" >> /etc/tor/torrc
+	echo -e "HiddenServicePort 22" >> /etc/tor/torrc
+	echo -e "HiddenServiceNonAnonymousMode 1" >> /etc/tor/torrc
+	echo -e "HiddenServiceSingleHopMode 1" >> /etc/tor/torrc
+	echo -e "SocksPort 0" >> /etc/tor/torrc
+	/usr/sbin/service tor start
+	while ! [ -s /data/tor/hidden_non-anonymous_SSH_server/hostname ] ; do
+		echo "Waiting for Tor hidden service hostname to be generated ..."
+		sleep 5
+	done
+	echo "Tor hostname: $(cat /data/tor/hidden_non-anonymous_SSH_server/hostname)" > /etc/issue.d/Tor.issue
+ 	touch /data/tor_SSH_hostname
+ 	chmod 644 /data/tor_SSH_hostname
+ 	cat /data/tor/hidden_services/SSH_server/hostname > /data/tor_SSH_hostname
+	echo "ssh://$(getent passwd | awk -F':' '$2=="x" && $3=="1000" && $4=="1000" { print $1 }')@$(cat /data/tor_SSH_hostname)" | qrencode -t ANSI256 >> /etc/issue.d/Tor.issue
 	raspi-config nonint enable_overlayfs 2>&1 | tee -a /data/$MY_ENV-apt.log
 	# make sure /data is not affected by overlayfs
 	sed -e "s#overlayroot=tmpfs #overlayroot=tmpfs:recurse=0 #" -i /boot/firmware/cmdline.txt
