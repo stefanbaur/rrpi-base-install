@@ -129,7 +129,7 @@ if grep -q "^$MY_ENV - cloud-init complete" /data/reboot.log ; then
 		fi
 	elif grep -q "^ENV2" /etc/ssh/banner; then
 		# as we already downloaded the required packages during the chroot phase, we can install them without needing internet access
-		apt-get install -y openbox tint2 x11-xserver-utils feh x11vnc onboard network-manager-gnome libcamera-tools linphone-cli linphone-common baresip baresip-x11 baresip-gtk baresip-gstreamer baresip-ffmpeg chromium chromium-sandbox chromium-l10n xdotool coreutils eatmydata xbindkeys alsa-utils pulseaudio-utils espeak pulseaudio 2>&1 | tee /data/$MY_ENV-apt.log
+		apt-get install -y openbox tint2 x11-xserver-utils feh x11vnc onboard network-manager-gnome libcamera-tools linphone-cli linphone-common baresip baresip-x11 baresip-gtk baresip-gstreamer baresip-ffmpeg chromium chromium-sandbox chromium-l10n xdotool coreutils eatmydata xbindkeys alsa-utils pulseaudio-utils espeak pulseaudio surf surf-display nodm 2>&1 | tee /data/$MY_ENV-apt.log
 		# now clean up apt, as we're done installing packages
 		apt-get clean 2>&1 | tee -a /data/$MY_ENV-apt.log
 		apt-get autopurge -y 2>&1 | tee -a /data/$MY_ENV-apt.log
@@ -153,7 +153,7 @@ if grep -q "^$MY_ENV - cloud-init complete" /data/reboot.log ; then
 		fi
 	elif grep -q "^ENV3" /etc/ssh/banner; then
 		# as we already downloaded the required packages during the chroot phase, we can install them without needing internet access
-		apt-get install -y openbox tint2 x11-xserver-utils feh x11vnc onboard network-manager-gnome libcamera-tools linphone-cli linphone-common baresip baresip-x11 baresip-gtk baresip-gstreamer baresip-ffmpeg chromium chromium-sandbox chromium-l10n xdotool coreutils eatmydata xbindkeys alsa-utils pulseaudio-utils espeak pulseaudio 2>&1 | tee /data/$MY_ENV-apt.log
+		apt-get install -y openbox tint2 x11-xserver-utils feh x11vnc onboard network-manager-gnome libcamera-tools linphone-cli linphone-common baresip baresip-x11 baresip-gtk baresip-gstreamer baresip-ffmpeg chromium chromium-sandbox chromium-l10n xdotool coreutils eatmydata xbindkeys alsa-utils pulseaudio-utils espeak pulseaudio surf surf-display nodm 2>&1 | tee /data/$MY_ENV-apt.log
 		# now clean up apt, as we're done installing packages
 		apt-get clean 2>&1 | tee -a /data/$MY_ENV-apt.log
 		apt-get autopurge -y 2>&1 | tee -a /data/$MY_ENV-apt.log
@@ -174,7 +174,8 @@ if grep -q "^$MY_ENV - cloud-init complete" /data/reboot.log ; then
 			echo "$MY_ENV - runonce removed - $(date)" | tee -a /data/reboot.log
 			touch /data/ENV3-runonce-removed
 			# cleanup unless we detected a failure
-			if ! grep -q "FAILURE TO RUN" /data/reboot.log ; then
+			#if ! grep -q "FAILURE TO RUN" /data/reboot.log ; then
+			if false ; then
 				rm /data/cloud-init-processes.log
 				rm /data/setup.log
 				for ENVFILE in /data/ENV?-stage-complete ; do
