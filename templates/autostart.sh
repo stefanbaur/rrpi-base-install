@@ -104,7 +104,7 @@ if grep -q "^$MY_ENV - cloud-init complete" /data/reboot.log ; then
 		mv /opt/* /data/ENV2/opt/
 		mv /var/lib/containerd/* /data/ENV2/var/lib/containerd/
 		mv /var/lib/docker/* /data/ENV2/var/lib/docker/
-		# manually bind-mount /data/opt to /opt for now
+		# manually bind-mount the new destinations for now
 		mount --bind /data/ENV2/opt/ /opt/
 		mount --bind /data/ENV2/var/lib/containerd/ /var/lib/containerd/
 		mount --bind /data/ENV2/var/lib/docker/ /var/lib/docker/
@@ -187,7 +187,7 @@ if grep -q "^$MY_ENV - cloud-init complete" /data/reboot.log ; then
 		mv /opt/* /data/ENV3/opt/
 		mv /var/lib/containerd/* /data/ENV3/var/lib/containerd/
 		mv /var/lib/docker/* /data/ENV3/var/lib/docker/
-		# manually bind-mount /data/opt to /opt for now
+		# manually bind-mount the new destinations for now
 		mount --bind /data/ENV3/opt/ /opt/
 		mount --bind /data/ENV3/var/lib/containerd/ /var/lib/containerd/
 		mount --bind /data/ENV3/var/lib/docker/ /var/lib/docker/
