@@ -94,7 +94,7 @@ if grep -q "^$MY_ENV - cloud-init complete" /data/reboot.log ; then
 		fi
 	elif grep -q "^ENV2" /etc/ssh/banner; then
 		# as we already downloaded the required packages during the chroot phase, we can install these without needing internet access
-		apt-get install -y git openssl curl gawk coreutils grep jq docker.io docker-compose 2>&1 | tee /data/$MY_ENV-apt.log
+		apt-get install -y bind9-host git openssl curl gawk coreutils grep jq docker.io docker-compose 2>&1 | tee /data/$MY_ENV-apt.log
 		# create bind-mount destinations, if not already present
 		mkdir -p /data/ENV2/opt /data/ENV2/var/lib/containerd /data/ENV2/var/lib/docker
 		# stop affected services
@@ -177,7 +177,7 @@ if grep -q "^$MY_ENV - cloud-init complete" /data/reboot.log ; then
 		fi
 	elif grep -q "^ENV3" /etc/ssh/banner; then
 		# as we already downloaded the required packages during the chroot phase, we can install these without needing internet access
-		apt-get install -y git openssl curl gawk coreutils grep jq docker.io docker-compose 2>&1 | tee /data/$MY_ENV-apt.log
+		apt-get install -y bind9-host git openssl curl gawk coreutils grep jq docker.io docker-compose 2>&1 | tee /data/$MY_ENV-apt.log
 		# create bind-mount destinations, if not already present
 		mkdir -p /data/ENV3/opt /data/ENV3/var/lib/containerd /data/ENV3/var/lib/docker
 		# stop affected services
