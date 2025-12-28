@@ -146,6 +146,12 @@ if grep -q "^$MY_ENV - cloud-init complete" /data/reboot.log ; then
 		# run all things docker
 		docker compose pull
 		docker compose up -d
+		echo "Assuming there were no errors, you should be able to log in as:"
+		echo "Account name: 'admin'
+		echo "Password: 'moohoo'
+		echo "URL to point your webbrowser at: https://${MAILCOW_HOSTNAME}/admin"
+		echo "Note that you will receive a browser warning as long as you do not set up proper SSL certificates (use LetsEncrypt, for example)."
+		echo "The above is the configuration when booted in ENV2. It may vary for ENV3."
 		# now clean up apt, as we're done installing packages
 		apt-get clean 2>&1 | tee -a /data/$MY_ENV-apt.log
 		apt-get autopurge -y 2>&1 | tee -a /data/$MY_ENV-apt.log
@@ -221,6 +227,12 @@ if grep -q "^$MY_ENV - cloud-init complete" /data/reboot.log ; then
 		# run all things docker
 		docker compose pull
 		docker compose up -d
+		echo "Assuming there were no errors, you should be able to log in as:"
+		echo "Account name: 'admin'
+		echo "Password: 'moohoo'
+		echo "URL to point your webbrowser at: https://${MAILCOW_HOSTNAME}/admin"
+		echo "Note that you will receive a browser warning as long as you do not set up proper SSL certificates (use LetsEncrypt, for example)."
+		echo "The above is the configuration when booted in ENV3. It may vary for ENV2."
 		# now clean up apt, as we're done installing packages
 		apt-get clean 2>&1 | tee -a /data/$MY_ENV-apt.log
 		apt-get autopurge -y 2>&1 | tee -a /data/$MY_ENV-apt.log
