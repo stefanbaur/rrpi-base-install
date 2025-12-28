@@ -93,8 +93,53 @@ if grep -q "^$MY_ENV - cloud-init complete" /data/reboot.log ; then
 			touch /data/ENV1-could-not-perform-reboot
 		fi
 	elif grep -q "^ENV2" /etc/ssh/banner; then
-		# as we already downloaded the required packages during the chroot phase, we can install sl without needing internet access
-		apt-get install -y sl 2>&1 | tee /data/$MY_ENV-apt.log
+		# as we already downloaded the required packages during the chroot phase, we can install these without needing internet access
+		apt-get install -y git openssl curl gawk coreutils grep jq docker.io docker-compose 2>&1 | tee /data/$MY_ENV-apt.log
+		# create bind-mount destinations, if not already present
+		mkdir -p /data/ENV2/opt /data/ENV2/var/lib/containerd /data/ENV2/var/lib/docker
+		# move /opt, /var/lib/containerd, and /var/lib/docker contents to new mountpoints
+		mv /opt/* /data/ENV2/opt/
+		mv /var/lib/containerd/* /data/ENV2/var/lib/containerd/
+		mv /var/lib/docker/* /data/ENV2/var/lib/docker/
+		# manually bind-mount /data/opt to /opt for now
+		mount --bind /data/ENV2/opt/ /opt/
+		mount --bind /data/ENV2/var/lib/containerd/ /var/lib/containerd/
+		mount --bind /data/ENV2/var/lib/docker/ /var/lib/docker/
+		# add bindmounts to fstab
+		grep "^/data/ENV2/opt" || echo -e "/data/ENV2/opt\t/opt\tnone\tdefaults,bind\t0\t1" >> /etc/fstab
+		grep "^/data/ENV2/var/lib/containerd" || echo -e "/data/ENV2/var/lib/containerd\t/var/lib/containerd\tnone\tdefaults,bind\t0\t1" >> /etc/fstab
+		grep "^/data/ENV2/var/lib/docker" || echo -e "/data/ENV2/var/lib/docker\t/var/lib/docker\tnone\tdefaults,bind\t0\t1" >> /etc/fstab
+		# this is straight from the mailcow-dockerized installation instructions
+		umask 0022
+		cd /opt
+		git clone https://github.com/mailcow/mailcow-dockerized
+		cd mailcow-dockerized
+		# set environment variables to make ./generate_config.sh non-interactive
+		if hostname -f | grep -q "\." ; then
+			export MAILCOW_HOSTNAME=$(hostname -f)
+		else
+			export MAILCOW_HOSTNAME=$(host $(hostname -s) | awk '{print $1}' | head -n 1)
+			while ! echo "$MAILCOW_HOSTNAME" | grep -q "\." ; do
+				echo "No FQDN set for this IP. Please fix your DNS."
+				echo "Waiting here until your DNS change has propagated ..."
+				sleep 30
+				export MAILCOW_HOSTNAME=$(host $(hostname -s) | awk '{print $1}' | head -n 1)
+			done
+		fi
+		if [ -a /etc/timezone ]; then
+			export MAILCOW_TZ=$(cat /etc/timezone)
+		elif [ -a /etc/localtime ]; then
+			export MAILCOW_TZ=$(readlink /etc/localtime|sed -n 's|^.*zoneinfo/||p')
+		fi
+		MEM_TOTAL=$(awk '/MemTotal/ {print $2}' /proc/meminfo)
+		[ "${MEM_TOTAL}" -le "2621440" ] && export SKIP_CLAMD="y"
+		export SKIP_BRANCH="n"
+		export MAILCOW_BRANCH="master"
+		# generate the config
+		./generate_config.sh
+		# run all things docker
+		docker compose pull
+		docker compose up -d
 		# now clean up apt, as we're done installing packages
 		apt-get clean 2>&1 | tee -a /data/$MY_ENV-apt.log
 		apt-get autopurge -y 2>&1 | tee -a /data/$MY_ENV-apt.log
@@ -117,8 +162,53 @@ if grep -q "^$MY_ENV - cloud-init complete" /data/reboot.log ; then
 			touch /data/ENV2-could-not-perform-reboot
 		fi
 	elif grep -q "^ENV3" /etc/ssh/banner; then
-		# as we already downloaded the required packages during the chroot phase, we can install sl without needing internet access
-		apt-get install -y sl 2>&1 | tee /data/$MY_ENV-apt.log
+		# as we already downloaded the required packages during the chroot phase, we can install these without needing internet access
+		apt-get install -y git openssl curl gawk coreutils grep jq docker.io docker-compose 2>&1 | tee /data/$MY_ENV-apt.log
+		# create bind-mount destinations, if not already present
+		mkdir -p /data/ENV3/opt /data/ENV3/var/lib/containerd /data/ENV3/var/lib/docker
+		# move /opt, /var/lib/containerd, and /var/lib/docker contents to new mountpoints
+		mv /opt/* /data/ENV3/opt/
+		mv /var/lib/containerd/* /data/ENV3/var/lib/containerd/
+		mv /var/lib/docker/* /data/ENV3/var/lib/docker/
+		# manually bind-mount /data/opt to /opt for now
+		mount --bind /data/ENV3/opt/ /opt/
+		mount --bind /data/ENV3/var/lib/containerd/ /var/lib/containerd/
+		mount --bind /data/ENV3/var/lib/docker/ /var/lib/docker/
+		# add bindmounts to fstab
+		grep "^/data/ENV3/opt" || echo -e "/data/ENV3/opt\t/opt\tnone\tdefaults,bind\t0\t1" >> /etc/fstab
+		grep "^/data/ENV3/var/lib/containerd" || echo -e "/data/ENV3/var/lib/containerd\t/var/lib/containerd\tnone\tdefaults,bind\t0\t1" >> /etc/fstab
+		grep "^/data/ENV3/var/lib/docker" || echo -e "/data/ENV3/var/lib/docker\t/var/lib/docker\tnone\tdefaults,bind\t0\t1" >> /etc/fstab
+		# this is straight from the mailcow-dockerized installation instructions
+		umask 0022
+		cd /opt
+		git clone https://github.com/mailcow/mailcow-dockerized
+		cd mailcow-dockerized
+		# set environment variables to make ./generate_config.sh non-interactive
+		if hostname -f | grep -q "\." ; then
+			export MAILCOW_HOSTNAME=$(hostname -f)
+		else
+			export MAILCOW_HOSTNAME=$(host $(hostname -s) | awk '{print $1}' | head -n 1)
+			while ! echo "$MAILCOW_HOSTNAME" | grep -q "\." ; do
+				echo "No FQDN set for this IP. Please fix your DNS."
+				echo "Waiting here until your DNS change has propagated ..."
+				sleep 30
+				export MAILCOW_HOSTNAME=$(host $(hostname -s) | awk '{print $1}' | head -n 1)
+			done
+		fi
+		if [ -a /etc/timezone ]; then
+			export MAILCOW_TZ=$(cat /etc/timezone)
+		elif [ -a /etc/localtime ]; then
+			export MAILCOW_TZ=$(readlink /etc/localtime|sed -n 's|^.*zoneinfo/||p')
+		fi
+		MEM_TOTAL=$(awk '/MemTotal/ {print $2}' /proc/meminfo)
+		[ "${MEM_TOTAL}" -le "2621440" ] && export SKIP_CLAMD="y"
+		export SKIP_BRANCH="n"
+		export MAILCOW_BRANCH="master"
+		# generate the config
+		./generate_config.sh
+		# run all things docker
+		docker compose pull
+		docker compose up -d
 		# now clean up apt, as we're done installing packages
 		apt-get clean 2>&1 | tee -a /data/$MY_ENV-apt.log
 		apt-get autopurge -y 2>&1 | tee -a /data/$MY_ENV-apt.log
