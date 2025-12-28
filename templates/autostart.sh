@@ -97,6 +97,9 @@ if grep -q "^$MY_ENV - cloud-init complete" /data/reboot.log ; then
 		apt-get install -y git openssl curl gawk coreutils grep jq docker.io docker-compose 2>&1 | tee /data/$MY_ENV-apt.log
 		# create bind-mount destinations, if not already present
 		mkdir -p /data/ENV2/opt /data/ENV2/var/lib/containerd /data/ENV2/var/lib/docker
+		# stop affected services
+		service docker stop
+		service containerd stop
 		# move /opt, /var/lib/containerd, and /var/lib/docker contents to new mountpoints
 		mv /opt/* /data/ENV2/opt/
 		mv /var/lib/containerd/* /data/ENV2/var/lib/containerd/
@@ -109,6 +112,9 @@ if grep -q "^$MY_ENV - cloud-init complete" /data/reboot.log ; then
 		grep "^/data/ENV2/opt" || echo -e "/data/ENV2/opt\t/opt\tnone\tdefaults,bind\t0\t1" >> /etc/fstab
 		grep "^/data/ENV2/var/lib/containerd" || echo -e "/data/ENV2/var/lib/containerd\t/var/lib/containerd\tnone\tdefaults,bind\t0\t1" >> /etc/fstab
 		grep "^/data/ENV2/var/lib/docker" || echo -e "/data/ENV2/var/lib/docker\t/var/lib/docker\tnone\tdefaults,bind\t0\t1" >> /etc/fstab
+		# start affected services again
+		service containerd start
+		service docker start
 		# this is straight from the mailcow-dockerized installation instructions
 		umask 0022
 		cd /opt
@@ -166,6 +172,9 @@ if grep -q "^$MY_ENV - cloud-init complete" /data/reboot.log ; then
 		apt-get install -y git openssl curl gawk coreutils grep jq docker.io docker-compose 2>&1 | tee /data/$MY_ENV-apt.log
 		# create bind-mount destinations, if not already present
 		mkdir -p /data/ENV3/opt /data/ENV3/var/lib/containerd /data/ENV3/var/lib/docker
+		# stop affected services
+		service docker stop
+		service containerd stop
 		# move /opt, /var/lib/containerd, and /var/lib/docker contents to new mountpoints
 		mv /opt/* /data/ENV3/opt/
 		mv /var/lib/containerd/* /data/ENV3/var/lib/containerd/
@@ -178,6 +187,9 @@ if grep -q "^$MY_ENV - cloud-init complete" /data/reboot.log ; then
 		grep "^/data/ENV3/opt" || echo -e "/data/ENV3/opt\t/opt\tnone\tdefaults,bind\t0\t1" >> /etc/fstab
 		grep "^/data/ENV3/var/lib/containerd" || echo -e "/data/ENV3/var/lib/containerd\t/var/lib/containerd\tnone\tdefaults,bind\t0\t1" >> /etc/fstab
 		grep "^/data/ENV3/var/lib/docker" || echo -e "/data/ENV3/var/lib/docker\t/var/lib/docker\tnone\tdefaults,bind\t0\t1" >> /etc/fstab
+		# start affected services again
+		service containerd start
+		service docker start
 		# this is straight from the mailcow-dockerized installation instructions
 		umask 0022
 		cd /opt
