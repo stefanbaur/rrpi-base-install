@@ -126,11 +126,13 @@ if grep -q "^$MY_ENV - cloud-init complete" /data/reboot.log ; then
 		else
 			export MAILCOW_HOSTNAME=$(host $(hostname -s) | awk '{print $1}' | head -n 1)
 			while ! echo "$MAILCOW_HOSTNAME" | grep -q "\." ; do
+				echo "heartbeat" > /sys/class/leds/PWR/trigger
 				echo "No FQDN set for this IP. Please fix your DNS."
 				echo "Waiting here until your DNS change has propagated ..."
 				sleep 30
 				export MAILCOW_HOSTNAME=$(host $(hostname -s) | awk '{print $1}' | head -n 1)
 			done
+			echo "default-on" > /sys/class/leds/PWR/trigger
 		fi
 		if [ -a /etc/timezone ]; then
 			export MAILCOW_TZ=$(cat /etc/timezone)
@@ -209,11 +211,13 @@ if grep -q "^$MY_ENV - cloud-init complete" /data/reboot.log ; then
 		else
 			export MAILCOW_HOSTNAME=$(host $(hostname -s) | awk '{print $1}' | head -n 1)
 			while ! echo "$MAILCOW_HOSTNAME" | grep -q "\." ; do
+				echo "heartbeat" > /sys/class/leds/PWR/trigger
 				echo "No FQDN set for this IP. Please fix your DNS."
 				echo "Waiting here until your DNS change has propagated ..."
 				sleep 30
 				export MAILCOW_HOSTNAME=$(host $(hostname -s) | awk '{print $1}' | head -n 1)
 			done
+			echo "default-on" > /sys/class/leds/PWR/trigger
 		fi
 		if [ -a /etc/timezone ]; then
 			export MAILCOW_TZ=$(cat /etc/timezone)
