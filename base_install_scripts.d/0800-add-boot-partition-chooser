@@ -13,10 +13,12 @@ GPIODEFINE
 fi
 
 # this part is always required
+# note that we need to start off with boot_partition=1
+# or else our installation routines (in templates/autostart.sh) will fail
 cat >> $MOUNTPOINT/boot/firmware/autoboot.txt <<AUTOBOOT
 # Default
 [default]
-boot_partition=2
+boot_partition=1
 [all]
 AUTOBOOT
 
