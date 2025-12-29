@@ -31,6 +31,9 @@ if [ -s ./base_install_custom.conf ]; then
 fi
 # TODO check that all required variables are set
 
+# log start
+echo "Start time: $(date)"
+
 #set dynamic variables
 export MOUNTPOINT=$(mktemp -d)
 export TEMPIMAGEDIR=$(mktemp -d -p $TEMPIMAGEDIRROOT)
@@ -65,6 +68,9 @@ else
 	echo "Directory ./base_install_scripts.d not found!"
 	exit 1
 fi
+
+# log end
+echo "End time: $(date)"
 
 ####################
 
