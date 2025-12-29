@@ -75,10 +75,8 @@ echo "End time: $(date)"
 ####################
 
 # TODO
-# - Make ENV1,2,3 do a "reboot dance" straight after base install, ending up in ENV2 - work in progress -> investigate autostart.sh
 # - try mkfs and rsync -avPAHXx --numeric-ids origin destination/ instead of dd - is it faster?
 # - note: rsync now supports -HS --inplace and possibly --no-whole-file as well
-# - command line to enable overlayfs: sudo raspi-config nonint enable_overlayfs
 # - update-rc.d alsa-utils disable
 # - update-rc.d dnsmasq disable
 # - watchdog is messed up?
