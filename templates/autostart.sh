@@ -1,5 +1,8 @@
 #!/bin/bash
 
+#log start
+[ -f /data/INI-start ] || touch /data/INI-start
+
 # show that we're not yet ready if the banner is not set yet
 chvt 8
 clear >/dev/tty8
