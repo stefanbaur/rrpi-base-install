@@ -72,6 +72,7 @@ if grep -q "^$MY_ENV - cloud-init complete" /data/reboot.log ; then
 	# do not use apt autopurge -y or apt clean here, or you might wipe the overlayfs packages we already downloaded during the chroot phase
 	# install and configure watchdog
 	apt install watchdog -y | tee -a /data/$MY_ENV-apt.log
+	mkdir -p /etc/systemd/system.conf.d
 	echo '# enable hardware watchdog' > /etc/systemd/system.conf.d/sysdwatchdog.conf
 	echo '#' >> /etc/systemd/system.conf.d/sysdwatchdog.conf
 	echo '# [Manager]' >> /etc/systemd/system.conf.d/sysdwatchdog.conf
