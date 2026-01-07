@@ -78,9 +78,9 @@ if grep -q "^$MY_ENV - cloud-init complete" /data/reboot.log ; then
 	echo '# [Manager]' >> /etc/systemd/system.conf.d/sysdwatchdog.conf
 	echo '# RuntimeWatchdogSec=15' >> /etc/systemd/system.conf.d/sysdwatchdog.conf
 	echo '# ShutdownWatchdogSec=5min' >> /etc/systemd/system.conf.d/sysdwatchdog.conf
-	sed 	-e '/#watchdog-device/a watchdog-device=/dev/watchdog/' \
-		-e '/#watchdog-timeout/a watchdog-timeout=15/' \
-		-e '/#max-load-1/a max-load-1=24/' \
+	sed 	-e '/#watchdog-device/a watchdog-device=/dev/watchdog' \
+		-e '/#watchdog-timeout/a watchdog-timeout=15' \
+		-e '/#max-load-1/a max-load-1=24' \
 		-i /etc/watchdog.conf
 	# enable overlay file system
 	raspi-config nonint enable_overlayfs 2>&1 | tee -a /data/$MY_ENV-apt.log
