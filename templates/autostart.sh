@@ -1,5 +1,8 @@
 #!/bin/bash
 
+#log start
+[ -f /data/INI-start ] || touch /data/INI-start
+
 # show that we're not yet ready if the banner is not set yet
 chvt 8
 clear >/dev/tty8
@@ -40,8 +43,6 @@ while ! [ -s /var/lib/cloud/instance/boot-finished ] ; do
 	ps ax >> /data/cloud-init-processes.log
 	# this is because sometimes, cloud-init is too dumb to live and claims /boot/firmware/meta-data and/or 
 	# /boot/firmware/user-data could not be found - EVEN THOUGH THE FILES ARE RIGHT WHERE THEY BELONG
-	#if grep -q "FAIL: no local data found" /var/log/cloud-init.log || grep -q " failed$" /var/log/cloud-init-output.log ; then
-	#if ((grep "No such file" /var/log/cloud-init.log | grep -q "user-data") || grep -q " failed$" /var/log/cloud-init-output.log) ; then
 	if (grep "No such file" /var/log/cloud-init.log | grep -q -e "user-data" -e "meta-data") ; then
 		# in that case, we copy and zero the logfiles ...
 		cp /var/log/cloud-init.log /data/$MY_ENV-FAIL-$(date +%F_%T|tr ':' '-')-cloud-init.log
@@ -68,10 +69,10 @@ if grep -q "^$MY_ENV - cloud-init complete" /data/reboot.log ; then
 	# add additional eth interfaces to bridge, if present
 	sed -e "s/bridge_ports eth0/bridge_ports $(ip a l | awk '$2~/eth/ && !/\@/ { print $2 }' | tr -s '\n:' '  ')/" -i /etc/network/interfaces
 	# remove cloud-init
-	apt purge cloud-init -y 2>&1 | tee -a /data/$MY_ENV-apt.log
-	# do not use apt autopurge -y or apt clean here, or you might wipe the overlayfs packages we already downloaded during the chroot phase
+	apt-get purge cloud-init -y 2>&1 | tee -a /data/$MY_ENV-apt.log
+	# do not use apt-get autopurge -y or apt-get clean here, or you might wipe the overlayfs packages we already downloaded during the chroot phase
 	# install and configure watchdog
-	apt install watchdog -y | tee -a /data/$MY_ENV-apt.log
+	apt-get install watchdog -y | tee -a /data/$MY_ENV-apt.log
 	mkdir -p /etc/systemd/system.conf.d
 	echo '# enable hardware watchdog' > /etc/systemd/system.conf.d/sysdwatchdog.conf
 	echo '#' >> /etc/systemd/system.conf.d/sysdwatchdog.conf
@@ -90,10 +91,14 @@ if grep -q "^$MY_ENV - cloud-init complete" /data/reboot.log ; then
 	# the following blocks are ENV-specific
 	if grep -q "^ENV1" /etc/ssh/banner; then
 		# now clean up apt, as we're in ENV1 and don't want to install any extra packages here
-		apt clean 2>&1 | tee -a /data/$MY_ENV-apt.log
-		apt autopurge -y 2>&1 | tee -a /data/$MY_ENV-apt.log
+		apt-get clean 2>&1 | tee -a /data/$MY_ENV-apt.log
+		apt-get autopurge -y 2>&1 | tee -a /data/$MY_ENV-apt.log
 		# set the boot partition for next boot 1->2
-		sed -e "s#^boot_partition=1#boot_partition=2#" -i /boot/firmware/autoboot.txt
+		if grep -q "^\[default\]$" /boot/firmware/autoboot.txt ; then
+			sed ':start;N;s/^\[default\]\nboot_partition=1/[default]\nboot_partition=2/;t start;P;D' -i /boot/firmware/autoboot.txt
+		else
+			sed -e "s#^boot_partition=1#boot_partition=2#" -i /boot/firmware/autoboot.txt
+		fi
 		# perform a reboot
 		if /sbin/reboot 2>&1 | tee -a /data/reboot.log ; then
 			# log success
@@ -165,13 +170,17 @@ ENV{ID_PATH}=="platform-fd500000.pcie-pci-0000:01:00.0-usb-0:1.3:1.0",SYMLINK+="
 ENV{ID_PATH}=="platform-fd500000.pcie-pci-0000:01:00.0-usb-0:1.4:1.0",SYMLINK+="persistent_lp/lp1"
 UDEVRULES
 		# as we already downloaded the required packages during the chroot phase, we can install p910nd without needing internet access
-		apt install -y p910nd xinetd 2>&1 | tee /data/$MY_ENV-apt.log
+		apt-get install -y p910nd xinetd 2>&1 | tee /data/$MY_ENV-apt.log
 		# now clean up apt, as we're done installing packages
-		apt clean 2>&1 | tee -a /data/$MY_ENV-apt.log
-		apt autopurge -y 2>&1 | tee -a /data/$MY_ENV-apt.log
+		apt-get clean 2>&1 | tee -a /data/$MY_ENV-apt.log
+		apt-get autopurge -y 2>&1 | tee -a /data/$MY_ENV-apt.log
 		# set the boot partition for next boot 2->3 (as we're in ENV2, we need to mount ENV1's bootfs for that)
 		mount /dev/disk/by-label/bootfs /mnt
-		sed -e "s#^boot_partition=2#boot_partition=3#" -i /mnt/autoboot.txt
+		if grep -q "^\[default\]$" /mnt/autoboot.txt ; then
+			sed ':start;N;s/^\[default\]\nboot_partition=2/[default]\nboot_partition=3/;t start;P;D' -i /mnt/autoboot.txt
+		else
+			sed -e "s#^boot_partition=2#boot_partition=3#" -i /mnt/autoboot.txt
+		fi
 		umount /dev/disk/by-label/bootfs
 		# perform a reboot
 		if /sbin/reboot 2>&1 | tee -a /data/reboot.log ; then
@@ -244,13 +253,17 @@ ENV{ID_PATH}=="platform-fd500000.pcie-pci-0000:01:00.0-usb-0:1.3:1.0",SYMLINK+="
 ENV{ID_PATH}=="platform-fd500000.pcie-pci-0000:01:00.0-usb-0:1.4:1.0",SYMLINK+="persistent_lp/lp1"
 UDEVRULES
 		# as we already downloaded the required packages during the chroot phase, we can install p910nd without needing internet access
-		apt install -y p910nd xinetd 2>&1 | tee -a /data/$MY_ENV-apt.log
+		apt-get install -y p910nd xinetd 2>&1 | tee -a /data/$MY_ENV-apt.log
 		# now clean up apt, as we're done installing packages
-		apt clean 2>&1 | tee -a /data/$MY_ENV-apt.log
-		apt autopurge -y 2>&1 | tee -a /data/$MY_ENV-apt.log
+		apt-get clean 2>&1 | tee -a /data/$MY_ENV-apt.log
+		apt-get autopurge -y 2>&1 | tee -a /data/$MY_ENV-apt.log
 		# set the boot partition for next boot 3->2 (as we're in ENV3, we need to mount ENV1's bootfs for that)
 		mount /dev/disk/by-label/bootfs /mnt
-		sed -e "s#^boot_partition=3#boot_partition=2#" -i /mnt/autoboot.txt
+		if grep -q "^\[default\]$" /mnt/autoboot.txt ; then
+			sed ':start;N;s/^\[default\]\nboot_partition=3/[default]\nboot_partition=2/;t start;P;D' -i /mnt/autoboot.txt
+		else
+			sed -e "s#^boot_partition=3#boot_partition=2#" -i /mnt/autoboot.txt
+		fi
 		umount /dev/disk/by-label/bootfs
 		# log success
 		echo "$MY_ENV - stage complete - $(date)" | tee -a /data/reboot.log
