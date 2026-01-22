@@ -1,0 +1,8 @@
+#!/bin/bash -e
+
+# copy any scripts we have prepared to /usr/local/bin and /usr/local/sbin, respectively
+
+[ -d ./usr/local/bin/* ] && cp -a ./usr/local/bin/* $MOUNTPOINT/usr/local/bin/
+[ -d ./usr/local/sbin/* ] && cp -a ./usr/local/sbin/* $MOUNTPOINT/usr/local/sbin/
+
+exit 0
