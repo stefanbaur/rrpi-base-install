@@ -57,4 +57,4 @@ fi
 
 echo "All done. 'ENV${NEWENV}' will become active after the next reboot."
 echo "To trigger a reboot into 'ENV${NEWENV}' immediately after making the change, call:"
-echo 'sudo $0 ${NEWENV} reboot'"
+echo "'sudo $0 ${NEWENV} reboot'"
