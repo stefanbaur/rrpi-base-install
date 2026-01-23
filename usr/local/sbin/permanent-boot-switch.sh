@@ -5,6 +5,13 @@ if [ $UID -ne 0 ] ; then
         exit 1
 fi
 
+if [ "$(stat -c %d:%i /)" != "$(stat -c %d:%i /proc/1/root/.)" ]; then
+	echo "Chroot detected! You should not attempt to"
+	echo "run this script inside a chroot environment."
+	echo "Exiting."
+	exit 1
+fi
+
 if [ -z "$1" ] ; then
         echo "This script requires you to pass the ENV number as its first parameter. Aborting."
         exit 1
