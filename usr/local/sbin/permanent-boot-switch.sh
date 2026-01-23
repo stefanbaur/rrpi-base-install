@@ -49,12 +49,12 @@ if [ "$2" == "reboot" ]; then
 		echo "Unable to reboot. Exiting."
 		exit 1
 	else
-		echo "All done. 'ENV${NEVENV}' will become active after the next reboot."
+		echo "All done. 'ENV${NEWENV}' will become active after the next reboot."
 		echo "Rebooting now."
 		exit 0
 	fi
 fi
 
-echo "All done. 'ENV${NEVENV}' will become active after the next reboot."
+echo "All done. 'ENV${NEWENV}' will become active after the next reboot."
 echo "To trigger a reboot into 'ENV${NEWENV}' immediately after making the change, call:"
 echo 'sudo $0 ${NEWENV} reboot'"
