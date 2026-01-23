@@ -5,6 +5,13 @@ if [ $UID -ne 0 ] ; then
         exit 1
 fi
 
+if [ "$(stat -c %d:%i /)" != "$(stat -c %d:%i /proc/1/root/.)" ]; then
+	echo "Chroot detected! You should not attempt to"
+	echo "run this script inside a chroot environment."
+	echo "Exiting."
+	exit 1
+fi
+
 if [ "$1" == "enable-bootro" ] ; then
 	if raspi-config nonint enable_bootro ; then
 		echo "Read-Only access to '/boot/firmware' will be enabled upon next reboot."
