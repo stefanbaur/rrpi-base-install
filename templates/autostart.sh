@@ -19,6 +19,18 @@ MY_ENV_NUMBER=$(sed -e 's/^ENV([1-3]).*$/$1/' /etc/ssh/banner)
 # log our ENV and date
 echo "$MY_ENV - booted and reached /data/autostart.sh - $(date)" | tee -a /data/reboot.log
 
+if [ $MY_ENV_NUMBER -gt 1 ] && [ -f /data/TOR_ONLY_IN_ENV1 ] ; then
+	if service tor status >/dev/null 2>&1 ; then
+		service tor stop
+	fi
+	update-rc.d disable tor
+else
+	if ! service tor status >/dev/null 2>&1 ; then
+		update-rc.d enable tor
+		service tor start
+	fi
+fi
+
 ### begin-of-runonce ###
 
 # copy all output to log file as well as debug console
