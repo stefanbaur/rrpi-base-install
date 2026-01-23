@@ -6,6 +6,11 @@ if [ $UID -ne 0 ] ; then
 fi
 
 if [ "$1" == "disable-bootro" ] ; then
+	if [ "$1" == "force-remount-rw" ] && ! mount -oremount,rw /boot/firmware ; then
+		echo "Error remounting '/boot/firmware' in read-write mode."
+		echo "No changes were made. Exiting."
+		exit 1
+	fi
 	if raspi-config nonint disable_bootro ; then
 		echo "Read-Write access to '/boot/firmware' will be enabled upon next reboot."
 		echo "To make further changes, call '$0' again, preferably after a reboot."
