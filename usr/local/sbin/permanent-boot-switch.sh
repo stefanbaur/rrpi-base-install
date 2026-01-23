@@ -48,6 +48,10 @@ if [ "$2" == "reboot" ]; then
 	if ! reboot ; then
 		echo "Unable to reboot. Exiting."
 		exit 1
+	else
+		echo "All done. 'ENV${NEVENV}' will become active after the next reboot."
+		echo "Rebooting now."
+		exit 0
 	fi
 fi
 
