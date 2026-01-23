@@ -2,11 +2,6 @@
 
 CURSYS=$(cut -c 4 /etc/ssh/banner)
 
-if [ $UID -ne 0 ]; then
-	echo "Please run this program as root or using sudo."
-	exit 1
-fi
-
 if [ -z "$1" ] ; then
         echo "This script requires you to pass the ENV number as its first parameter. Aborting."
         exit 1
@@ -42,7 +37,7 @@ else
         DEST=$1
 fi
 
-if [ $FORCE_CURSYS != "yes" ] ; then
+if [ "$FORCE_CURSYS" != "yes" ] ; then
         MOUNTPOINT=$(mktemp -d)
         mount /dev/disk/by-label/rootfs${DEST} /${MOUNTPOINT}
         mount /dev/disk/by-label/bootfs${DEST} /${MOUNTPOINT}/boot/firmware
@@ -50,8 +45,9 @@ if [ $FORCE_CURSYS != "yes" ] ; then
         mount --bind /sys /${MOUNTPOINT}/sys
         mount -t devpts none /${MOUNTPOINT}/dev/pts
         mount -t proc none /${MOUNTPOINT}/proc
-        CHROOT_COMMAND="chroot /${MOUNTPOINT}"
+        CHROOT_COMMAND="chroot"
 else
+        MOUNTPOINT=""
         CHROOT_COMMAND=""
 fi
 
@@ -63,11 +59,11 @@ fi
 OLDIFS=$IFS
 IFS=$'\n'
 for APTCMD in $(echo -e "$APTCMDLIST") ; do
-        $CHROOT_COMMAND /bin/bash -c "DEBIAN_FRONTEND='noninteractive' apt $APTCMD"
+        $CHROOT_COMMAND $MOUNTPOINT /bin/bash -c "DEBIAN_FRONTEND='noninteractive' apt $APTCMD"
 done
 IFS=$OLDIFS
 
-if [ $FORCE_CURSYS != "yes" ] ; then
+if [ "$FORCE_CURSYS" != "yes" ] ; then
         umount -R /${MOUNTPOINT}
         rmdir /${MOUNTPOINT}
 fi
