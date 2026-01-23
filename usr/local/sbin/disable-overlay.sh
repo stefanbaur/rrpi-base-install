@@ -5,6 +5,13 @@ if [ $UID -ne 0 ] ; then
         exit 1
 fi
 
+if [ "$(stat -c %d:%i /)" != "$(stat -c %d:%i /proc/1/root/.)" ]; then
+	echo "Chroot detected! You should not attempt to"
+	echo "run this script inside a chroot environment."
+	echo "Exiting."
+	exit 1
+fi
+
 if [ "$1" == "disable-bootro" ] ; then
 	if [ "$1" == "force-remount-rw" ] && ! mount -oremount,rw /boot/firmware ; then
 		echo "Error remounting '/boot/firmware' in read-write mode."
