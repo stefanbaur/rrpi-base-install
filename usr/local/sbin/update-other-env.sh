@@ -2,6 +2,11 @@
 
 CURSYS=$(cut -c 4 /etc/ssh/banner)
 
+if [ $UID -ne 0 ]; then
+	echo "Please run this program as root or using sudo."
+	exit 1
+fi
+
 if [ -z "$1" ] ; then
         echo "This script requires you to pass the ENV number as its first parameter. Aborting."
         exit 1
