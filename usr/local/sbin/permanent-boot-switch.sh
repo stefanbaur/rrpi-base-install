@@ -10,6 +10,8 @@ if [ -z "$1" ] ; then
         exit 1
 fi
 
+NEWENV=$1
+
 # this sets SOURCE to the device name of the current /boot/firmware mount
 eval $(findmnt -P /boot/firmware  | tr ' ' '\n' | grep '^SOURCE')
 
