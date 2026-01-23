@@ -44,3 +44,13 @@ if ! [ "$(readlink -e /dev/disk/by-label/bootfs)" == "$SOURCE" ] ; then
 		exit 1
 	fi
 fi
+if [ "$2" == "reboot" ]; then
+	if ! reboot ; then
+		echo "Unable to reboot. Exiting."
+		exit 1
+	fi
+fi
+
+echo "All done. 'ENV${NEVENV}' will become active after the next reboot."
+echo "To trigger a reboot into 'ENV${NEWENV}' immediately after making the change, call:"
+echo 'sudo $0 ${NEWENV} reboot'"
