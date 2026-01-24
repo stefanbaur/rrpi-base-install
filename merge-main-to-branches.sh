@@ -20,7 +20,7 @@ REMOTEBRANCHLIST=$(echo "$FULLBRANCHLIST" | grep '^remotes/origin/' | awk -F '/'
 for BRANCH in $LOCALBRANCHLIST ; do
 	git checkout "$BRANCH"
 	git merge main -m "pull updates from main via merge"
-	if echo "$REMOTEBRANCHLIST" | grep -q "^${BRANCH}$"; then
+	if echo -e "$REMOTEBRANCHLIST" | grep -q "^${BRANCH}$"; then
 		git push
 	fi
 done
