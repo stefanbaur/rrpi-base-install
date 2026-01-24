@@ -15,7 +15,7 @@ git push
 # now take care of the others
 FULLBRANCHLIST=$(git branch -a | tr -d ' *' | grep -v '^main$' | grep -v '/main$')
 LOCALBRANCHLIST=$(echo "$FULLBRANCHLIST" | grep -v '^remotes/origin/' | sort )
-REMOTEBRANCHLIST=$(echo "$FULLBRANCHLIST" | grep '^remotes/origin/' | awk -F '/' { print $3 })
+REMOTEBRANCHLIST=$(echo "$FULLBRANCHLIST" | grep '^remotes/origin/' | awk -F '/' '{ print $3 }')
 
 for BRANCH in $LOCALBRANCHLIST ; do
 	git checkout "$BRANCH"
