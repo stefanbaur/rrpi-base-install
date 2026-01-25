@@ -31,10 +31,10 @@ if [ -n "$DEBUG_VIA_USBETH" ] ; then
 	echo "bind-interfaces" >> $MOUNTPOINT/etc/dnsmasq.d/usb0
 	echo "# Set range and lease time" >> $MOUNTPOINT/etc/dnsmasq.d/usb0
 	echo "dhcp-range=${FIRSTTHREEOCTETS}.20,${FIRSTTHREEOCTETS}.10,1h" >> $MOUNTPOINT/etc/dnsmasq.d/usb0
-	echo "# Send no default route" >> $MOUNTPOINT/etc/dnsmasq.d/usb0
-	echo "dhcp-option=3" >> $MOUNTPOINT/etc/dnsmasq.d/usb0
-	echo "# Send no DNS server info" >> $MOUNTPOINT/etc/dnsmasq.d/usb0
-	echo "dhcp-option=6" >> $MOUNTPOINT/etc/dnsmasq.d/usb0
+	echo "# Send no default route on usb0" >> $MOUNTPOINT/etc/dnsmasq.d/usb0
+	echo "dhcp-option=usb0,3" >> $MOUNTPOINT/etc/dnsmasq.d/usb0
+	echo "# Send no DNS server info on usb0" >> $MOUNTPOINT/etc/dnsmasq.d/usb0
+	echo "dhcp-option=usb0,6" >> $MOUNTPOINT/etc/dnsmasq.d/usb0
 
 	# add usb0-specific output to IP.issue
 	sed -e '1 i\My usb0 IP address is \\4{usb0} \\6{usb0}' -i $MOUNTPOINT/etc/issue.d/IP.issue
