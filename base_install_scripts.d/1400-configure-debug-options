@@ -2,7 +2,7 @@
 
 echo "Checking if any debug settings were requested ..."
 # add settings and packages for debugging via USB ethernet gadget
-if [ -n "$DEBUG_VIA_USBETH" ] ; then
+if [ -n "$DEBUG_VIA_USBETH" ] && ! [ "false" == "$DEBUG_VIA_USBETH" ] ; then
 	echo "Debugging via USB-Ethernet gadget device requested."
 	echo "Changing configuration files accordingly ..."
 	# add cmdline.txt parameters for USB ethernet gadget
@@ -41,7 +41,7 @@ if [ -n "$DEBUG_VIA_USBETH" ] ; then
 fi
 
 # add config.txt parameters for SPI touchscreen
-if [ -n "$DEBUG_VIA_SPI" ] ; then
+if [ -n "$DEBUG_VIA_SPI" ] && ! [ "false" == "$DEBUG_VIA_SPI" ] ; then
 	echo "Debugging via SPI Touchscreen requested."
 	echo "Changing configuration files accordingly ..."
 	tail -n 1 $MOUNTPOINT/boot/firmware/config.txt | grep -q '^\[all\]$' || echo "[all]" >> $MOUNTPOINT/boot/firmware/config.txt
