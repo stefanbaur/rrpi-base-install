@@ -14,7 +14,7 @@ chvt 1
 
 # set ENV vars once banner is available
 MY_ENV=$(cat /etc/ssh/banner)
-MY_ENV_NUMBER=$(sed -e 's/^ENV([1-3]).*$/$1/' /etc/ssh/banner)
+MY_ENV_NUMBER=$(sed -e 's/^ENV\([1-3]\).*$/\1/' /etc/ssh/banner)
 
 # log our ENV and date
 echo "$MY_ENV - booted and reached /data/autostart.sh - $(date)" | tee -a /data/reboot.log
