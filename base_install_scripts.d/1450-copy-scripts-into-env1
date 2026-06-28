@@ -2,7 +2,7 @@
 
 # copy any scripts we have prepared to /usr/local/bin and /usr/local/sbin, respectively
 
-[ -d ./usr/local/bin/* ] && cp -a ./usr/local/bin/* $MOUNTPOINT/usr/local/bin/
-[ -d ./usr/local/sbin/* ] && cp -a ./usr/local/sbin/* $MOUNTPOINT/usr/local/sbin/
+[ -d ./usr/local/bin ] && ls -1 usr/local/bin/ | xargs --no-run-if-empty -I XXX cp -av ./usr/local/bin/XXX $MOUNTPOINT/usr/local/bin/
+[ -d ./usr/local/sbin ] && ls -1 usr/local/sbin/ | xargs --no-run-if-empty -I XXX cp -av ./usr/local/sbin/XXX $MOUNTPOINT/usr/local/sbin/
 
 exit 0
