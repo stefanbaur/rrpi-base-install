@@ -16,6 +16,9 @@ chvt 1
 MY_ENV=$(cat /etc/ssh/banner)
 MY_ENV_NUMBER=$(sed -e 's/^ENV\([1-3]\).*$/\1/' /etc/ssh/banner)
 
+# show ENV1 has been booted by heartbeat-flashing the ACT LED
+[ "$MY_ENV_NUMBER" == "1" ] && echo heartbeat >/sys/devices/platform/leds/leds/ACT/trigger
+
 # log our ENV and date
 echo "$MY_ENV - booted and reached /data/autostart.sh - $(date)" | tee -a /data/reboot.log
 
