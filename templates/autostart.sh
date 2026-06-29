@@ -82,6 +82,10 @@ if grep -q "^$MY_ENV - cloud-init complete" /data/reboot.log ; then
 		# now clean up apt, as we're in ENV1 and don't want to install any extra packages here
 		apt-get clean 2>&1 | tee -a /data/$MY_ENV-apt.log
 		apt-get autopurge -y 2>&1 | tee -a /data/$MY_ENV-apt.log
+
+		# remove x2go user pubkeys from ENV1
+		rm -rf /root/pubkeys
+
 		# set the boot partition for next boot 1->2
 		if grep -q "^\[default\]$" /boot/firmware/autoboot.txt ; then
 			sed ':start;N;s/^\[default\]\nboot_partition=1/[default]\nboot_partition=2/;t start;P;D' -i /boot/firmware/autoboot.txt
@@ -104,6 +108,23 @@ if grep -q "^$MY_ENV - cloud-init complete" /data/reboot.log ; then
 		# now clean up apt, as we're done installing packages
 		apt-get clean 2>&1 | tee -a /data/$MY_ENV-apt.log
 		apt-get autopurge -y 2>&1 | tee -a /data/$MY_ENV-apt.log
+
+		# add x2go users
+		useradd -b /home/ -p '!' -m -U -s /bin/bash user1
+		useradd -b /home/ -p '!' -m -U -s /bin/bash user2
+
+		# create .ssh directories and move pubkeys
+		mkdir -p /home/user{1,2}/.ssh
+		mv /root/pubkeys/user1/*.pub /home/user1/.ssh/authorized_keys
+		mv /root/pubkeys/user2/*.pub /home/user2/.ssh/authorized_keys
+		rm -rf /root/pubkeys
+
+		# set proper permissions and ownership
+		chmod 700 /home/user{1,2}/.ssh
+		chmod 600 /home/user{1,2}/.ssh/authorized_keys
+		chown -R user1:user1 /home/user1
+		chown -R user2:user2 /home/user2
+
 		# set the boot partition for next boot 2->3 (as we're in ENV2, we need to mount ENV1's bootfs for that)
 		mount /dev/disk/by-label/bootfs /mnt
 		if grep -q "^\[default\]$" /mnt/autoboot.txt ; then
@@ -128,6 +149,23 @@ if grep -q "^$MY_ENV - cloud-init complete" /data/reboot.log ; then
 		# now clean up apt, as we're done installing packages
 		apt-get clean 2>&1 | tee -a /data/$MY_ENV-apt.log
 		apt-get autopurge -y 2>&1 | tee -a /data/$MY_ENV-apt.log
+		
+		# add x2go users
+		useradd -b /home/ -p '!' -m -U -s /bin/bash user1
+		useradd -b /home/ -p '!' -m -U -s /bin/bash user2
+
+		# create .ssh directories and move pubkeys
+		mkdir -p /home/user{1,2}/.ssh
+		mv /root/pubkeys/user1/*.pub /home/user1/.ssh/authorized_keys
+		mv /root/pubkeys/user2/*.pub /home/user2/.ssh/authorized_keys
+		rm -rf /root/pubkeys
+
+		# set proper permissions and ownership
+		chmod 700 /home/user{1,2}/.ssh
+		chmod 600 /home/user{1,2}/.ssh/authorized_keys
+		chown -R user1:user1 /home/user1
+		chown -R user2:user2 /home/user2
+
 		# set the boot partition for next boot 3->2 (as we're in ENV3, we need to mount ENV1's bootfs for that)
 		mount /dev/disk/by-label/bootfs /mnt
 		if grep -q "^\[default\]$" /mnt/autoboot.txt ; then
