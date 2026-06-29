@@ -83,7 +83,7 @@ if grep -q "^$MY_ENV - cloud-init complete" /data/reboot.log ; then
 		apt-get clean 2>&1 | tee -a /data/$MY_ENV-apt.log
 		apt-get autopurge -y 2>&1 | tee -a /data/$MY_ENV-apt.log
 
-		# remove x2go user pubkeys from ENV1
+		# remove x2go user pubkeys from ENV1, as we are not creating x2go users here
 		rm -rf /root/pubkeys
 
 		# set the boot partition for next boot 1->2
@@ -124,6 +124,28 @@ if grep -q "^$MY_ENV - cloud-init complete" /data/reboot.log ; then
 		chmod 600 /home/user{1,2}/.ssh/authorized_keys
 		chown -R user1:user1 /home/user1
 		chown -R user2:user2 /home/user2
+		# create bind-mount destinations, if not already present
+		mkdir -p /data/${MY_ENV}/home/user{1,2}
+
+		# move /home/user? contents to new mountpoints
+		mv /home/user1 /data/${MY_ENV}/home/
+		mv /home/user2 /data/${MY_ENV}/home/
+
+		# recreate original directories
+		mkdir -p /home/user{1,2}
+		chmod 700 /home/user{1,2}
+
+		# re-set ownership for newly recreated directories
+		chown -R user1:user1 /home/user1
+		chown -R user2:user2 /home/user2
+
+		# manually bind-mount the new destinations for now
+		mount --bind /data/${MY_ENV}/home/user1 /home/user1
+		mount --bind /data/${MY_ENV}/home/user1 /home/user1
+
+		# add bindmounts to fstab
+		grep "^/data/${MY_ENV}/home/user1" || echo -e "/data/${MY_ENV}/home/user1\t/opt\tnone\tdefaults,bind\t0\t1" >> /etc/fstab
+		grep "^/data/${MY_ENV}/home/user2" || echo -e "/data/${MY_ENV}/home/user2\t/opt\tnone\tdefaults,bind\t0\t1" >> /etc/fstab
 
 		# set the boot partition for next boot 2->3 (as we're in ENV2, we need to mount ENV1's bootfs for that)
 		mount /dev/disk/by-label/bootfs /mnt
@@ -149,7 +171,7 @@ if grep -q "^$MY_ENV - cloud-init complete" /data/reboot.log ; then
 		# now clean up apt, as we're done installing packages
 		apt-get clean 2>&1 | tee -a /data/$MY_ENV-apt.log
 		apt-get autopurge -y 2>&1 | tee -a /data/$MY_ENV-apt.log
-		
+
 		# add x2go users
 		useradd -b /home/ -p '!' -m -U -s /bin/bash user1
 		useradd -b /home/ -p '!' -m -U -s /bin/bash user2
@@ -165,6 +187,28 @@ if grep -q "^$MY_ENV - cloud-init complete" /data/reboot.log ; then
 		chmod 600 /home/user{1,2}/.ssh/authorized_keys
 		chown -R user1:user1 /home/user1
 		chown -R user2:user2 /home/user2
+		# create bind-mount destinations, if not already present
+		mkdir -p /data/${MY_ENV}/home/user{1,2}
+
+		# move /home/user? contents to new mountpoints
+		mv /home/user1 /data/${MY_ENV}/home/
+		mv /home/user2 /data/${MY_ENV}/home/
+
+		# recreate original directories
+		mkdir -p /home/user{1,2}
+		chmod 700 /home/user{1,2}
+
+		# re-set ownership for newly recreated directories
+		chown -R user1:user1 /home/user1
+		chown -R user2:user2 /home/user2
+
+		# manually bind-mount the new destinations for now
+		mount --bind /data/${MY_ENV}/home/user1 /home/user1
+		mount --bind /data/${MY_ENV}/home/user1 /home/user1
+
+		# add bindmounts to fstab
+		grep "^/data/${MY_ENV}/home/user1" || echo -e "/data/${MY_ENV}/home/user1\t/opt\tnone\tdefaults,bind\t0\t1" >> /etc/fstab
+		grep "^/data/${MY_ENV}/home/user2" || echo -e "/data/${MY_ENV}/home/user2\t/opt\tnone\tdefaults,bind\t0\t1" >> /etc/fstab
 
 		# set the boot partition for next boot 3->2 (as we're in ENV3, we need to mount ENV1's bootfs for that)
 		mount /dev/disk/by-label/bootfs /mnt
