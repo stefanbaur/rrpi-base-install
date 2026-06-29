@@ -1,4 +1,4 @@
-#/bin/bash -e
+#!/bin/bash -e
 
 # create custom directory and generate keys, if not already present
 mkdir -p  ./custom/x2goserver/user{1,2}
@@ -8,4 +8,4 @@ mkdir -p  ./custom/x2goserver/user{1,2}
 [ -s ./custom/x2goserver/user2/id_ed25519.pub ] || ssh-keygen -f ./custom/x2goserver/user2/id_ed25519 -y > ./custom/x2goserver/user2/id_ed25519.pub
 
 # copy pubkeys to root directory so we can retrieve them later
-rsync -aP --include="ed25519.pub" ./custom/x2goserver/user{1,2}/ $MOUNTPOINT/root/pubkeys
+rsync -aP --exclude="id_ed25519" --include="id_ed25519.pub" ./custom/x2goserver/user{1,2} $MOUNTPOINT/root/pubkeys/
