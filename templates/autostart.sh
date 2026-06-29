@@ -99,8 +99,6 @@ if grep -q "^$MY_ENV - cloud-init complete" /data/reboot.log ; then
 			touch /data/ENV1-could-not-perform-reboot
 		fi
 	elif grep -q "^ENV2" /etc/ssh/banner; then
-		# as we already downloaded the required packages during the chroot phase, we can install sl without needing internet access
-		apt-get install -y sl 2>&1 | tee /data/$MY_ENV-apt.log
 		# now clean up apt, as we're done installing packages
 		apt-get clean 2>&1 | tee -a /data/$MY_ENV-apt.log
 		apt-get autopurge -y 2>&1 | tee -a /data/$MY_ENV-apt.log
@@ -123,8 +121,6 @@ if grep -q "^$MY_ENV - cloud-init complete" /data/reboot.log ; then
 			touch /data/ENV2-could-not-perform-reboot
 		fi
 	elif grep -q "^ENV3" /etc/ssh/banner; then
-		# as we already downloaded the required packages during the chroot phase, we can install sl without needing internet access
-		apt-get install -y sl 2>&1 | tee /data/$MY_ENV-apt.log
 		# now clean up apt, as we're done installing packages
 		apt-get clean 2>&1 | tee -a /data/$MY_ENV-apt.log
 		apt-get autopurge -y 2>&1 | tee -a /data/$MY_ENV-apt.log
