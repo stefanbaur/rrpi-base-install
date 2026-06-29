@@ -113,6 +113,13 @@ if grep -q "^$MY_ENV - cloud-init complete" /data/reboot.log ; then
 		useradd -b /home/ -p '!' -m -U -s /bin/bash user1
 		useradd -b /home/ -p '!' -m -U -s /bin/bash user2
 
+		# add x2go users to additional groups
+		for X2GOUSER in user1 user2; do
+			for USERGROUP in dialout cdrom audio video plugdev games users input render; do
+				adduser $X2GOUSER $USERGROUP
+			done
+		done
+
 		# create .ssh directories and move pubkeys
 		mkdir -p /home/user{1,2}/.ssh
 		mv /root/pubkeys/user1/*.pub /home/user1/.ssh/authorized_keys
@@ -175,6 +182,13 @@ if grep -q "^$MY_ENV - cloud-init complete" /data/reboot.log ; then
 		# add x2go users
 		useradd -b /home/ -p '!' -m -U -s /bin/bash user1
 		useradd -b /home/ -p '!' -m -U -s /bin/bash user2
+
+		# add x2go users to additional groups
+		for X2GOUSER in user1 user2; do
+			for USERGROUP in dialout cdrom audio video plugdev games users input render; do
+				adduser $X2GOUSER $USERGROUP
+			done
+		done
 
 		# create .ssh directories and move pubkeys
 		mkdir -p /home/user{1,2}/.ssh
