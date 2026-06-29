@@ -110,13 +110,13 @@ if grep -q "^$MY_ENV - cloud-init complete" /data/reboot.log ; then
 		apt-get autopurge -y 2>&1 | tee -a /data/$MY_ENV-apt.log
 
 		# add x2go users
-		useradd -b /home/ -p '!' -m -U -s /bin/bash user1
-		useradd -b /home/ -p '!' -m -U -s /bin/bash user2
+		/usr/sbin/useradd -b /home/ -p '!' -m -U -s /bin/bash user1
+		/usr/sbin/useradd -b /home/ -p '!' -m -U -s /bin/bash user2
 
 		# add x2go users to additional groups
 		for X2GOUSER in user1 user2; do
 			for USERGROUP in dialout cdrom audio video plugdev games users input render; do
-				adduser $X2GOUSER $USERGROUP
+				/usr/sbin/adduser $X2GOUSER $USERGROUP
 			done
 		done
 
@@ -151,8 +151,8 @@ if grep -q "^$MY_ENV - cloud-init complete" /data/reboot.log ; then
 		mount --bind /data/${MY_ENV}/home/user1 /home/user1
 
 		# add bindmounts to fstab
-		grep "^/data/${MY_ENV}/home/user1" || echo -e "/data/${MY_ENV}/home/user1\t/opt\tnone\tdefaults,bind\t0\t1" >> /etc/fstab
-		grep "^/data/${MY_ENV}/home/user2" || echo -e "/data/${MY_ENV}/home/user2\t/opt\tnone\tdefaults,bind\t0\t1" >> /etc/fstab
+		grep "^/data/${MY_ENV}/home/user1" || echo -e "/data/${MY_ENV}/home/user1\t/home/user1\tnone\tdefaults,bind\t0\t1" >> /etc/fstab
+		grep "^/data/${MY_ENV}/home/user2" || echo -e "/data/${MY_ENV}/home/user2\t/home/user2\tnone\tdefaults,bind\t0\t1" >> /etc/fstab
 
 		# set the boot partition for next boot 2->3 (as we're in ENV2, we need to mount ENV1's bootfs for that)
 		mount /dev/disk/by-label/bootfs /mnt
@@ -180,13 +180,13 @@ if grep -q "^$MY_ENV - cloud-init complete" /data/reboot.log ; then
 		apt-get autopurge -y 2>&1 | tee -a /data/$MY_ENV-apt.log
 
 		# add x2go users
-		useradd -b /home/ -p '!' -m -U -s /bin/bash user1
-		useradd -b /home/ -p '!' -m -U -s /bin/bash user2
+		/usr/sbin/useradd -b /home/ -p '!' -m -U -s /bin/bash user1
+		/usr/sbin/useradd -b /home/ -p '!' -m -U -s /bin/bash user2
 
 		# add x2go users to additional groups
 		for X2GOUSER in user1 user2; do
 			for USERGROUP in dialout cdrom audio video plugdev games users input render; do
-				adduser $X2GOUSER $USERGROUP
+				/usr/sbin/adduser $X2GOUSER $USERGROUP
 			done
 		done
 
@@ -221,8 +221,8 @@ if grep -q "^$MY_ENV - cloud-init complete" /data/reboot.log ; then
 		mount --bind /data/${MY_ENV}/home/user1 /home/user1
 
 		# add bindmounts to fstab
-		grep "^/data/${MY_ENV}/home/user1" || echo -e "/data/${MY_ENV}/home/user1\t/opt\tnone\tdefaults,bind\t0\t1" >> /etc/fstab
-		grep "^/data/${MY_ENV}/home/user2" || echo -e "/data/${MY_ENV}/home/user2\t/opt\tnone\tdefaults,bind\t0\t1" >> /etc/fstab
+		grep "^/data/${MY_ENV}/home/user1" || echo -e "/data/${MY_ENV}/home/user1\t/home/user1\tnone\tdefaults,bind\t0\t1" >> /etc/fstab
+		grep "^/data/${MY_ENV}/home/user2" || echo -e "/data/${MY_ENV}/home/user2\t/home/user2\tnone\tdefaults,bind\t0\t1" >> /etc/fstab
 
 		# set the boot partition for next boot 3->2 (as we're in ENV3, we need to mount ENV1's bootfs for that)
 		mount /dev/disk/by-label/bootfs /mnt
