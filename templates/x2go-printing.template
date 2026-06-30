@@ -1,0 +1,16 @@
+[General]
+pdfview=false
+showdialog=true
+
+[CUPS]
+defaultprinter=PDF
+
+[print]
+command=lpr
+ps=false
+startcmd=false
+stdin=false
+
+[view]
+command=evince
+open=true

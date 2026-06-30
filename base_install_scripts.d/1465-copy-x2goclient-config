@@ -1,0 +1,13 @@
+#!/bin/bash -e
+
+# create custom directory as well as sessions/settings files from templates, if not already present
+mkdir -p  ./custom/x2goclient
+[ -s ./custom/x2goclient/sessions ] || cp ./templates/x2go-sessions.template ./custom/x2goclient/sessions
+[ -s ./custom/x2goclient/settings ] || cp ./templates/x2go-settings.template ./custom/x2goclient/settings
+[ -s ./custom/x2goclient/printing ] || cp ./templates/x2go-printing.template ./custom/x2goclient/printing
+
+# copy keys (public and secret) to root directory so we can retrieve them later
+rsync -aP ./custom/x2goserver/user{1,2} $MOUNTPOINT/root/x2goclient/
+
+# copy x2go config files to root directory so we can retrieve them later
+rsync -aP ./custom/x2goclient/{sessions,settings,printing} $MOUNTPOINT/root/x2goclient/

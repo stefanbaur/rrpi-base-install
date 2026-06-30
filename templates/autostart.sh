@@ -82,6 +82,10 @@ if grep -q "^$MY_ENV - cloud-init complete" /data/reboot.log ; then
 		# now clean up apt, as we're in ENV1 and don't want to install any extra packages here
 		apt-get clean 2>&1 | tee -a /data/$MY_ENV-apt.log
 		apt-get autopurge -y 2>&1 | tee -a /data/$MY_ENV-apt.log
+
+		# remove x2goclient directory from ENV1, as we are not creating x2go users here
+		rm -rf /root/x2goclient
+
 		# set the boot partition for next boot 1->2
 		if grep -q "^\[default\]$" /boot/firmware/autoboot.txt ; then
 			sed ':start;N;s/^\[default\]\nboot_partition=1/[default]\nboot_partition=2/;t start;P;D' -i /boot/firmware/autoboot.txt
@@ -104,6 +108,23 @@ if grep -q "^$MY_ENV - cloud-init complete" /data/reboot.log ; then
 		# now clean up apt, as we're done installing packages
 		apt-get clean 2>&1 | tee -a /data/$MY_ENV-apt.log
 		apt-get autopurge -y 2>&1 | tee -a /data/$MY_ENV-apt.log
+
+		# create .ssh and .x2goclient directories and move keys as well as config and settings
+		DEFAULT_USER_HOME=$(getent passwd 1000 | cut -d: -f6)
+		mkdir -p ${DEFAULT_USER_HOME}/.ssh ${DEFAULT_USER_HOME}/.x2goclient
+		mv /root/x2goclient/user1 ${DEFAULT_USER_HOME}/.ssh/
+		mv /root/x2goclient/user2 ${DEFAULT_USER_HOME}/.ssh/
+		mv /root/x2goclient/{settings,sessions,printing} ${DEFAULT_USER_HOME}/.x2goclient/
+		rm -rf /root/x2goclient
+
+		# set proper permissions and ownership
+		chmod 700 ${DEFAULT_USER_HOME}/.ssh
+		chmod 600 ${DEFAULT_USER_HOME}/.ssh/user{1,2}/*
+		chmod 644 ${DEFAULT_USER_HOME}/.ssh/user{1,2}/*.pub
+		chmod 775 ${DEFAULT_USER_HOME}/.x2goclient
+		chmod 664 ${DEFAULT_USER_HOME}/.x2goclient/{settings,sessions,printing}
+		chown -R 1000:1000 ${DEFAULT_USER_HOME}
+
 		# set the boot partition for next boot 2->3 (as we're in ENV2, we need to mount ENV1's bootfs for that)
 		mount /dev/disk/by-label/bootfs /mnt
 		if grep -q "^\[default\]$" /mnt/autoboot.txt ; then
@@ -128,6 +149,23 @@ if grep -q "^$MY_ENV - cloud-init complete" /data/reboot.log ; then
 		# now clean up apt, as we're done installing packages
 		apt-get clean 2>&1 | tee -a /data/$MY_ENV-apt.log
 		apt-get autopurge -y 2>&1 | tee -a /data/$MY_ENV-apt.log
+
+		# create .ssh and .x2goclient directories and move keys as well as config and settings
+		DEFAULT_USER_HOME=$(getent passwd 1000 | cut -d: -f6)
+		mkdir -p ${DEFAULT_USER_HOME}/.ssh ${DEFAULT_USER_HOME}/.x2goclient
+		mv /root/x2goclient/user1 ${DEFAULT_USER_HOME}/.ssh/
+		mv /root/x2goclient/user2 ${DEFAULT_USER_HOME}/.ssh/
+		mv /root/x2goclient/s* ${DEFAULT_USER_HOME}/.x2goclient/
+		rm -rf /root/x2goclient
+
+		# set proper permissions and ownership
+		chmod 700 ${DEFAULT_USER_HOME}/.ssh
+		chmod 600 ${DEFAULT_USER_HOME}/.ssh/user{1,2}/*
+		chmod 644 ${DEFAULT_USER_HOME}/.ssh/user{1,2}/*.pub
+		chmod 775 ${DEFAULT_USER_HOME}/.x2goclient
+		chmod 664 ${DEFAULT_USER_HOME}/.x2goclient/{settings,sessions}
+		chown -R 1000:1000 ${DEFAULT_USER_HOME}
+
 		# set the boot partition for next boot 3->2 (as we're in ENV3, we need to mount ENV1's bootfs for that)
 		mount /dev/disk/by-label/bootfs /mnt
 		if grep -q "^\[default\]$" /mnt/autoboot.txt ; then
