@@ -6,6 +6,7 @@ mkdir -p  ./custom/x2goclient
 [ -s ./custom/x2goclient/settings ] || cp ./templates/x2go-settings.template ./custom/x2goclient/settings
 [ -s ./custom/x2goclient/printing ] || cp ./templates/x2go-printing.template ./custom/x2goclient/printing
 [ -s ./custom/x2goclient/.xsession ] || cp ./templates/x11-xsession.template ./custom/x2goclient/.xsession
+[ -s ./custom/x2goclient/x2goclient ] || cp ./templates/x2goclient.template ./custom/x2goclient/x2goclient
 
 # copy keys (public and secret) to root directory so we can retrieve them later
 rsync -aP ./custom/x2goserver/user{1,2} $MOUNTPOINT/root/x2goclient/

@@ -1,0 +1,2 @@
+#!/bin/bash
+/usr/bin/x2goclient --no-session-edit --thinclient --add-to-known-hosts $@
