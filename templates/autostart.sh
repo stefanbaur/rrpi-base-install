@@ -111,6 +111,7 @@ if grep -q "^$MY_ENV - cloud-init complete" /data/reboot.log ; then
 
 		# create .ssh and .x2goclient directories and move keys as well as config and settings
 		DEFAULT_USER_HOME=$(getent passwd 1000 | cut -d: -f6)
+		DEFAULT_USER=$(getent passwd 1000 | cut -d: -f1)
 		mkdir -p ${DEFAULT_USER_HOME}/.ssh ${DEFAULT_USER_HOME}/.x2goclient
 		mv /root/x2goclient/user1 ${DEFAULT_USER_HOME}/.ssh/
 		mv /root/x2goclient/user2 ${DEFAULT_USER_HOME}/.ssh/
@@ -124,6 +125,9 @@ if grep -q "^$MY_ENV - cloud-init complete" /data/reboot.log ; then
 		chmod 775 ${DEFAULT_USER_HOME}/.x2goclient
 		chmod 664 ${DEFAULT_USER_HOME}/.x2goclient/{settings,sessions,printing}
 		chown -R 1000:1000 ${DEFAULT_USER_HOME}
+
+		# set nodm user
+		sed -e's#^NODM_USER=.*$#NODM_USER='${DEFAULT_USER}'#' -i /etc/default/nodm
 
 		# set the boot partition for next boot 2->3 (as we're in ENV2, we need to mount ENV1's bootfs for that)
 		mount /dev/disk/by-label/bootfs /mnt
@@ -152,6 +156,7 @@ if grep -q "^$MY_ENV - cloud-init complete" /data/reboot.log ; then
 
 		# create .ssh and .x2goclient directories and move keys as well as config and settings
 		DEFAULT_USER_HOME=$(getent passwd 1000 | cut -d: -f6)
+		DEFAULT_USER=$(getent passwd 1000 | cut -d: -f1)
 		mkdir -p ${DEFAULT_USER_HOME}/.ssh ${DEFAULT_USER_HOME}/.x2goclient
 		mv /root/x2goclient/user1 ${DEFAULT_USER_HOME}/.ssh/
 		mv /root/x2goclient/user2 ${DEFAULT_USER_HOME}/.ssh/
@@ -165,6 +170,9 @@ if grep -q "^$MY_ENV - cloud-init complete" /data/reboot.log ; then
 		chmod 775 ${DEFAULT_USER_HOME}/.x2goclient
 		chmod 664 ${DEFAULT_USER_HOME}/.x2goclient/{settings,sessions}
 		chown -R 1000:1000 ${DEFAULT_USER_HOME}
+
+		# set nodm user
+		sed -e's#^NODM_USER=.*$#NODM_USER='${DEFAULT_USER}'#' -i /etc/default/nodm
 
 		# set the boot partition for next boot 3->2 (as we're in ENV3, we need to mount ENV1's bootfs for that)
 		mount /dev/disk/by-label/bootfs /mnt
