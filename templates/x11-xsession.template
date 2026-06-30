@@ -1,0 +1,8 @@
+#!/bin/bash
+
+# Start tint2 in the background
+(sleep 2 && tint2) &
+(sleep 2 && x2goclient) &
+
+# Launch Openbox
+exec openbox-session

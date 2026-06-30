@@ -116,6 +116,7 @@ if grep -q "^$MY_ENV - cloud-init complete" /data/reboot.log ; then
 		mv /root/x2goclient/user1 ${DEFAULT_USER_HOME}/.ssh/
 		mv /root/x2goclient/user2 ${DEFAULT_USER_HOME}/.ssh/
 		mv /root/x2goclient/{settings,sessions,printing} ${DEFAULT_USER_HOME}/.x2goclient/
+		mv /root/x2goclient/.xsession ${DEFAULT_USER_HOME}/
 		rm -rf /root/x2goclient
 
 		# set proper permissions and ownership
@@ -161,6 +162,7 @@ if grep -q "^$MY_ENV - cloud-init complete" /data/reboot.log ; then
 		mv /root/x2goclient/user1 ${DEFAULT_USER_HOME}/.ssh/
 		mv /root/x2goclient/user2 ${DEFAULT_USER_HOME}/.ssh/
 		mv /root/x2goclient/s* ${DEFAULT_USER_HOME}/.x2goclient/
+		mv /root/x2goclient/.xsession ${DEFAULT_USER_HOME}/
 		rm -rf /root/x2goclient
 
 		# set proper permissions and ownership
