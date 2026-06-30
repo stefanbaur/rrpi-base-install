@@ -2,3 +2,5 @@ base_install_custom.conf
 base_install.log
 custom/autostart.sh
 custom/ENV?-custom-install.sh
+custom/x2goserver
+custom/x2goclient
