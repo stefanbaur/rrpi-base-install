@@ -48,4 +48,6 @@ if [ -n "$DEBUG_VIA_SPI" ] && ! [ "false" == "$DEBUG_VIA_SPI" ] ; then
 	echo "# for SPI TouchScreen" >> $MOUNTPOINT/boot/firmware/config.txt
 	echo "dtparam=spi=on" >> $MOUNTPOINT/boot/firmware/config.txt
 	echo "dtoverlay=piscreen,speed=16000000,rotate=270" >> $MOUNTPOINT/boot/firmware/config.txt
+	sed -e 's/^dtoverlay=vc4-kms-v3d/# disabled due to SPI TouchScreen: dtoverlay=vc4-kms-v3d/' -i $MOUNTPOINT/boot/firmware/config.txt
+	sed -e 's/^max_framebuffers=2/# disabled due to SPI TouchScreen: max_framebuffers=2/' -i $MOUNTPOINT/boot/firmware/config.txt
 fi
