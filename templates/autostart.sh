@@ -165,7 +165,7 @@ if grep -q "^$MY_ENV - cloud-init complete" /data/reboot.log ; then
 		mkdir -p ${DEFAULT_USER_HOME}/.ssh ${DEFAULT_USER_HOME}/.x2goclient
 		mv /root/x2goclient/user1 ${DEFAULT_USER_HOME}/.ssh/
 		mv /root/x2goclient/user2 ${DEFAULT_USER_HOME}/.ssh/
-		mv /root/x2goclient/s* ${DEFAULT_USER_HOME}/.x2goclient/
+		mv /root/x2goclient/{settings,sessions,printing} ${DEFAULT_USER_HOME}/.x2goclient/
 		mv /root/x2goclient/.xsession ${DEFAULT_USER_HOME}/
 		mv /root/x2goclient/x2goclient /usr/local/bin
 		rm -rf /root/x2goclient
@@ -175,7 +175,7 @@ if grep -q "^$MY_ENV - cloud-init complete" /data/reboot.log ; then
 		chmod 600 ${DEFAULT_USER_HOME}/.ssh/user{1,2}/*
 		chmod 644 ${DEFAULT_USER_HOME}/.ssh/user{1,2}/*.pub
 		chmod 775 ${DEFAULT_USER_HOME}/.x2goclient
-		chmod 664 ${DEFAULT_USER_HOME}/.x2goclient/{settings,sessions}
+		chmod 664 ${DEFAULT_USER_HOME}/.x2goclient/{settings,sessions,printing}
 		chown -R 1000:1000 ${DEFAULT_USER_HOME}
 
 		# set nodm user
