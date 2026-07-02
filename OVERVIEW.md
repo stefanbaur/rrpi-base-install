@@ -5,6 +5,10 @@
 
 ## Fixed ports per model:
 
+    Pi1:
+    ETH lp0
+    PRT lp1
+
     Pi3B:
     ETH lp0 lp2
     PRT lp1 lp3
