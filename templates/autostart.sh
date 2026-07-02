@@ -104,7 +104,7 @@ if grep -q "^$MY_ENV - cloud-init complete" /data/reboot.log ; then
 		fi
 	elif grep -q "^ENV2" /etc/ssh/banner; then
 		# as we already downloaded the required packages during the chroot phase, we can install them without needing internet access
-		apt-get install -y xserver-xorg-video-fbdev xserver-xorg-input-libinput openbox tint2 x11-xserver-utils x11vnc network-manager-gnome xdotool coreutils eatmydata xbindkeys alsa-utils pulseaudio-utils pulseaudio chromium chromium-l10n chromium-sandbox xterm x2goclient x2gokdriveclient nodm 2>&1 | tee /data/$MY_ENV-apt.log
+		apt-get install -y plymouth plymouth-themes rpi-splash-screen-support rpd-plym-splash xserver-xorg-video-fbdev xserver-xorg-input-libinput openbox tint2 x11-xserver-utils x11vnc network-manager-gnome xdotool coreutils eatmydata xbindkeys alsa-utils pulseaudio-utils pulseaudio chromium chromium-l10n chromium-sandbox xterm x2goclient x2gokdriveclient nodm 2>&1 | tee /data/$MY_ENV-apt.log
 		# now clean up apt, as we're done installing packages
 		apt-get clean 2>&1 | tee -a /data/$MY_ENV-apt.log
 		apt-get autopurge -y 2>&1 | tee -a /data/$MY_ENV-apt.log
@@ -134,6 +134,9 @@ if grep -q "^$MY_ENV - cloud-init complete" /data/reboot.log ; then
 		# configure tint2 autostart on openbox start
 		echo 'tint2 &' >> /etc/xdg/openbox/autostart
 		echo 'x2goclient &' >> /etc/xdg/openbox/autostart
+
+		# enable splash screen
+		raspi-config nonint do_boot_splash 0 
 
 		# set graphical target as default
 		systemctl set-default graphical.target
@@ -158,7 +161,7 @@ if grep -q "^$MY_ENV - cloud-init complete" /data/reboot.log ; then
 		fi
 	elif grep -q "^ENV3" /etc/ssh/banner; then
 		# as we already downloaded the required packages during the chroot phase, we can install them without needing internet access
-		apt-get install -y xserver-xorg-video-fbdev xserver-xorg-input-libinput openbox tint2 x11-xserver-utils x11vnc network-manager-gnome xdotool coreutils eatmydata xbindkeys alsa-utils pulseaudio-utils pulseaudio chromium chromium-l10n chromium-sandbox xterm x2goclient x2gokdriveclient nodm 2>&1 | tee /data/$MY_ENV-apt.log
+		apt-get install -y plymouth plymouth-themes rpi-splash-screen-support rpd-plym-splash xserver-xorg-video-fbdev xserver-xorg-input-libinput openbox tint2 x11-xserver-utils x11vnc network-manager-gnome xdotool coreutils eatmydata xbindkeys alsa-utils pulseaudio-utils pulseaudio chromium chromium-l10n chromium-sandbox xterm x2goclient x2gokdriveclient nodm 2>&1 | tee /data/$MY_ENV-apt.log
 		# now clean up apt, as we're done installing packages
 		apt-get clean 2>&1 | tee -a /data/$MY_ENV-apt.log
 		apt-get autopurge -y 2>&1 | tee -a /data/$MY_ENV-apt.log
@@ -188,6 +191,9 @@ if grep -q "^$MY_ENV - cloud-init complete" /data/reboot.log ; then
 		# configure tint2 autostart on openbox start
 		echo 'tint2 &' >> /etc/xdg/openbox/autostart
 		echo 'x2goclient &' >> /etc/xdg/openbox/autostart
+
+		# enable splash screen
+		raspi-config nonint do_boot_splash 0 
 
 		# set graphical target as default
 		systemctl set-default graphical.target
