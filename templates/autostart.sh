@@ -131,6 +131,9 @@ if grep -q "^$MY_ENV - cloud-init complete" /data/reboot.log ; then
 		# set nodm user
 		sed -e's#^NODM_USER=.*$#NODM_USER='${DEFAULT_USER}'#' -i /etc/default/nodm
 
+		# configure tint2 autostart on openbox start
+		echo 'tint2 &' >> /etc/xdg/openbox/autostart
+
 		# set the boot partition for next boot 2->3 (as we're in ENV2, we need to mount ENV1's bootfs for that)
 		mount /dev/disk/by-label/bootfs /mnt
 		if grep -q "^\[default\]$" /mnt/autoboot.txt ; then
@@ -177,6 +180,9 @@ if grep -q "^$MY_ENV - cloud-init complete" /data/reboot.log ; then
 
 		# set nodm user
 		sed -e's#^NODM_USER=.*$#NODM_USER='${DEFAULT_USER}'#' -i /etc/default/nodm
+
+		# configure tint2 autostart on openbox start
+		echo 'tint2 &' >> /etc/xdg/openbox/autostart
 
 		# set the boot partition for next boot 3->2 (as we're in ENV3, we need to mount ENV1's bootfs for that)
 		mount /dev/disk/by-label/bootfs /mnt
