@@ -117,7 +117,7 @@ if grep -q "^$MY_ENV - cloud-init complete" /data/reboot.log ; then
 		mkdir -p /etc/xinetd.d/
 		COUNT=0
 		while [ $COUNT -lt 4 ]; do 
-			cat >/etc/xinetd.d/p910${COUNT}d <<P910ND_TEMPLATE
+			cat >/etc/xinetd.d/p910${COUNT}d <<P910ND_TEMPLATE2
 service p910${COUNT}d
 {
         disable         = no
@@ -129,12 +129,12 @@ service p910${COUNT}d
         server          = /usr/sbin/p910nd
         server_args     = -b -f /dev/persistent_lp/lp${COUNT}
 }
-P910ND_TEMPLATE
+P910ND_TEMPLATE2
 			sed -e "\#910${COUNT}/tcp#d" -i /etc/services
 			echo -e "p910${COUNT}d\t910${COUNT}/tcp\t# TCP RAW print service" >>/etc/services
 			COUNT=$((COUNT+1))
 		done
-		cat > /etc/udev/rules.d/050_persistent_printer_mappings.rules <<UDEVRULES
+		cat > /etc/udev/rules.d/050_persistent_printer_mappings.rules <<UDEVRULES2
 # do not act upon removal
 ACTION=="remove", GOTO="persistent_printer_end"
 # get USB ID
@@ -145,18 +145,32 @@ ENV{ID_TYPE}!="printer", GOTO="persistent_printer_end"
 # get PATH ID
 IMPORT{builtin}="path_id"
 
-## Pi 3B+
-# Pi3B+
+## Pi 3B
+# upper left
+ENV{ID_PATH}=="platform-3f980000.usb-usb-0:1.2:1.0",SYMLINK+="persistent_lp/lp0"
+# lower left
+ENV{ID_PATH}=="platform-3f980000.usb-usb-0:1.3:1.0",SYMLINK+="persistent_lp/lp1"
 # upper right
-ENV{ID_PATH}=="platform-3f980000.usb-usb-0:1.3:1.0",SYMLINK+="persistent_lp/lp2"
+ENV{ID_PATH}=="platform-3f980000.usb-usb-0:1.4:1.0",SYMLINK+="persistent_lp/lp2"
 # lower right
-ENV{ID_PATH}=="platform-3f980000.usb-usb-0:1.2:1.0",SYMLINK+="persistent_lp/lp3"
+ENV{ID_PATH}=="platform-3f980000.usb-usb-0:1.5:1.0",SYMLINK+="persistent_lp/lp3"
+
+## Pi 3B+
 # upper left
 ENV{ID_PATH}=="platform-3f980000.usb-usb-0:1.1.2:1.0",SYMLINK+="persistent_lp/lp0"
 # lower left
 ENV{ID_PATH}=="platform-3f980000.usb-usb-0:1.1.3:1.0",SYMLINK+="persistent_lp/lp1"
+# upper right
+ENV{ID_PATH}=="platform-3f980000.usb-usb-0:1.3:1.0",SYMLINK+="persistent_lp/lp2"
+# lower right
+ENV{ID_PATH}=="platform-3f980000.usb-usb-0:1.2:1.0",SYMLINK+="persistent_lp/lp3"
 
 ## Pi 4B
+# USB2 and below only
+# upper left
+ENV{ID_PATH}=="platform-fd500000.pcie-pci-0000:01:00.0-usb-0:1.3:1.0",SYMLINK+="persistent_lp/lp0"
+# lower left
+ENV{ID_PATH}=="platform-fd500000.pcie-pci-0000:01:00.0-usb-0:1.4:1.0",SYMLINK+="persistent_lp/lp1"
 # USB3
 # upper right
 ENV{ID_PATH}=="platform-fd500000.pcie-pci-0000:01:00.0-usbv3-0:1:1.0",SYMLINK+="persistent_lp/lp2"
@@ -167,11 +181,7 @@ ENV{ID_PATH}=="platform-fd500000.pcie-pci-0000:01:00.0-usbv3-0:2:1.0",SYMLINK+="
 ENV{ID_PATH}=="platform-fd500000.pcie-pci-0000:01:00.0-usb-0:1.1:1.0",SYMLINK+="persistent_lp/lp2"
 # lower right
 ENV{ID_PATH}=="platform-fd500000.pcie-pci-0000:01:00.0-usb-0:1.2:1.0",SYMLINK+="persistent_lp/lp3"
-# upper left
-ENV{ID_PATH}=="platform-fd500000.pcie-pci-0000:01:00.0-usb-0:1.3:1.0",SYMLINK+="persistent_lp/lp0"
-# lower left
-ENV{ID_PATH}=="platform-fd500000.pcie-pci-0000:01:00.0-usb-0:1.4:1.0",SYMLINK+="persistent_lp/lp1"
-UDEVRULES
+UDEVRULES2
 		# as we already downloaded the required packages during the chroot phase, we can install p910nd without needing internet access
 		apt-get install -y p910nd xinetd 2>&1 | tee /data/$MY_ENV-apt.log
 		# now clean up apt, as we're done installing packages
@@ -200,7 +210,7 @@ UDEVRULES
 		mkdir -p /etc/xinetd.d/
 		COUNT=0
 		while [ $COUNT -lt 4 ]; do 
-			cat >/etc/xinetd.d/p910${COUNT}d <<P910ND_TEMPLATE
+			cat >/etc/xinetd.d/p910${COUNT}d <<P910ND_TEMPLATE3
 service p910${COUNT}d
 {
         disable         = no
@@ -212,12 +222,12 @@ service p910${COUNT}d
         server          = /usr/sbin/p910nd
         server_args     = -b -f /dev/persistent_lp/lp${COUNT}
 }
-P910ND_TEMPLATE
+P910ND_TEMPLATE3
 			sed -e "\#910${COUNT}/tcp#d" -i /etc/services
 			echo -e "p910${COUNT}d\t910${COUNT}/tcp\t# TCP RAW print service" >>/etc/services
 			COUNT=$((COUNT+1))
 		done
-		cat > /etc/udev/rules.d/050_persistent_printer_mappings.rules <<UDEVRULES
+		cat > /etc/udev/rules.d/050_persistent_printer_mappings.rules <<UDEVRULES3
 # do not act upon removal
 ACTION=="remove", GOTO="persistent_printer_end"
 # get USB ID
@@ -228,18 +238,32 @@ ENV{ID_TYPE}!="printer", GOTO="persistent_printer_end"
 # get PATH ID
 IMPORT{builtin}="path_id"
 
-## Pi 3B+
-# Pi3B+
+## Pi 3B
+# upper left
+ENV{ID_PATH}=="platform-3f980000.usb-usb-0:1.2:1.0",SYMLINK+="persistent_lp/lp0"
+# lower left
+ENV{ID_PATH}=="platform-3f980000.usb-usb-0:1.3:1.0",SYMLINK+="persistent_lp/lp1"
 # upper right
-ENV{ID_PATH}=="platform-3f980000.usb-usb-0:1.3:1.0",SYMLINK+="persistent_lp/lp2"
+ENV{ID_PATH}=="platform-3f980000.usb-usb-0:1.4:1.0",SYMLINK+="persistent_lp/lp2"
 # lower right
-ENV{ID_PATH}=="platform-3f980000.usb-usb-0:1.2:1.0",SYMLINK+="persistent_lp/lp3"
+ENV{ID_PATH}=="platform-3f980000.usb-usb-0:1.5:1.0",SYMLINK+="persistent_lp/lp3"
+
+## Pi 3B+
 # upper left
 ENV{ID_PATH}=="platform-3f980000.usb-usb-0:1.1.2:1.0",SYMLINK+="persistent_lp/lp0"
 # lower left
 ENV{ID_PATH}=="platform-3f980000.usb-usb-0:1.1.3:1.0",SYMLINK+="persistent_lp/lp1"
+# upper right
+ENV{ID_PATH}=="platform-3f980000.usb-usb-0:1.3:1.0",SYMLINK+="persistent_lp/lp2"
+# lower right
+ENV{ID_PATH}=="platform-3f980000.usb-usb-0:1.2:1.0",SYMLINK+="persistent_lp/lp3"
 
 ## Pi 4B
+# USB2 and below only
+# upper left
+ENV{ID_PATH}=="platform-fd500000.pcie-pci-0000:01:00.0-usb-0:1.3:1.0",SYMLINK+="persistent_lp/lp0"
+# lower left
+ENV{ID_PATH}=="platform-fd500000.pcie-pci-0000:01:00.0-usb-0:1.4:1.0",SYMLINK+="persistent_lp/lp1"
 # USB3
 # upper right
 ENV{ID_PATH}=="platform-fd500000.pcie-pci-0000:01:00.0-usbv3-0:1:1.0",SYMLINK+="persistent_lp/lp2"
@@ -250,11 +274,7 @@ ENV{ID_PATH}=="platform-fd500000.pcie-pci-0000:01:00.0-usbv3-0:2:1.0",SYMLINK+="
 ENV{ID_PATH}=="platform-fd500000.pcie-pci-0000:01:00.0-usb-0:1.1:1.0",SYMLINK+="persistent_lp/lp2"
 # lower right
 ENV{ID_PATH}=="platform-fd500000.pcie-pci-0000:01:00.0-usb-0:1.2:1.0",SYMLINK+="persistent_lp/lp3"
-# upper left
-ENV{ID_PATH}=="platform-fd500000.pcie-pci-0000:01:00.0-usb-0:1.3:1.0",SYMLINK+="persistent_lp/lp0"
-# lower left
-ENV{ID_PATH}=="platform-fd500000.pcie-pci-0000:01:00.0-usb-0:1.4:1.0",SYMLINK+="persistent_lp/lp1"
-UDEVRULES
+UDEVRULES3
 		# as we already downloaded the required packages during the chroot phase, we can install p910nd without needing internet access
 		apt-get install -y p910nd xinetd 2>&1 | tee -a /data/$MY_ENV-apt.log
 		# now clean up apt, as we're done installing packages
