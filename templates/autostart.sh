@@ -156,14 +156,15 @@ ENV{ID_PATH}=="platform-3f980000.usb-usb-0:1.4:1.0",SYMLINK+="persistent_lp/lp2"
 ENV{ID_PATH}=="platform-3f980000.usb-usb-0:1.5:1.0",SYMLINK+="persistent_lp/lp3"
 
 ## Pi 3B+
+# reverse order due to conflict with regular Pi 3B (same IDs for lp0/lp1)
 # upper left
-ENV{ID_PATH}=="platform-3f980000.usb-usb-0:1.1.2:1.0",SYMLINK+="persistent_lp/lp0"
+ENV{ID_PATH}=="platform-3f980000.usb-usb-0:1.1.2:1.0",SYMLINK+="persistent_lp/lp2"
 # lower left
-ENV{ID_PATH}=="platform-3f980000.usb-usb-0:1.1.3:1.0",SYMLINK+="persistent_lp/lp1"
+ENV{ID_PATH}=="platform-3f980000.usb-usb-0:1.1.3:1.0",SYMLINK+="persistent_lp/lp3"
 # upper right
-ENV{ID_PATH}=="platform-3f980000.usb-usb-0:1.3:1.0",SYMLINK+="persistent_lp/lp2"
+ENV{ID_PATH}=="platform-3f980000.usb-usb-0:1.3:1.0",SYMLINK+="persistent_lp/lp1"
 # lower right
-ENV{ID_PATH}=="platform-3f980000.usb-usb-0:1.2:1.0",SYMLINK+="persistent_lp/lp3"
+ENV{ID_PATH}=="platform-3f980000.usb-usb-0:1.2:1.0",SYMLINK+="persistent_lp/lp0"
 
 ## Pi 4B
 # USB2 and below only
@@ -249,14 +250,15 @@ ENV{ID_PATH}=="platform-3f980000.usb-usb-0:1.4:1.0",SYMLINK+="persistent_lp/lp2"
 ENV{ID_PATH}=="platform-3f980000.usb-usb-0:1.5:1.0",SYMLINK+="persistent_lp/lp3"
 
 ## Pi 3B+
+# reverse order due to conflict with regular Pi 3B (same IDs for lp0/lp1)
 # upper left
-ENV{ID_PATH}=="platform-3f980000.usb-usb-0:1.1.2:1.0",SYMLINK+="persistent_lp/lp0"
+ENV{ID_PATH}=="platform-3f980000.usb-usb-0:1.1.2:1.0",SYMLINK+="persistent_lp/lp2"
 # lower left
-ENV{ID_PATH}=="platform-3f980000.usb-usb-0:1.1.3:1.0",SYMLINK+="persistent_lp/lp1"
+ENV{ID_PATH}=="platform-3f980000.usb-usb-0:1.1.3:1.0",SYMLINK+="persistent_lp/lp3"
 # upper right
-ENV{ID_PATH}=="platform-3f980000.usb-usb-0:1.3:1.0",SYMLINK+="persistent_lp/lp2"
+ENV{ID_PATH}=="platform-3f980000.usb-usb-0:1.3:1.0",SYMLINK+="persistent_lp/lp1"
 # lower right
-ENV{ID_PATH}=="platform-3f980000.usb-usb-0:1.2:1.0",SYMLINK+="persistent_lp/lp3"
+ENV{ID_PATH}=="platform-3f980000.usb-usb-0:1.2:1.0",SYMLINK+="persistent_lp/lp0"
 
 ## Pi 4B
 # USB2 and below only
