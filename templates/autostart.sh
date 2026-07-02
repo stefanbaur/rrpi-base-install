@@ -145,6 +145,12 @@ ENV{ID_TYPE}!="printer", GOTO="persistent_printer_end"
 # get PATH ID
 IMPORT{builtin}="path_id"
 
+## Pi 1 (untested)
+# upper
+ENV{ID_PATH}=="platform-20980000.usb-usb-0:1.2:1.0",SYMLINK+="persistent_lp/lp0"
+# lower
+ENV{ID_PATH}=="platform-20980000.usb-usb-0:1.3:1.0",SYMLINK+="persistent_lp/lp1"
+
 ## Pi 3B
 # upper left
 ENV{ID_PATH}=="platform-3f980000.usb-usb-0:1.2:1.0",SYMLINK+="persistent_lp/lp0"
@@ -238,6 +244,12 @@ ENV{ID_TYPE}!="printer", GOTO="persistent_printer_end"
 
 # get PATH ID
 IMPORT{builtin}="path_id"
+
+## Pi 1 (untested)
+# upper
+ENV{ID_PATH}=="platform-20980000.usb-usb-0:1.2:1.0",SYMLINK+="persistent_lp/lp0"
+# lower
+ENV{ID_PATH}=="platform-20980000.usb-usb-0:1.3:1.0",SYMLINK+="persistent_lp/lp1"
 
 ## Pi 3B
 # upper left
