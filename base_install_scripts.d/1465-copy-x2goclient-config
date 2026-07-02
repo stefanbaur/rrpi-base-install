@@ -11,5 +11,8 @@ mkdir -p  ./custom/x2goclient
 # copy keys (public and secret) to root directory so we can retrieve them later
 rsync -aP ./custom/x2goserver/user{1,2} $MOUNTPOINT/root/x2goclient/
 
+# copy custom x2goclient startup script to root directory so we can retrieve it later
+rsync -aP ./custom/x2goclient/x2goclient $MOUNTPOINT/root/x2goclient/
+
 # copy x2go config files to root directory so we can retrieve them later
 rsync -aP ./custom/x2goclient/{sessions,settings,printing,.xsession} $MOUNTPOINT/root/x2goclient/
