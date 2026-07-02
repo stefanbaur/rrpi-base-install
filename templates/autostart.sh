@@ -104,7 +104,7 @@ if grep -q "^$MY_ENV - cloud-init complete" /data/reboot.log ; then
 		fi
 	elif grep -q "^ENV2" /etc/ssh/banner; then
 		# as we already downloaded the required packages during the chroot phase, we can install them without needing internet access
-		apt-get install -y openbox tint2 x11-xserver-utils x11vnc network-manager-gnome xdotool coreutils eatmydata xbindkeys alsa-utils pulseaudio-utils pulseaudio chromium chromium-l10n chromium-sandbox xterm x2goclient x2gokdriveclient nodm 2>&1 | tee /data/$MY_ENV-apt.log
+		apt-get install -y xserver-xorg-video-fbdev openbox tint2 x11-xserver-utils x11vnc network-manager-gnome xdotool coreutils eatmydata xbindkeys alsa-utils pulseaudio-utils pulseaudio chromium chromium-l10n chromium-sandbox xterm x2goclient x2gokdriveclient nodm 2>&1 | tee /data/$MY_ENV-apt.log
 		# now clean up apt, as we're done installing packages
 		apt-get clean 2>&1 | tee -a /data/$MY_ENV-apt.log
 		apt-get autopurge -y 2>&1 | tee -a /data/$MY_ENV-apt.log
@@ -151,7 +151,7 @@ if grep -q "^$MY_ENV - cloud-init complete" /data/reboot.log ; then
 		fi
 	elif grep -q "^ENV3" /etc/ssh/banner; then
 		# as we already downloaded the required packages during the chroot phase, we can install them without needing internet access
-		apt-get install -y openbox tint2 x11-xserver-utils x11vnc network-manager-gnome xdotool coreutils eatmydata xbindkeys alsa-utils pulseaudio-utils pulseaudio chromium chromium-l10n chromium-sandbox xterm x2goclient x2gokdriveclient nodm 2>&1 | tee /data/$MY_ENV-apt.log
+		apt-get install -y xserver-xorg-video-fbdev openbox tint2 x11-xserver-utils x11vnc network-manager-gnome xdotool coreutils eatmydata xbindkeys alsa-utils pulseaudio-utils pulseaudio chromium chromium-l10n chromium-sandbox xterm x2goclient x2gokdriveclient nodm 2>&1 | tee /data/$MY_ENV-apt.log
 		# now clean up apt, as we're done installing packages
 		apt-get clean 2>&1 | tee -a /data/$MY_ENV-apt.log
 		apt-get autopurge -y 2>&1 | tee -a /data/$MY_ENV-apt.log
