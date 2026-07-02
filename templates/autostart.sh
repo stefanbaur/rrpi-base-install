@@ -104,6 +104,20 @@ if grep -q "^$MY_ENV - cloud-init complete" /data/reboot.log ; then
 		# now clean up apt, as we're done installing packages
 		apt-get clean 2>&1 | tee -a /data/$MY_ENV-apt.log
 		apt-get autopurge -y 2>&1 | tee -a /data/$MY_ENV-apt.log
+
+		# enable IPv4 forwarding in kernel
+		echo 'net.ipv4.ip_forward=1' > /etc/sysctl.d/010-ipforward.conf
+
+		# disable bluetooth for better wifi
+		grep '^dtoverlay=disable-bt' /boot/firmware/config.txt || echo -e '[all]\n# disable bluetooth for better wifi\ndtoverlay=disable-bt\n' >> /boot/firmware/config.txt
+
+		# determine country from surrounding WiFis
+		COUNTRY=$(iw dev wlan0 scan | grep -i "Country:" | awk '$1=="Country:" { print $2 }' | uniq | head -n 1 )
+
+		# set regulatory domain
+		sed -e 's/cfg80211.ieee80211_regdom[^ ]*/cfg80211.ieee80211_regdom='${COUNTRY}'/' -i /boot/firmware/config.txt
+		sed -e 's/^country=.*$/country='${COUNTRY}'/' -i /etc/wpa_supplicant/wpa_supplicant.conf
+
 		# set the boot partition for next boot 2->3 (as we're in ENV2, we need to mount ENV1's bootfs for that)
 		mount /dev/disk/by-label/bootfs /mnt
 		if grep -q "^\[default\]$" /mnt/autoboot.txt ; then
@@ -128,6 +142,20 @@ if grep -q "^$MY_ENV - cloud-init complete" /data/reboot.log ; then
 		# now clean up apt, as we're done installing packages
 		apt-get clean 2>&1 | tee -a /data/$MY_ENV-apt.log
 		apt-get autopurge -y 2>&1 | tee -a /data/$MY_ENV-apt.log
+
+		# enable IPv4 forwarding in kernel
+		echo 'net.ipv4.ip_forward=1' > /etc/sysctl.d/010-ipforward.conf
+
+		# disable bluetooth for better wifi
+		grep '^dtoverlay=disable-bt' /boot/firmware/config.txt || echo -e '[all]\n# disable bluetooth for better wifi\ndtoverlay=disable-bt\n' >> /boot/firmware/config.txt
+
+		# determine country from surrounding WiFis
+		COUNTRY=$(iw dev wlan0 scan | grep -i "Country:" | awk '$1=="Country:" { print $2 }' | uniq | head -n 1 )
+
+		# set regulatory domain
+		sed -e 's/cfg80211.ieee80211_regdom[^ ]*/cfg80211.ieee80211_regdom='${COUNTRY}'/' -i /boot/firmware/config.txt
+		sed -e 's/^country=.*$/country='${COUNTRY}'/' -i /etc/wpa_supplicant/wpa_supplicant.conf
+
 		# set the boot partition for next boot 3->2 (as we're in ENV3, we need to mount ENV1's bootfs for that)
 		mount /dev/disk/by-label/bootfs /mnt
 		if grep -q "^\[default\]$" /mnt/autoboot.txt ; then
