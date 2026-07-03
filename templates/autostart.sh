@@ -113,6 +113,7 @@ if grep -q "^$MY_ENV - cloud-init complete" /data/reboot.log ; then
 
 		# determine country from surrounding WiFis
 		COUNTRY=$(iw dev wlan0 scan | grep -i "Country:" | awk '$1=="Country:" { print $2 }' | uniq | head -n 1 )
+		[ -z "$COUNTRY" ] && COUNTRY=00
 
 		# set regulatory domain
 		sed -e 's/cfg80211.ieee80211_regdom[^ ]*/cfg80211.ieee80211_regdom='${COUNTRY}'/' -i /boot/firmware/config.txt
@@ -151,6 +152,7 @@ if grep -q "^$MY_ENV - cloud-init complete" /data/reboot.log ; then
 
 		# determine country from surrounding WiFis
 		COUNTRY=$(iw dev wlan0 scan | grep -i "Country:" | awk '$1=="Country:" { print $2 }' | uniq | head -n 1 )
+		[ -z "$COUNTRY" ] && COUNTRY=00
 
 		# set regulatory domain
 		sed -e 's/cfg80211.ieee80211_regdom[^ ]*/cfg80211.ieee80211_regdom='${COUNTRY}'/' -i /boot/firmware/config.txt
