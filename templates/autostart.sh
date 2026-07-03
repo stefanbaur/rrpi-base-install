@@ -108,7 +108,7 @@ if grep -q "^$MY_ENV - cloud-init complete" /data/reboot.log ; then
 		# create bind-mount destinations, if not already present
 		mkdir -p /data/ENV2/etc/wpa_supplicant
 		# move /etc/wpa_supplicant content to new mountpoint
-		mv /etc/wpa_supplicant* /data/ENV2/etc/wpa_supplicant
+		mv /etc/wpa_supplicant/* /data/ENV2/etc/wpa_supplicant
 		# manually bind-mount the new destinations for now
 		mount --bind /data/ENV2/etc/wpa_supplicant /etc/wpa_supplicant
 		# add bindmount to fstab
@@ -168,7 +168,7 @@ if grep -q "^$MY_ENV - cloud-init complete" /data/reboot.log ; then
 		# create bind-mount destinations, if not already present
 		mkdir -p /data/ENV3/etc/wpa_supplicant
 		# move /etc/wpa_supplicant content to new mountpoint
-		mv /etc/wpa_supplicant* /data/ENV3/etc/wpa_supplicant
+		mv /etc/wpa_supplicant/* /data/ENV3/etc/wpa_supplicant
 		# manually bind-mount the new destinations for now
 		mount --bind /data/ENV3/etc/wpa_supplicant /etc/wpa_supplicant
 		# add bindmount to fstab
