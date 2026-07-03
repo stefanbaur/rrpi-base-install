@@ -1,0 +1,4 @@
+interface=br0
+no-hosts
+filterwin2k
+dhcp-range=10.1.0.100,10.1.0.200,24h
