@@ -105,6 +105,15 @@ if grep -q "^$MY_ENV - cloud-init complete" /data/reboot.log ; then
 		apt-get clean 2>&1 | tee -a /data/$MY_ENV-apt.log
 		apt-get autopurge -y 2>&1 | tee -a /data/$MY_ENV-apt.log
 
+                # create bind-mount destinations, if not already present
+                mkdir -p /data/ENV2/etc/wpa_supplicant
+                # move /etc/wpa_supplicant content to new mountpoint
+                mv /etc/wpa_supplicant* /data/ENV2/etc/wpa_supplicant
+                # manually bind-mount the new destinations for now
+                mount --bind /data/ENV2/etc/wpa_supplicant /etc/wpa_supplicant
+                # add bindmount to fstab
+                grep "^/data/ENV2/etc/wpa_supplicant" || echo -e "/data/ENV2/etc/wpa_supplicant\t/etc/wpa_supplicant\tnone\tdefaults,bind\t0\t1" >> /etc/fstab
+
 		# enable IPv4 forwarding in kernel
 		echo 'net.ipv4.ip_forward=1' > /etc/sysctl.d/010-ipforward.conf
 
@@ -143,6 +152,15 @@ if grep -q "^$MY_ENV - cloud-init complete" /data/reboot.log ; then
 		# now clean up apt, as we're done installing packages
 		apt-get clean 2>&1 | tee -a /data/$MY_ENV-apt.log
 		apt-get autopurge -y 2>&1 | tee -a /data/$MY_ENV-apt.log
+
+                # create bind-mount destinations, if not already present
+                mkdir -p /data/ENV3/etc/wpa_supplicant
+                # move /etc/wpa_supplicant content to new mountpoint
+                mv /etc/wpa_supplicant* /data/ENV3/etc/wpa_supplicant
+                # manually bind-mount the new destinations for now
+                mount --bind /data/ENV3/etc/wpa_supplicant /etc/wpa_supplicant
+                # add bindmount to fstab
+                grep "^/data/ENV3/etc/wpa_supplicant" || echo -e "/data/ENV3/etc/wpa_supplicant\t/etc/wpa_supplicant\tnone\tdefaults,bind\t0\t1" >> /etc/fstab
 
 		# enable IPv4 forwarding in kernel
 		echo 'net.ipv4.ip_forward=1' > /etc/sysctl.d/010-ipforward.conf
