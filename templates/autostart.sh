@@ -114,6 +114,12 @@ if grep -q "^$MY_ENV - cloud-init complete" /data/reboot.log ; then
                 # add bindmount to fstab
                 grep "^/data/ENV2/etc/wpa_supplicant" || echo -e "/data/ENV2/etc/wpa_supplicant\t/etc/wpa_supplicant\tnone\tdefaults,bind\t0\t1" >> /etc/fstab
 
+                # replace wpa_supplicant.conf with our version
+                cp /etc/wpa_supplicant/wpa_supplicant.conf /etc/wpa_supplicant/wpa_supplicant.original
+		# cat keeps permissions intact
+                cat /root/wpa_supplicant/wpa_supplicant.conf > /etc/wpa_supplicant/wpa_supplicant.conf
+                rm -rf /root/wpa_supplicant
+
 		# enable IPv4 forwarding in kernel
 		echo 'net.ipv4.ip_forward=1' > /etc/sysctl.d/010-ipforward.conf
 
@@ -161,6 +167,12 @@ if grep -q "^$MY_ENV - cloud-init complete" /data/reboot.log ; then
                 mount --bind /data/ENV3/etc/wpa_supplicant /etc/wpa_supplicant
                 # add bindmount to fstab
                 grep "^/data/ENV3/etc/wpa_supplicant" || echo -e "/data/ENV3/etc/wpa_supplicant\t/etc/wpa_supplicant\tnone\tdefaults,bind\t0\t1" >> /etc/fstab
+
+                # replace wpa_supplicant.conf with our version
+                cp /etc/wpa_supplicant/wpa_supplicant.conf /etc/wpa_supplicant/wpa_supplicant.original
+		# cat keeps permissions intact
+                cat /root/wpa_supplicant/wpa_supplicant.conf > /etc/wpa_supplicant/wpa_supplicant.conf
+                rm -rf /root/wpa_supplicant
 
 		# enable IPv4 forwarding in kernel
 		echo 'net.ipv4.ip_forward=1' > /etc/sysctl.d/010-ipforward.conf
