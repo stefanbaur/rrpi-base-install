@@ -51,7 +51,7 @@ while ! [ -s /var/lib/cloud/instance/boot-finished ] ; do
 		cp /var/log/cloud-init.log /data/$MY_ENV-FAIL-$(date +%F_%T|tr ':' '-')-cloud-init.log
 		echo "" > /var/log/cloud-init.log
 		cp /var/log/cloud-init-output.log /data/$MY_ENV-FAIL-$(date +%F_%T|tr ':' '-')-cloud-init-output.log
-	        echo "" > /var/log/cloud-init-output.log
+		echo "" > /var/log/cloud-init-output.log
 		# ... log the error in our own logfile ...
 		echo "$MY_ENV - FAILURE TO RUN CLOUD-INIT, REBOOTING - $(date)" | tee -a /data/reboot.log
 		# ... and trigger an immediate reboot into current ENV, because rebooting and running cloud-init again seems to fix it
@@ -105,20 +105,20 @@ if grep -q "^$MY_ENV - cloud-init complete" /data/reboot.log ; then
 		apt-get clean 2>&1 | tee -a /data/$MY_ENV-apt.log
 		apt-get autopurge -y 2>&1 | tee -a /data/$MY_ENV-apt.log
 
-                # create bind-mount destinations, if not already present
-                mkdir -p /data/ENV2/etc/wpa_supplicant
-                # move /etc/wpa_supplicant content to new mountpoint
-                mv /etc/wpa_supplicant* /data/ENV2/etc/wpa_supplicant
-                # manually bind-mount the new destinations for now
-                mount --bind /data/ENV2/etc/wpa_supplicant /etc/wpa_supplicant
-                # add bindmount to fstab
-                grep "^/data/ENV2/etc/wpa_supplicant" || echo -e "/data/ENV2/etc/wpa_supplicant\t/etc/wpa_supplicant\tnone\tdefaults,bind\t0\t1" >> /etc/fstab
+		# create bind-mount destinations, if not already present
+		mkdir -p /data/ENV2/etc/wpa_supplicant
+		# move /etc/wpa_supplicant content to new mountpoint
+		mv /etc/wpa_supplicant* /data/ENV2/etc/wpa_supplicant
+		# manually bind-mount the new destinations for now
+		mount --bind /data/ENV2/etc/wpa_supplicant /etc/wpa_supplicant
+		# add bindmount to fstab
+		grep "^/data/ENV2/etc/wpa_supplicant" || echo -e "/data/ENV2/etc/wpa_supplicant\t/etc/wpa_supplicant\tnone\tdefaults,bind\t0\t1" >> /etc/fstab
 
-                # replace wpa_supplicant.conf with our version
-                cp /etc/wpa_supplicant/wpa_supplicant.conf /etc/wpa_supplicant/wpa_supplicant.original
+		# replace wpa_supplicant.conf with our version
+		cp /etc/wpa_supplicant/wpa_supplicant.conf /etc/wpa_supplicant/wpa_supplicant.original
 		# cat keeps permissions intact
-                cat /root/wpa_supplicant/wpa_supplicant.conf > /etc/wpa_supplicant/wpa_supplicant.conf
-                rm -rf /root/wpa_supplicant
+		cat /root/wpa_supplicant/wpa_supplicant.conf > /etc/wpa_supplicant/wpa_supplicant.conf
+		rm -rf /root/wpa_supplicant
 
 		# enable IPv4 forwarding in kernel
 		echo 'net.ipv4.ip_forward=1' > /etc/sysctl.d/010-ipforward.conf
@@ -159,20 +159,20 @@ if grep -q "^$MY_ENV - cloud-init complete" /data/reboot.log ; then
 		apt-get clean 2>&1 | tee -a /data/$MY_ENV-apt.log
 		apt-get autopurge -y 2>&1 | tee -a /data/$MY_ENV-apt.log
 
-                # create bind-mount destinations, if not already present
-                mkdir -p /data/ENV3/etc/wpa_supplicant
-                # move /etc/wpa_supplicant content to new mountpoint
-                mv /etc/wpa_supplicant* /data/ENV3/etc/wpa_supplicant
-                # manually bind-mount the new destinations for now
-                mount --bind /data/ENV3/etc/wpa_supplicant /etc/wpa_supplicant
-                # add bindmount to fstab
-                grep "^/data/ENV3/etc/wpa_supplicant" || echo -e "/data/ENV3/etc/wpa_supplicant\t/etc/wpa_supplicant\tnone\tdefaults,bind\t0\t1" >> /etc/fstab
+		# create bind-mount destinations, if not already present
+		mkdir -p /data/ENV3/etc/wpa_supplicant
+		# move /etc/wpa_supplicant content to new mountpoint
+		mv /etc/wpa_supplicant* /data/ENV3/etc/wpa_supplicant
+		# manually bind-mount the new destinations for now
+		mount --bind /data/ENV3/etc/wpa_supplicant /etc/wpa_supplicant
+		# add bindmount to fstab
+		grep "^/data/ENV3/etc/wpa_supplicant" || echo -e "/data/ENV3/etc/wpa_supplicant\t/etc/wpa_supplicant\tnone\tdefaults,bind\t0\t1" >> /etc/fstab
 
-                # replace wpa_supplicant.conf with our version
-                cp /etc/wpa_supplicant/wpa_supplicant.conf /etc/wpa_supplicant/wpa_supplicant.original
+		# replace wpa_supplicant.conf with our version
+		cp /etc/wpa_supplicant/wpa_supplicant.conf /etc/wpa_supplicant/wpa_supplicant.original
 		# cat keeps permissions intact
-                cat /root/wpa_supplicant/wpa_supplicant.conf > /etc/wpa_supplicant/wpa_supplicant.conf
-                rm -rf /root/wpa_supplicant
+		cat /root/wpa_supplicant/wpa_supplicant.conf > /etc/wpa_supplicant/wpa_supplicant.conf
+		rm -rf /root/wpa_supplicant
 
 		# enable IPv4 forwarding in kernel
 		echo 'net.ipv4.ip_forward=1' > /etc/sysctl.d/010-ipforward.conf
