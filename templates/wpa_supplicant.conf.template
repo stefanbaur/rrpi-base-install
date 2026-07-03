@@ -1,0 +1,84 @@
+ctrl_interface=DIR=/var/run/wpa_supplicant GROUP=netdev
+update_config=1
+country=00
+
+network={
+	ssid="@BayernWLAN"
+	key_mgmt=NONE
+}
+
+network={
+	ssid="ulm.freifunk.net"
+	key_mgmt=NONE
+}
+
+network={
+	ssid="stuttgart.freifunk.net"
+	key_mgmt=NONE
+}
+
+network={
+	ssid="Freifunk"
+	key_mgmt=NONE
+}
+
+network={
+	ssid="muenchen.freifunk.net/muc_cty"
+	key_mgmt=NONE
+}
+
+network={
+	ssid="muenchen.freifunk.net/muc_nord"
+	key_mgmt=NONE
+}
+
+network={
+	ssid="muenchen.freifunk.net/muc_ost"
+	key_mgmt=NONE
+}
+
+network={
+	ssid="muenchen.freifunk.net/muc_sued"
+	key_mgmt=NONE
+}
+
+network={
+	ssid="muenchen.freifunk.net/muc_west"
+	key_mgmt=NONE
+}
+
+network={
+	ssid="muenchen.freifunk.net/uml_nord"
+	key_mgmt=NONE
+}
+
+network={
+	ssid="muenchen.freifunk.net/uml_ost"
+	key_mgmt=NONE
+}
+
+network={
+	ssid="muenchen.freifunk.net/uml_sued"
+	key_mgmt=NONE
+}
+
+network={
+	ssid="muenchen.freifunk.net/uml_west"
+	key_mgmt=NONE
+}
+
+network={
+	ssid="muenchen.freifunk.net/gauting"
+	key_mgmt=NONE
+}
+
+network={
+	ssid="muenchen.freifunk.net/freising"
+	key_mgmt=NONE
+}
+
+network={
+	ssid="muenchen.freifunk.net/welt"
+	key_mgmt=NONE
+}
+
