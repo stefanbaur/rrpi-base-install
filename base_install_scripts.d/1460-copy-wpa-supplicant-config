@@ -1,8 +1,0 @@
-#!/bin/bash -e
-
-# create custom directory as well as wpa_supplicant.conf file from templates, if not already present
-mkdir -p  ./custom/lan-to-upstream-wifi-bridge/wpa_supplicant
-[ -s ./custom/lan-to-upstream-wifi-bridge/wpa_supplicant/wpa_supplicant.conf ] || cp ./templates/lan-to-upstream-wifi-bridge/wpa_supplicant.conf.template ./custom/lan-to-upstream-wifi-bridge/wpa_supplicant/wpa_supplicant.conf
-
-# copy wpa_supplicant.conf to root directory so we can retrieve them later
-rsync -aP ./custom/lan-to-upstream-wifi-bridge/wpa_supplicant/wpa_supplicant.conf $MOUNTPOINT/root/wpa_supplicant/
