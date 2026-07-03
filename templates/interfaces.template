@@ -1,0 +1,30 @@
+# interfaces(5) file used by ifup(8) and ifdown(8)
+# Include files from /etc/network/interfaces.d:
+source /etc/network/interfaces.d/*
+auto lo
+iface lo inet loopback
+
+allow-hotplug eth0
+iface eth0 inet manual
+
+auto br0
+iface br0 inet static
+        bridge_ports eth0
+        address 10.1.0.1
+        netmask 255.255.0.0
+
+allow-hotplug wlan0
+iface wlan0 inet dhcp
+        wpa-conf /etc/wpa_supplicant/wpa_supplicant.conf
+        pre-up rfkill unblock wlan
+        pre-up service dnsmasq stop
+        post-up nft add table ip nat
+        post-up nft add chain ip nat prerouting '{ type nat hook prerouting priority -100; policy accept; }'
+        post-up nft add chain ip nat input '{ type nat hook input priority 100; policy accept; }'
+        post-up nft add chain ip nat output '{ type nat hook output priority -100; policy accept; }'
+        post-up nft add chain ip nat postrouting '{ type nat hook postrouting priority 100; policy accept; }'
+        post-up nft add rule ip nat postrouting oifname wlan0 masquerade
+	# TODO: this is how we could switch downstream IP range in case of conflict (might need to go in a separate script)
+	# post-up if [ "$(ip r l  awk -F'.' '$0~/wlan0/ && $0~/proto kernel/ { print $1 "." $2}') == "10.1" ] && sed -e 's/address 10\.1/address 172.16/g' -i /etc/network/interfaces /etc/dnsmasq.d/br0.conf
+	# post-up if [ "$(ip r l  awk -F'.' '$0~/wlan0/ && $0~/proto kernel/ { print $1 "." $2}') == "10.1" ] && sed -e 's/address 10\.1/address 172.16/g' #do same for running sys, ifconfig ... etc. 
+        post-up service dnsmasq start
