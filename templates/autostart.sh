@@ -117,8 +117,14 @@ if grep -q "^$MY_ENV - cloud-init complete" /data/reboot.log ; then
 		# replace wpa_supplicant.conf with our version
 		cp /etc/wpa_supplicant/wpa_supplicant.conf /etc/wpa_supplicant/wpa_supplicant.original
 		# cat keeps permissions intact
-		cat /root/wpa_supplicant/wpa_supplicant.conf > /etc/wpa_supplicant/wpa_supplicant.conf
-		rm -rf /root/wpa_supplicant
+		cat /root/lan-to-upstream-wifi-bridge/wpa_supplicant/wpa_supplicant.conf > /etc/wpa_supplicant/wpa_supplicant.conf
+		# replace interfaces with our version
+		cp /etc/network/interfaces /etc/network/interfaces.original
+		# cat keeps permissions intact
+		cat /root/lan-to-upstream-wifi-bridge/network/interfaces > /etc/network/interfaces
+		# inject dnsmasq br0.conf
+		cp /root/lan-to-upstream-wifi-bridge/dnsmasq.d/br0.conf /etc/dnsmasq.d/
+		rm -rf /root/lan-to-upstream-wifi-bridge
 
 		# enable IPv4 forwarding in kernel
 		echo 'net.ipv4.ip_forward=1' > /etc/sysctl.d/010-ipforward.conf
@@ -171,8 +177,14 @@ if grep -q "^$MY_ENV - cloud-init complete" /data/reboot.log ; then
 		# replace wpa_supplicant.conf with our version
 		cp /etc/wpa_supplicant/wpa_supplicant.conf /etc/wpa_supplicant/wpa_supplicant.original
 		# cat keeps permissions intact
-		cat /root/wpa_supplicant/wpa_supplicant.conf > /etc/wpa_supplicant/wpa_supplicant.conf
-		rm -rf /root/wpa_supplicant
+		cat /root/lan-to-upstream-wifi-bridge/wpa_supplicant/wpa_supplicant.conf > /etc/wpa_supplicant/wpa_supplicant.conf
+		# replace interfaces with our version
+		cp /etc/network/interfaces /etc/network/interfaces.original
+		# cat keeps permissions intact
+		cat /root/lan-to-upstream-wifi-bridge/network/interfaces > /etc/network/interfaces
+		# inject dnsmasq br0.conf
+		cp /root/lan-to-upstream-wifi-bridge/dnsmasq.d/br0.conf /etc/dnsmasq.d/
+		rm -rf /root/lan-to-upstream-wifi-bridge
 
 		# enable IPv4 forwarding in kernel
 		echo 'net.ipv4.ip_forward=1' > /etc/sysctl.d/010-ipforward.conf
