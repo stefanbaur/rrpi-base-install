@@ -3,7 +3,7 @@
 # create custom directory as well as wpa_supplicant.conf file from templates, if not already present
 mkdir -p  ./custom/lan-to-upstream-wifi-bridge/{wpa_supplicant,dnsmasq.d,network} $MOUNTPOINT/root/lan-to-upstream-wifi-bridge/{dnsmasq.d,network}
 [ -s ./custom/lan-to-upstream-wifi-bridge/wpa_supplicant/wpa_supplicant.conf ] || cp ./templates/lan-to-upstream-wifi-bridge/wpa_supplicant.conf.template ./custom/lan-to-upstream-wifi-bridge/wpa_supplicant/wpa_supplicant.conf
-[ -s ./custom/lan-to-upstream-wifi-bridge/interfaces ] || cp ./templates/lan-to-upstream-wifi-bridge/interfaces.template ./custom/lan-to-upstream-wifi-bridge/network/interfaces
+[ -s ./custom/lan-to-upstream-wifi-bridge/network/interfaces ] || cp ./templates/lan-to-upstream-wifi-bridge/network/interfaces.template ./custom/lan-to-upstream-wifi-bridge/network/interfaces
 [ -s ./custom/lan-to-upstream-wifi-bridge/dnsmasq.d/br0.conf ] || cp ./templates/lan-to-upstream-wifi-bridge/dnsmasq-br0.conf.template ./custom/lan-to-upstream-wifi-bridge/dnsmasq.d/br0.conf
 
 # copy wpa_supplicant.conf to root directory so we can retrieve them later
