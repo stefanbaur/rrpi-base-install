@@ -132,6 +132,8 @@ if grep -q "^$MY_ENV - cloud-init complete" /data/reboot.log ; then
 			chown root:root /root/lan-to-upstream-wifi-bridge/network/dispatcher/pre-up/*.sh
 			chmod 755 /root/lan-to-upstream-wifi-bridge/network/dispatcher/pre-up/*.sh
 			cp /root/lan-to-upstream-wifi-bridge/network/dispatcher/pre-up/*.sh /etc/NetworkManager/dispatcher.d/pre-up.d/
+			rm /usr/local/bin/change_wifi.sh
+			ln -s /usr/bin/nmtui /usr/local/bin/change_wifi.sh
 		fi
 		# replace interfaces with our version
 		cp /etc/network/interfaces /etc/network/interfaces.original
@@ -207,6 +209,8 @@ if grep -q "^$MY_ENV - cloud-init complete" /data/reboot.log ; then
                         chown root:root /root/lan-to-upstream-wifi-bridge/network/dispatcher/pre-up/*.sh
                         chmod 755 /root/lan-to-upstream-wifi-bridge/network/dispatcher/pre-up/*.sh
                         cp /root/lan-to-upstream-wifi-bridge/network/dispatcher/pre-up/*.sh /etc/NetworkManager/dispatcher.d/pre-up.d/
+			rm /usr/local/bin/change_wifi.sh
+			ln -s /usr/bin/nmtui /usr/local/bin/change_wifi.sh
                 fi
                 # replace interfaces with our version
 		cp /etc/network/interfaces /etc/network/interfaces.original
