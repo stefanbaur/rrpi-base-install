@@ -106,18 +106,33 @@ if grep -q "^$MY_ENV - cloud-init complete" /data/reboot.log ; then
 		apt-get autopurge -y 2>&1 | tee -a /data/$MY_ENV-apt.log
 
 		# create bind-mount destinations, if not already present
-		mkdir -p /data/ENV2/etc/wpa_supplicant
-		# move /etc/wpa_supplicant content to new mountpoint
+		mkdir -p /data/ENV2/etc/wpa_supplicant /data/ENV2/etc/NetworkManager/system-connections/
+		# move /etc/wpa_supplicant and Network-Manager content to new mountpoint
 		mv /etc/wpa_supplicant/* /data/ENV2/etc/wpa_supplicant
+		mv /etc/NetworkManager/system-connections/* /data/ENV2/etc/NetworkManager/system-connections/
 		# manually bind-mount the new destinations for now
 		mount --bind /data/ENV2/etc/wpa_supplicant /etc/wpa_supplicant
+		mount --bind /data/ENV2/etc/NetworkManager/system-connections /etc/NetworkManager/system-connections
 		# add bindmount to fstab
 		grep "^/data/ENV2/etc/wpa_supplicant" || echo -e "/data/ENV2/etc/wpa_supplicant\t/etc/wpa_supplicant\tnone\tdefaults,bind\t0\t1" >> /etc/fstab
+		grep "^/data/ENV2/etc/NetworkManager/system-connections" || echo -e "/data/ENV2/etc/NetworkManager/system-connections/\t/etc/NetworkManager/system-connections\tnone\tdefaults,bind\t0\t1" >> /etc/fstab
 
-		# replace wpa_supplicant.conf with our version
-		cp /etc/wpa_supplicant/wpa_supplicant.conf /etc/wpa_supplicant/wpa_supplicant.original
-		# cat keeps permissions intact
-		cat /root/lan-to-upstream-wifi-bridge/wpa_supplicant/wpa_supplicant.conf > /etc/wpa_supplicant/wpa_supplicant.conf
+		# old-style networking: use wpa_supplicant
+		if [ -s /root/lan-to-upstream-wifi-bridge/wpa_supplicant/wpa_supplicant.conf ] ; then
+			# replace wpa_supplicant.conf with our version
+			cp /etc/wpa_supplicant/wpa_supplicant.conf /etc/wpa_supplicant/wpa_supplicant.original
+			# cat keeps permissions intact
+			cat /root/lan-to-upstream-wifi-bridge/wpa_supplicant/wpa_supplicant.conf > /etc/wpa_supplicant/wpa_supplicant.conf
+		fi
+		# new-style networking: use NetworkManager
+		if [ -d /root/lan-to-upstream-wifi-bridge/network/dispatcher ]; then
+			chown root:root /root/lan-to-upstream-wifi-bridge/network/dispatcher/*.sh
+			chmod 755 /root/lan-to-upstream-wifi-bridge/network/dispatcher/*.sh
+			cp /root/lan-to-upstream-wifi-bridge/network/dispatcher/*.sh /etc/NetworkManager/dispatcher.d/
+			chown root:root /root/lan-to-upstream-wifi-bridge/network/dispatcher/pre-up/*.sh
+			chmod 755 /root/lan-to-upstream-wifi-bridge/network/dispatcher/pre-up/*.sh
+			cp /root/lan-to-upstream-wifi-bridge/network/dispatcher/pre-up/*.sh /etc/NetworkManager/dispatcher.d/pre-up.d/
+		fi
 		# replace interfaces with our version
 		cp /etc/network/interfaces /etc/network/interfaces.original
 		# cat keeps permissions intact
@@ -165,20 +180,35 @@ if grep -q "^$MY_ENV - cloud-init complete" /data/reboot.log ; then
 		apt-get clean 2>&1 | tee -a /data/$MY_ENV-apt.log
 		apt-get autopurge -y 2>&1 | tee -a /data/$MY_ENV-apt.log
 
-		# create bind-mount destinations, if not already present
-		mkdir -p /data/ENV3/etc/wpa_supplicant
-		# move /etc/wpa_supplicant content to new mountpoint
-		mv /etc/wpa_supplicant/* /data/ENV3/etc/wpa_supplicant
-		# manually bind-mount the new destinations for now
-		mount --bind /data/ENV3/etc/wpa_supplicant /etc/wpa_supplicant
-		# add bindmount to fstab
-		grep "^/data/ENV3/etc/wpa_supplicant" || echo -e "/data/ENV3/etc/wpa_supplicant\t/etc/wpa_supplicant\tnone\tdefaults,bind\t0\t1" >> /etc/fstab
+                # create bind-mount destinations, if not already present
+                mkdir -p /data/ENV3/etc/wpa_supplicant /data/ENV3/etc/NetworkManager/system-connections/
+                # move /etc/wpa_supplicant and Network-Manager content to new mountpoint
+                mv /etc/wpa_supplicant/* /data/ENV3/etc/wpa_supplicant
+                mv /etc/NetworkManager/system-connections/* /data/ENV3/etc/NetworkManager/system-connections/
+                # manually bind-mount the new destinations for now
+                mount --bind /data/ENV3/etc/wpa_supplicant /etc/wpa_supplicant
+                mount --bind /data/ENV3/etc/NetworkManager/system-connections /etc/NetworkManager/system-connections
+                # add bindmount to fstab
+                grep "^/data/ENV3/etc/wpa_supplicant" || echo -e "/data/ENV3/etc/wpa_supplicant\t/etc/wpa_supplicant\tnone\tdefaults,bind\t0\t1" >> /etc/fstab
+                grep "^/data/ENV3/etc/NetworkManager/system-connections" || echo -e "/data/ENV3/etc/NetworkManager/system-connections/\t/etc/NetworkManager/system-connections\tnone\tdefaults,bind\t0\t1" >> /etc/fstab
 
-		# replace wpa_supplicant.conf with our version
-		cp /etc/wpa_supplicant/wpa_supplicant.conf /etc/wpa_supplicant/wpa_supplicant.original
-		# cat keeps permissions intact
-		cat /root/lan-to-upstream-wifi-bridge/wpa_supplicant/wpa_supplicant.conf > /etc/wpa_supplicant/wpa_supplicant.conf
-		# replace interfaces with our version
+                # old-style networking: use wpa_supplicant
+                if [ -s /root/lan-to-upstream-wifi-bridge/wpa_supplicant/wpa_supplicant.conf ] ; then
+                        # replace wpa_supplicant.conf with our version
+                        cp /etc/wpa_supplicant/wpa_supplicant.conf /etc/wpa_supplicant/wpa_supplicant.original
+                        # cat keeps permissions intact
+                        cat /root/lan-to-upstream-wifi-bridge/wpa_supplicant/wpa_supplicant.conf > /etc/wpa_supplicant/wpa_supplicant.conf
+                fi
+                # new-style networking: use NetworkManager
+                if [ -d /root/lan-to-upstream-wifi-bridge/network/dispatcher ]; then
+                        chown root:root /root/lan-to-upstream-wifi-bridge/network/dispatcher/*.sh
+                        chmod 755 /root/lan-to-upstream-wifi-bridge/network/dispatcher/*.sh
+                        cp /root/lan-to-upstream-wifi-bridge/network/dispatcher/*.sh /etc/NetworkManager/dispatcher.d/
+                        chown root:root /root/lan-to-upstream-wifi-bridge/network/dispatcher/pre-up/*.sh
+                        chmod 755 /root/lan-to-upstream-wifi-bridge/network/dispatcher/pre-up/*.sh
+                        cp /root/lan-to-upstream-wifi-bridge/network/dispatcher/pre-up/*.sh /etc/NetworkManager/dispatcher.d/pre-up.d/
+                fi
+                # replace interfaces with our version
 		cp /etc/network/interfaces /etc/network/interfaces.original
 		# cat keeps permissions intact
 		cat /root/lan-to-upstream-wifi-bridge/network/interfaces > /etc/network/interfaces
