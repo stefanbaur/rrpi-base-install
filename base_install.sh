@@ -26,9 +26,21 @@ source ./base_install.conf
 
 # override settings with custom file if present
 if [ -s ./base_install_custom.conf ]; then
-	echo "Custom base install file found, overriding default settings."
+	echo "Custom base install config file found, overriding default settings."
 	source ./base_install_custom.conf
 fi
+
+# source branch-specific config if present
+if [ -s ./base_install_branch_specific.conf ]; then
+	source ./base_install_branch_specific.conf
+fi
+
+# override branch-specific settings with custom file if present
+if [ -s ./base_install_branch_specific_custom.conf ]; then
+	echo "Custom branch-specific base install config file found, overriding default settings."
+	source ./base_install_branch_specific_custom.conf
+fi
+
 # TODO check that all required variables are set
 
 # log start

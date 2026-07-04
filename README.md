@@ -49,6 +49,9 @@
     - Once in the other environment, you can either set it to be the default until the next update, or apply the updates again to the now inactive environment.
   - You will need to apply updates to ENV1 as well, but hopefully, due to the minimal installation there, updates should occur way less frequently than in the other two environments.
 
+# Branch-Specific Information
+Anything branch-specific will be documented in the [OVERVIEW.md](./OVERVIEW.md) file in the root directory (not all branches have one).
+
 # Customization
 Please see the `README.md` files in the folders `templates` and `custom` for details on how to add your own packages and scripts.
 If you're still confused:
