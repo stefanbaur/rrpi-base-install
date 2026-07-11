@@ -121,47 +121,8 @@ if grep -q "^$MY_ENV - cloud-init complete" /data/reboot.log ; then
 		# start affected services again
 		/usr/sbin/service containerd start
 		/usr/sbin/service docker start
-		# this is straight from the mailcow-dockerized installation instructions
-		umask 0022
-		cd /opt
-		git clone https://github.com/mailcow/mailcow-dockerized
-		cd mailcow-dockerized
-		# set environment variables to make ./generate_config.sh non-interactive
-		if hostname -f | grep -q "\." ; then
-			export MAILCOW_HOSTNAME=$(hostname -f)
-		else
-			export MAILCOW_HOSTNAME=$(host $(hostname -s) | awk '{print $1}' | head -n 1)
-			while ! echo "$MAILCOW_HOSTNAME" | grep -q "\." ; do
-				echo "heartbeat" > /sys/class/leds/PWR/trigger
-				echo "No FQDN set for this IP. Please fix your DNS."
-				echo "Waiting here until your DNS change has propagated ..."
-				sleep 30
-				export MAILCOW_HOSTNAME=$(host $(hostname -s) | awk '{print $1}' | head -n 1)
-			done
-			echo "default-on" > /sys/class/leds/PWR/trigger
-		fi
-		if [ -a /etc/timezone ]; then
-			export MAILCOW_TZ=$(cat /etc/timezone)
-		elif [ -a /etc/localtime ]; then
-			export MAILCOW_TZ=$(readlink /etc/localtime|sed -n 's|^.*zoneinfo/||p')
-		fi
-		MEM_TOTAL=$(awk '/MemTotal/ {print $2}' /proc/meminfo)
-		[ "${MEM_TOTAL}" -le "2621440" ] && export SKIP_CLAMD="y"
-		export SKIP_BRANCH="n"
-		export MAILCOW_BRANCH="master"
-		# generate the config
-		./generate_config.sh
-		# run all things docker
-		docker compose pull
-		docker compose up -d
-		echo "PLEASE FIND YOUR MAILCOW LOGIN DATA FOR ENV2 BELOW" > /data/mailcow-login.txt
-		echo "Assuming there were no errors, you should be able to log in as:" | tee -a /data/mailcow-login.txt
-		echo "Account name: 'admin'" | tee -a /data/mailcow-login.txt
-		echo "Password: 'moohoo'" | tee -a /data/mailcow-login.txt 
-		echo "URL to point your webbrowser at: https://${MAILCOW_HOSTNAME}/admin" | tee -a /data/mailcow-login.txt
-		echo "Note that you will receive a browser warning as long as you do not set up proper SSL certificates (use LetsEncrypt, for example)." | tee -a /data/mailcow-login.txt
-		echo "The above is the configuration when booted in ENV2. It may vary for ENV3." | tee -a /data/mailcow-login.txt
-		echo "(see below)" >> /data/mailcow-login.txt
+		# this is straight from the paperless-ngx-dockerized installation instructions
+		bash -c "$(curl --location --silent --show-error https://raw.githubusercontent.com/paperless-ngx/paperless-ngx/main/install-paperless-ngx.sh)"
 		# now clean up apt, as we're done installing packages
 		apt-get clean 2>&1 | tee -a /data/$MY_ENV-apt.log
 		apt-get autopurge -y 2>&1 | tee -a /data/$MY_ENV-apt.log
@@ -206,46 +167,8 @@ if grep -q "^$MY_ENV - cloud-init complete" /data/reboot.log ; then
 		# start affected services again
 		/usr/sbin/service containerd start
 		/usr/sbin/service docker start
-		# this is straight from the mailcow-dockerized installation instructions
-		umask 0022
-		cd /opt
-		git clone https://github.com/mailcow/mailcow-dockerized
-		cd mailcow-dockerized
-		# set environment variables to make ./generate_config.sh non-interactive
-		if hostname -f | grep -q "\." ; then
-			export MAILCOW_HOSTNAME=$(hostname -f)
-		else
-			export MAILCOW_HOSTNAME=$(host $(hostname -s) | awk '{print $1}' | head -n 1)
-			while ! echo "$MAILCOW_HOSTNAME" | grep -q "\." ; do
-				echo "heartbeat" > /sys/class/leds/PWR/trigger
-				echo "No FQDN set for this IP. Please fix your DNS."
-				echo "Waiting here until your DNS change has propagated ..."
-				sleep 30
-				export MAILCOW_HOSTNAME=$(host $(hostname -s) | awk '{print $1}' | head -n 1)
-			done
-			echo "default-on" > /sys/class/leds/PWR/trigger
-		fi
-		if [ -a /etc/timezone ]; then
-			export MAILCOW_TZ=$(cat /etc/timezone)
-		elif [ -a /etc/localtime ]; then
-			export MAILCOW_TZ=$(readlink /etc/localtime|sed -n 's|^.*zoneinfo/||p')
-		fi
-		MEM_TOTAL=$(awk '/MemTotal/ {print $2}' /proc/meminfo)
-		[ "${MEM_TOTAL}" -le "2621440" ] && export SKIP_CLAMD="y"
-		export SKIP_BRANCH="n"
-		export MAILCOW_BRANCH="master"
-		# generate the config
-		./generate_config.sh
-		# run all things docker
-		docker compose pull
-		docker compose up -d
-		echo "PLEASE FIND YOUR MAILCOW LOGIN DATA FOR ENV3 BELOW" >> /data/mailcow-login.txt
-		echo "Assuming there were no errors, you should be able to log in as:" | tee -a /data/mailcow-login.txt
-		echo "Account name: 'admin'" | tee -a /data/mailcow-login.txt
-		echo "Password: 'moohoo'" | tee -a /data/mailcow-login.txt 
-		echo "URL to point your webbrowser at: https://${MAILCOW_HOSTNAME}/admin" | tee -a /data/mailcow-login.txt
-		echo "Note that you will receive a browser warning as long as you do not set up proper SSL certificates (use LetsEncrypt, for example)." | tee -a /data/mailcow-login.txt
-		echo "The above is the configuration when booted in ENV3. It may vary for ENV2." | tee -a /data/mailcow-login.txt
+		# this is straight from the paperless-ngx-dockerized installation instructions
+		bash -c "$(curl --location --silent --show-error https://raw.githubusercontent.com/paperless-ngx/paperless-ngx/main/install-paperless-ngx.sh)"
 		# now clean up apt, as we're done installing packages
 		apt-get clean 2>&1 | tee -a /data/$MY_ENV-apt.log
 		apt-get autopurge -y 2>&1 | tee -a /data/$MY_ENV-apt.log
