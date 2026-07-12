@@ -142,11 +142,8 @@ if grep -q "^$MY_ENV - cloud-init complete" /data/reboot.log ; then
 		fi
 		mkdir -p "/data/${MY_ENV}/paperless-ngx" "/data/${MY_ENV}/paperless-ngx-media" "/data/${MY_ENV}/paperless-ngx-data" "/data/${MY_ENV}/paperless-ngx-db"
 		chown pi:pi -R "/data/${MY_ENV}/paperless-ngx" "/data/${MY_ENV}/paperless-ngx-media" "/data/${MY_ENV}/paperless-ngx-data" "/data/${MY_ENV}/paperless-ngx-db"
-		/usr/sbin/usermod -aG docker pi 2>&1 | tee /data/${MY_ENV}-paperless-ngx-usermod.log
-		sudo groups pi 2>&1 | tee -a /data/${MY_ENV}-paperless-ngx-usermod.log
-		ps aux 2>&1 | grep pi 2>&1 | tee -a /data/${MY_ENV}-paperless-ngx-usermod.log
+		/usr/sbin/usermod -aG docker pi
 		[ -f /data/install-paperless-ngx.sh ] && rm /data/install-paperless-ngx.sh
-		sudo -i -u pi docker compose 2>&1 | tee /data/${MY_ENV}-paperless-ngx.log
 		wget -P /data https://raw.githubusercontent.com/paperless-ngx/paperless-ngx/main/install-paperless-ngx.sh
 		sed -i \
 			-e '/read.*PASSWORD.*$/d' \
@@ -174,7 +171,7 @@ if grep -q "^$MY_ENV - cloud-init complete" /data/reboot.log ; then
 
 		chmod +x /data/install-paperless-ngx.sh
 
-		(sudo -i -u pi /bin/bash -xv /data/install-paperless-ngx.sh 2>&1 | tee -a /data/${MY_ENV}-paperless-ngx.log) && rm /data/install-paperless-ngx.sh
+		sudo -i -u pi /bin/bash /data/install-paperless-ngx.sh 2>&1 && rm /data/install-paperless-ngx.sh
 
 		# now clean up apt, as we're done installing packages
 		apt-get clean 2>&1 | tee -a /data/$MY_ENV-apt.log
@@ -241,11 +238,8 @@ if grep -q "^$MY_ENV - cloud-init complete" /data/reboot.log ; then
 		fi
 		mkdir -p "/data/${MY_ENV}/paperless-ngx" "/data/${MY_ENV}/paperless-ngx-media" "/data/${MY_ENV}/paperless-ngx-data" "/data/${MY_ENV}/paperless-ngx-db"
 		chown pi:pi -R "/data/${MY_ENV}/paperless-ngx" "/data/${MY_ENV}/paperless-ngx-media" "/data/${MY_ENV}/paperless-ngx-data" "/data/${MY_ENV}/paperless-ngx-db"
-		/usr/sbin/usermod -aG docker pi 2>&1 | tee /data/${MY_ENV}-paperless-ngx-usermod.log
-		sudo groups pi 2>&1 | tee -a /data/${MY_ENV}-paperless-ngx-usermod.log
-		ps aux 2>&1 | grep pi 2>&1 | tee -a /data/${MY_ENV}-paperless-ngx-usermod.log
+		/usr/sbin/usermod -aG docker pi
 		[ -f /data/install-paperless-ngx.sh ] && rm /data/install-paperless-ngx.sh
-		sudo -i -u pi docker compose 2>&1 | tee /data/${MY_ENV}-paperless-ngx.log
 		wget -P /data https://raw.githubusercontent.com/paperless-ngx/paperless-ngx/main/install-paperless-ngx.sh
 		sed -i \
 			-e '/read.*PASSWORD.*$/d' \
@@ -273,7 +267,7 @@ if grep -q "^$MY_ENV - cloud-init complete" /data/reboot.log ; then
 
 		chmod +x /data/install-paperless-ngx.sh
 
-		(sudo -i -u pi /bin/bash -xv /data/install-paperless-ngx.sh 2>&1 | tee -a /data/${MY_ENV}-paperless-ngx.log) && rm /data/install-paperless-ngx.sh
+		sudo -i -u pi /bin/bash /data/install-paperless-ngx.sh 2>&1 && rm /data/install-paperless-ngx.sh
 
 		# now clean up apt, as we're done installing packages
 		apt-get clean 2>&1 | tee -a /data/$MY_ENV-apt.log
