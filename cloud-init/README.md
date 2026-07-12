@@ -1,7 +1,7 @@
-#rpi-imager seems to make the following changes to the first partition
+# rpi-imager seems to make the following changes to the first partition
 
 ## cmdline.txt
-Additional entry at end of line: cfg80211.ieee80211_regdom=TWO_LETTER_COUNTRY_CODE_IN_ALL_CAPS_GOES_HERE
+Additional entry at end of line: `cfg80211.ieee80211_regdom=TWO_LETTER_COUNTRY_CODE_IN_ALL_CAPS_GOES_HERE`
 
 ## meta-data
 ### Original Content:
