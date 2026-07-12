@@ -122,26 +122,78 @@ if grep -q "^$MY_ENV - cloud-init complete" /data/reboot.log ; then
 		/usr/sbin/service containerd start
 		/usr/sbin/service docker start
 		# install dockerized paperless-ngx
-		if hostname -f | grep -q "\." ; then
-			export PAPERLESS_HOSTNAME=$(hostname -f)
-		else
-			export PAPERLESS_HOSTNAME=$(host $(hostname -s) | awk '{print $1}' | head -n 1)
-			while ! echo "$PAPERLESS_HOSTNAME" | grep -q "\." ; do
-				echo "heartbeat" > /sys/class/leds/PWR/trigger
-				echo "No FQDN set for this IP. Please fix your DNS."
-				echo "Waiting here until your DNS change has propagated ..."
-				sleep 30
+		# source config file
+		source /root/paperless-ngx/base_install_branch_specific.conf
+		# source custom config file to override default settings, if present
+		if [ -s /root/base_install_branch_specific_custom.conf ]; then
+			source /root/paperless-ngx/base_install_branch_specific_custom.conf
+		fi
+		if [ -z "$PAPERLESS_HOSTNAME" ]; then
+			if hostname -f | grep -q "\." ; then
+				export PAPERLESS_HOSTNAME=$(hostname -f)
+			else
 				export PAPERLESS_HOSTNAME=$(host $(hostname -s) | awk '{print $1}' | head -n 1)
-			done
-			echo "default-on" > /sys/class/leds/PWR/trigger
+				while ! echo "$PAPERLESS_HOSTNAME" | grep -q "\." ; do
+					echo "heartbeat" > /sys/class/leds/PWR/trigger
+					echo "No FQDN set for this IP. Please fix your DNS."
+					echo "Waiting here until your DNS change has propagated ..."
+					sleep 30
+					export PAPERLESS_HOSTNAME=$(host $(hostname -s) | awk '{print $1}' | head -n 1)
+				done
+				echo "default-on" > /sys/class/leds/PWR/trigger
+			fi
 		fi
-		if [ -a /etc/timezone ]; then
-			export PAPERLESS_TZ=$(cat /etc/timezone)
-		elif [ -a /etc/localtime ]; then
-			export PAPERLESS_TZ=$(readlink /etc/localtime|sed -n 's|^.*zoneinfo/||p')
+		if [ -z "$PAPERLESS_PORT" ]; then
+			PAPERLESS_PORT=8000
 		fi
-		mkdir -p "/data/${MY_ENV}/paperless-ngx" "/data/${MY_ENV}/paperless-ngx-media" "/data/${MY_ENV}/paperless-ngx-data" "/data/${MY_ENV}/paperless-ngx-db"
-		chown pi:pi -R "/data/${MY_ENV}/paperless-ngx" "/data/${MY_ENV}/paperless-ngx-media" "/data/${MY_ENV}/paperless-ngx-data" "/data/${MY_ENV}/paperless-ngx-db"
+		if [ -z "$PAPERLESS_TZ" ]; then
+			if [ -a /etc/timezone ]; then
+				export PAPERLESS_TZ=$(cat /etc/timezone)
+			elif [ -a /etc/localtime ]; then
+				export PAPERLESS_TZ=$(readlink /etc/localtime|sed -n 's|^.*zoneinfo/||p')
+			fi
+		fi
+		if [ -z "$PAPERLESS_BACKEND" ]; then
+			PAPERLESS_BACKEND="sqlite"
+		fi
+		if [ -z "$PAPERLESS_TIKA" ]; then
+			PAPERLESS_TIKA="no"
+		fi
+		if [ -z "$PAPERLESS_OCR_LANGS" ]; then
+			PAPERLESS_TIKA="eng"
+		fi
+		if [ -z "$PAPERLESS_USER_UID" ] ; then
+			PAPERLESS_USER_UID=1000
+		fi
+		if [ -z "$PAPERLESS_USER_GID" ] ; then
+			PAPERLESS_USER_GID=1000
+		fi
+		if [ -z "$PAPERLESS_USERNAME" ] ; then
+			PAPERLESS_USERNAME=$(getent passwd 1000 | cut -d: -f1)
+		fi
+		if [ -z "$PAPERLESS_PASSWORD" ] ; then
+			PAPERLESS_PASSWORD="${RANDOM}${RANDOM}${RANDOM}${RANDOM}${RANDOM}${RANDOM}${RANDOM}${RANDOM}"
+		fi
+		if [ -z "$PAPERLESS_EMAIL" ] ; then
+			PAPERLESS_EMAIL="$(getent passwd 1000 | cut -d: -f1)@localhost"
+		fi
+		if [ -z "$PAPERLESS_TARGET_FOLDER" ] ; then
+			PAPERLESS_TARGET_FOLDER="/target"
+		fi
+		if [ -z "$PAPERLESS_CONSUME_FOLDER" ] ; then
+			PAPERLESS_CONSUME_FOLDER="/consume"
+		fi
+		if [ -z "$PAPERLESS_MEDIA_FOLDER" ] ; then
+			PAPERLESS_MEDIA_FOLDER="/media"
+		fi
+		if [ -z "$PAPERLESS_DATA_FOLDER" ] ; then
+			PAPERLESS_DATA_FOLDER="/data"
+		fi
+		if [ -z "$PAPERLESS_DATABASE_FOLDER" ] ; then
+			PAPERLESS_DATABASE_FOLDER="/db"
+		fi
+		mkdir -p "/data/ENV${MY_ENV_NUMBER}/paperless-ngx/{$PAPERLESS_TARGET_FOLDER,$PAPERLESS_CONSUME_FOLDER,$PAPERLESS_MEDIA_FOLDER,$PAPERLESS_DATA_FOLDER,$PAPERLESS_DATABASE_FOLDER}"
+		chown $PAPERLESS_USER_UID:$PAPERLESS_USER_GID -R "/data/ENV${MY_ENV_NUMBER}/paperless-ngx/{$PAPERLESS_TARGET_FOLDER,$PAPERLESS_CONSUME_FOLDER,$PAPERLESS_MEDIA_FOLDER,$PAPERLESS_DATA_FOLDER,$PAPERLESS_DATABASE_FOLDER}"
 		/usr/sbin/usermod -aG docker pi
 		[ -f /data/install-paperless-ngx.sh ] && rm /data/install-paperless-ngx.sh
 		wget -P /data https://raw.githubusercontent.com/paperless-ngx/paperless-ngx/main/install-paperless-ngx.sh
@@ -151,22 +203,22 @@ if grep -q "^$MY_ENV - cloud-init complete" /data/reboot.log ; then
 			-e 's/^\(\t*\)ask /\1#ask /' \
 			-e 's/^\(\t*\)ask_docker_folder /\1#ask_docker_folder /' \
 			-e "s%^\(\t*\)URL=.*$%\1URL=http://$PAPERLESS_HOSTNAME%" \
-			-e "s/^\(\t*\)PORT=.*$/\1PORT=8000/" \
+			-e "s/^\(\t*\)PORT=.*$/\1PORT=$PAPERLESS_PORT/" \
 			-e "s:^\(\t*\)TIME_ZONE=.*$:\1TIME_ZONE=$PAPERLESS_TZ:" \
-			-e "s/^\(\t*\)DATABASE_BACKEND=.*$/\1DATABASE_BACKEND=sqlite/" \
-			-e "s/^\(\t*\)TIKA_ENABLED=.*$/\1TIKA_ENABLED=no/" \
-			-e "s/^\(\t*\)OCR_LANGUAGE=.*$/\1OCR_LANGUAGE=eng+deu+fra/" \
-			-e "s/^\(\t*\)USERMAP_UID=.*$/\1USERMAP_UID=$(id -u pi)/" \
-			-e "s/^\(\t*\)USERMAP_GID=.*$/\1USERMAP_GID=$(id -g pi)/" \
-			-e "s:^\(\t*\)TARGET_FOLDER=.*$:\1TARGET_FOLDER=/data/${MY_ENV}/paperless-ngx:" \
-			-e "s:^\(\t*\)CONSUME_FOLDER.*$:\1CONSUME_FOLDER=/data/${MY_ENV}/paperless-ngx-consume:" \
-			-e "s:^\(\t*\)MEDIA_FOLDER=.*$:\1MEDIA_FOLDER=/data/${MY_ENV}/paperless-ngx-media:" \
-			-e "s:^\(\t*\)DATA_FOLDER=.*$:\1DATA_FOLDER=/data/${MY_ENV}/paperless-ngx-data:" \
-			-e "s:^\(\t*\)DATABASE_FOLDER=.*$:\1DATABASE_FOLDER=/data/${MY_ENV}/paperless-ngx-db:" \
-			-e "s/^\(\t*\)USERNAME=.*$/\1USERNAME=pi/" \
-			-e '/^\t*USERNAME=.*$/a PASSWORD_REPEAT="Starten1"' \
-			-e '/^\t*USERNAME=.*$/a PASSWORD="Starten1"' \
-			-e "s/^\(\t*\)EMAIL=.*$/\1EMAIL='pi@localhost'/" \
+			-e "s/^\(\t*\)DATABASE_BACKEND=.*$/\1DATABASE_BACKEND=$PAPERLESS_BACKEND/" \
+			-e "s/^\(\t*\)TIKA_ENABLED=.*$/\1TIKA_ENABLED=$PAPERLESS_TIKA/" \
+			-e "s/^\(\t*\)OCR_LANGUAGE=.*$/\1OCR_LANGUAGE=$PAPERLESS_OCR_LANGS/" \
+			-e "s/^\(\t*\)USERMAP_UID=.*$/\1USERMAP_UID=$PAPERLESS_USER_UID/" \
+			-e "s/^\(\t*\)USERMAP_GID=.*$/\1USERMAP_GID=$PAPERLESS_USER_GID/" \
+			-e "s:^\(\t*\)TARGET_FOLDER=.*$:\1TARGET_FOLDER=/data/ENV${MY_ENV_NUMBER}/paperless-ngx/$PAPERLESS_TARGET_FOLDER:" \
+			-e "s:^\(\t*\)CONSUME_FOLDER.*$:\1CONSUME_FOLDER=/data/ENV${MY_ENV_NUMBER}/paperless-ngx/$PAPERLESS_CONSUME_FOLDER:" \
+			-e "s:^\(\t*\)MEDIA_FOLDER=.*$:\1MEDIA_FOLDER=/data/ENV${MY_ENV_NUMBER}/paperless-ngx/$PAPERLESS_MEDIA_FOLDER:" \
+			-e "s:^\(\t*\)DATA_FOLDER=.*$:\1DATA_FOLDER=/data/ENV${MY_ENV_NUMBER}/paperless-ngx/$PAPERLESS_DATA_FOLDER:" \
+			-e "s:^\(\t*\)DATABASE_FOLDER=.*$:\1DATABASE_FOLDER=/data/ENV${MY_ENV_NUMBER}/paperless-ngx/$PAPERLESS_DATABASE_FOLDER:" \
+			-e "s/^\(\t*\)USERNAME=.*$/\1USERNAME=$PAPERLESS_USERNAME/" \
+			-e "/^\t*USERNAME=.*$/a PASSWORD_REPEAT='$PAPERLESS_PASSWORD'" \
+			-e "/^\t*USERNAME=.*$/a PASSWORD='$PAPERLESS_PASSWORD'" \
+			-e "s/^\(\t*\)EMAIL=.*$/\1EMAIL='$PAPERLESS_EMAIL'/" \
 			/data/install-paperless-ngx.sh
 
 		chmod +x /data/install-paperless-ngx.sh
@@ -218,26 +270,78 @@ if grep -q "^$MY_ENV - cloud-init complete" /data/reboot.log ; then
 		/usr/sbin/service containerd start
 		/usr/sbin/service docker start
 		# install dockerized paperless-ngx
-		if hostname -f | grep -q "\." ; then
-			export PAPERLESS_HOSTNAME=$(hostname -f)
-		else
-			export PAPERLESS_HOSTNAME=$(host $(hostname -s) | awk '{print $1}' | head -n 1)
-			while ! echo "$PAPERLESS_HOSTNAME" | grep -q "\." ; do
-				echo "heartbeat" > /sys/class/leds/PWR/trigger
-				echo "No FQDN set for this IP. Please fix your DNS."
-				echo "Waiting here until your DNS change has propagated ..."
-				sleep 30
+		# source config file
+		source /root/paperless-ngx/base_install_branch_specific.conf
+		# source custom config file to override default settings, if present
+		if [ -s /root/base_install_branch_specific_custom.conf ]; then
+			source /root/paperless-ngx/base_install_branch_specific_custom.conf
+		fi
+		if [ -z "$PAPERLESS_HOSTNAME" ]; then
+			if hostname -f | grep -q "\." ; then
+				export PAPERLESS_HOSTNAME=$(hostname -f)
+			else
 				export PAPERLESS_HOSTNAME=$(host $(hostname -s) | awk '{print $1}' | head -n 1)
-			done
-			echo "default-on" > /sys/class/leds/PWR/trigger
+				while ! echo "$PAPERLESS_HOSTNAME" | grep -q "\." ; do
+					echo "heartbeat" > /sys/class/leds/PWR/trigger
+					echo "No FQDN set for this IP. Please fix your DNS."
+					echo "Waiting here until your DNS change has propagated ..."
+					sleep 30
+					export PAPERLESS_HOSTNAME=$(host $(hostname -s) | awk '{print $1}' | head -n 1)
+				done
+				echo "default-on" > /sys/class/leds/PWR/trigger
+			fi
 		fi
-		if [ -a /etc/timezone ]; then
-			export PAPERLESS_TZ=$(cat /etc/timezone)
-		elif [ -a /etc/localtime ]; then
-			export PAPERLESS_TZ=$(readlink /etc/localtime|sed -n 's|^.*zoneinfo/||p')
+		if [ -z "$PAPERLESS_PORT" ]; then
+			PAPERLESS_PORT=8000
 		fi
-		mkdir -p "/data/${MY_ENV}/paperless-ngx" "/data/${MY_ENV}/paperless-ngx-media" "/data/${MY_ENV}/paperless-ngx-data" "/data/${MY_ENV}/paperless-ngx-db"
-		chown pi:pi -R "/data/${MY_ENV}/paperless-ngx" "/data/${MY_ENV}/paperless-ngx-media" "/data/${MY_ENV}/paperless-ngx-data" "/data/${MY_ENV}/paperless-ngx-db"
+		if [ -z "$PAPERLESS_TZ" ]; then
+			if [ -a /etc/timezone ]; then
+				export PAPERLESS_TZ=$(cat /etc/timezone)
+			elif [ -a /etc/localtime ]; then
+				export PAPERLESS_TZ=$(readlink /etc/localtime|sed -n 's|^.*zoneinfo/||p')
+			fi
+		fi
+		if [ -z "$PAPERLESS_BACKEND" ]; then
+			PAPERLESS_BACKEND="sqlite"
+		fi
+		if [ -z "$PAPERLESS_TIKA" ]; then
+			PAPERLESS_TIKA="no"
+		fi
+		if [ -z "$PAPERLESS_OCR_LANGS" ]; then
+			PAPERLESS_TIKA="eng"
+		fi
+		if [ -z "$PAPERLESS_USER_UID" ] ; then
+			PAPERLESS_USER_UID=1000
+		fi
+		if [ -z "$PAPERLESS_USER_GID" ] ; then
+			PAPERLESS_USER_GID=1000
+		fi
+		if [ -z "$PAPERLESS_USERNAME" ] ; then
+			PAPERLESS_USERNAME=$(getent passwd 1000 | cut -d: -f1)
+		fi
+		if [ -z "$PAPERLESS_PASSWORD" ] ; then
+			PAPERLESS_PASSWORD="${RANDOM}${RANDOM}${RANDOM}${RANDOM}${RANDOM}${RANDOM}${RANDOM}${RANDOM}"
+		fi
+		if [ -z "$PAPERLESS_EMAIL" ] ; then
+			PAPERLESS_EMAIL="$(getent passwd 1000 | cut -d: -f1)@localhost"
+		fi
+		if [ -z "$PAPERLESS_TARGET_FOLDER" ] ; then
+			PAPERLESS_TARGET_FOLDER="/target"
+		fi
+		if [ -z "$PAPERLESS_CONSUME_FOLDER" ] ; then
+			PAPERLESS_CONSUME_FOLDER="/consume"
+		fi
+		if [ -z "$PAPERLESS_MEDIA_FOLDER" ] ; then
+			PAPERLESS_MEDIA_FOLDER="/media"
+		fi
+		if [ -z "$PAPERLESS_DATA_FOLDER" ] ; then
+			PAPERLESS_DATA_FOLDER="/data"
+		fi
+		if [ -z "$PAPERLESS_DATABASE_FOLDER" ] ; then
+			PAPERLESS_DATABASE_FOLDER="/db"
+		fi
+		mkdir -p "/data/ENV${MY_ENV_NUMBER}/paperless-ngx/{$PAPERLESS_TARGET_FOLDER,$PAPERLESS_CONSUME_FOLDER,$PAPERLESS_MEDIA_FOLDER,$PAPERLESS_DATA_FOLDER,$PAPERLESS_DATABASE_FOLDER}"
+		chown $PAPERLESS_USER_UID:$PAPERLESS_USER_GID -R "/data/ENV${MY_ENV_NUMBER}/paperless-ngx/{$PAPERLESS_TARGET_FOLDER,$PAPERLESS_CONSUME_FOLDER,$PAPERLESS_MEDIA_FOLDER,$PAPERLESS_DATA_FOLDER,$PAPERLESS_DATABASE_FOLDER}"
 		/usr/sbin/usermod -aG docker pi
 		[ -f /data/install-paperless-ngx.sh ] && rm /data/install-paperless-ngx.sh
 		wget -P /data https://raw.githubusercontent.com/paperless-ngx/paperless-ngx/main/install-paperless-ngx.sh
@@ -247,22 +351,22 @@ if grep -q "^$MY_ENV - cloud-init complete" /data/reboot.log ; then
 			-e 's/^\(\t*\)ask /\1#ask /' \
 			-e 's/^\(\t*\)ask_docker_folder /\1#ask_docker_folder /' \
 			-e "s%^\(\t*\)URL=.*$%\1URL=http://$PAPERLESS_HOSTNAME%" \
-			-e "s/^\(\t*\)PORT=.*$/\1PORT=8000/" \
+			-e "s/^\(\t*\)PORT=.*$/\1PORT=$PAPERLESS_PORT/" \
 			-e "s:^\(\t*\)TIME_ZONE=.*$:\1TIME_ZONE=$PAPERLESS_TZ:" \
-			-e "s/^\(\t*\)DATABASE_BACKEND=.*$/\1DATABASE_BACKEND=sqlite/" \
-			-e "s/^\(\t*\)TIKA_ENABLED=.*$/\1TIKA_ENABLED=no/" \
-			-e "s/^\(\t*\)OCR_LANGUAGE=.*$/\1OCR_LANGUAGE=eng+deu+fra/" \
-			-e "s/^\(\t*\)USERMAP_UID=.*$/\1USERMAP_UID=$(id -u pi)/" \
-			-e "s/^\(\t*\)USERMAP_GID=.*$/\1USERMAP_GID=$(id -g pi)/" \
-			-e "s:^\(\t*\)TARGET_FOLDER=.*$:\1TARGET_FOLDER=/data/${MY_ENV}/paperless-ngx:" \
-			-e "s:^\(\t*\)CONSUME_FOLDER.*$:\1CONSUME_FOLDER=/data/${MY_ENV}/paperless-ngx-consume:" \
-			-e "s:^\(\t*\)MEDIA_FOLDER=.*$:\1MEDIA_FOLDER=/data/${MY_ENV}/paperless-ngx-media:" \
-			-e "s:^\(\t*\)DATA_FOLDER=.*$:\1DATA_FOLDER=/data/${MY_ENV}/paperless-ngx-data:" \
-			-e "s:^\(\t*\)DATABASE_FOLDER=.*$:\1DATABASE_FOLDER=/data/${MY_ENV}/paperless-ngx-db:" \
-			-e "s/^\(\t*\)USERNAME=.*$/\1USERNAME=pi/" \
-			-e '/^\t*USERNAME=.*$/a PASSWORD_REPEAT="Starten1"' \
-			-e '/^\t*USERNAME=.*$/a PASSWORD="Starten1"' \
-			-e "s/^\(\t*\)EMAIL=.*$/\1EMAIL='pi@localhost'/" \
+			-e "s/^\(\t*\)DATABASE_BACKEND=.*$/\1DATABASE_BACKEND=$PAPERLESS_BACKEND/" \
+			-e "s/^\(\t*\)TIKA_ENABLED=.*$/\1TIKA_ENABLED=$PAPERLESS_TIKA/" \
+			-e "s/^\(\t*\)OCR_LANGUAGE=.*$/\1OCR_LANGUAGE=$PAPERLESS_OCR_LANGS/" \
+			-e "s/^\(\t*\)USERMAP_UID=.*$/\1USERMAP_UID=$PAPERLESS_USER_UID/" \
+			-e "s/^\(\t*\)USERMAP_GID=.*$/\1USERMAP_GID=$PAPERLESS_USER_GID/" \
+			-e "s:^\(\t*\)TARGET_FOLDER=.*$:\1TARGET_FOLDER=/data/ENV${MY_ENV_NUMBER}/paperless-ngx/$PAPERLESS_TARGET_FOLDER:" \
+			-e "s:^\(\t*\)CONSUME_FOLDER.*$:\1CONSUME_FOLDER=/data/ENV${MY_ENV_NUMBER}/paperless-ngx/$PAPERLESS_CONSUME_FOLDER:" \
+			-e "s:^\(\t*\)MEDIA_FOLDER=.*$:\1MEDIA_FOLDER=/data/ENV${MY_ENV_NUMBER}/paperless-ngx/$PAPERLESS_MEDIA_FOLDER:" \
+			-e "s:^\(\t*\)DATA_FOLDER=.*$:\1DATA_FOLDER=/data/ENV${MY_ENV_NUMBER}/paperless-ngx/$PAPERLESS_DATA_FOLDER:" \
+			-e "s:^\(\t*\)DATABASE_FOLDER=.*$:\1DATABASE_FOLDER=/data/ENV${MY_ENV_NUMBER}/paperless-ngx/$PAPERLESS_DATABASE_FOLDER:" \
+			-e "s/^\(\t*\)USERNAME=.*$/\1USERNAME=$PAPERLESS_USERNAME/" \
+			-e "/^\t*USERNAME=.*$/a PASSWORD_REPEAT='$PAPERLESS_PASSWORD'" \
+			-e "/^\t*USERNAME=.*$/a PASSWORD='$PAPERLESS_PASSWORD'" \
+			-e "s/^\(\t*\)EMAIL=.*$/\1EMAIL='$PAPERLESS_EMAIL'/" \
 			/data/install-paperless-ngx.sh
 
 		chmod +x /data/install-paperless-ngx.sh
