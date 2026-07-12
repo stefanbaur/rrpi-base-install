@@ -121,8 +121,61 @@ if grep -q "^$MY_ENV - cloud-init complete" /data/reboot.log ; then
 		# start affected services again
 		/usr/sbin/service containerd start
 		/usr/sbin/service docker start
-		# this is straight from the paperless-ngx-dockerized installation instructions
-		bash -c "$(curl --location --silent --show-error https://raw.githubusercontent.com/paperless-ngx/paperless-ngx/main/install-paperless-ngx.sh)"
+		# install dockerized paperless-ngx
+		if hostname -f | grep -q "\." ; then
+			export PAPERLESS_HOSTNAME=$(hostname -f)
+		else
+			export PAPERLESS_HOSTNAME=$(host $(hostname -s) | awk '{print $1}' | head -n 1)
+			while ! echo "$PAPERLESS_HOSTNAME" | grep -q "\." ; do
+				echo "heartbeat" > /sys/class/leds/PWR/trigger
+				echo "No FQDN set for this IP. Please fix your DNS."
+				echo "Waiting here until your DNS change has propagated ..."
+				sleep 30
+				export PAPERLESS_HOSTNAME=$(host $(hostname -s) | awk '{print $1}' | head -n 1)
+			done
+			echo "default-on" > /sys/class/leds/PWR/trigger
+		fi
+		if [ -a /etc/timezone ]; then
+			export PAPERLESS_TZ=$(cat /etc/timezone)
+		elif [ -a /etc/localtime ]; then
+			export PAPERLESS_TZ=$(readlink /etc/localtime|sed -n 's|^.*zoneinfo/||p')
+		fi
+		mkdir -p "/data/${MY_ENV}/paperless-ngx" "/data/${MY_ENV}/paperless-ngx-media" "/data/${MY_ENV}/paperless-ngx-data" "/data/${MY_ENV}/paperless-ngx-db"
+		chown pi:pi -R "/data/${MY_ENV}/paperless-ngx" "/data/${MY_ENV}/paperless-ngx-media" "/data/${MY_ENV}/paperless-ngx-data" "/data/${MY_ENV}/paperless-ngx-db"
+		/usr/sbin/usermod -aG docker pi 2>&1 | tee /data/${MY_ENV}-paperless-ngx-usermod.log
+		sudo groups pi 2>&1 | tee -a /data/${MY_ENV}-paperless-ngx-usermod.log
+		ps aux 2>&1 | grep pi 2>&1 | tee -a /data/${MY_ENV}-paperless-ngx-usermod.log
+		[ -f /data/install-paperless-ngx.sh ] && rm /data/install-paperless-ngx.sh
+		sudo -i -u pi docker compose 2>&1 | tee /data/${MY_ENV}-paperless-ngx.log
+		wget -P /data https://raw.githubusercontent.com/paperless-ngx/paperless-ngx/main/install-paperless-ngx.sh
+		sed -i \
+			-e '/read.*PASSWORD.*$/d' \
+			-e '/^read.* -p.*$/d' \
+			-e 's/^\(\t*\)ask /\1#ask /' \
+			-e 's/^\(\t*\)ask_docker_folder /\1#ask_docker_folder /' \
+			-e "s%^\(\t*\)URL=.*$%\1URL=http://$PAPERLESS_HOSTNAME%" \
+			-e "s/^\(\t*\)PORT=.*$/\1PORT=8000/" \
+			-e "s:^\(\t*\)TIME_ZONE=.*$:\1TIME_ZONE=$PAPERLESS_TZ:" \
+			-e "s/^\(\t*\)DATABASE_BACKEND=.*$/\1DATABASE_BACKEND=sqlite/" \
+			-e "s/^\(\t*\)TIKA_ENABLED=.*$/\1TIKA_ENABLED=no/" \
+			-e "s/^\(\t*\)OCR_LANGUAGE=.*$/\1OCR_LANGUAGE=eng+deu+fra/" \
+			-e "s/^\(\t*\)USERMAP_UID=.*$/\1USERMAP_UID=$(id -u pi)/" \
+			-e "s/^\(\t*\)USERMAP_GID=.*$/\1USERMAP_GID=$(id -g pi)/" \
+			-e "s:^\(\t*\)TARGET_FOLDER=.*$:\1TARGET_FOLDER=/data/${MY_ENV}/paperless-ngx:" \
+			-e "s:^\(\t*\)CONSUME_FOLDER.*$:\1CONSUME_FOLDER=/data/${MY_ENV}/paperless-ngx-consume:" \
+			-e "s:^\(\t*\)MEDIA_FOLDER=.*$:\1MEDIA_FOLDER=/data/${MY_ENV}/paperless-ngx-media:" \
+			-e "s:^\(\t*\)DATA_FOLDER=.*$:\1DATA_FOLDER=/data/${MY_ENV}/paperless-ngx-data:" \
+			-e "s:^\(\t*\)DATABASE_FOLDER=.*$:\1DATABASE_FOLDER=/data/${MY_ENV}/paperless-ngx-db:" \
+			-e "s/^\(\t*\)USERNAME=.*$/\1USERNAME=pi/" \
+			-e '/^\t*USERNAME=.*$/a PASSWORD_REPEAT="Starten1"' \
+			-e '/^\t*USERNAME=.*$/a PASSWORD="Starten1"' \
+			-e "s/^\(\t*\)EMAIL=.*$/\1EMAIL='pi@localhost'/" \
+			/data/install-paperless-ngx.sh
+
+		chmod +x /data/install-paperless-ngx.sh
+
+		(sudo -i -u pi /bin/bash -xv /data/install-paperless-ngx.sh 2>&1 | tee -a /data/${MY_ENV}-paperless-ngx.log) && rm /data/install-paperless-ngx.sh
+
 		# now clean up apt, as we're done installing packages
 		apt-get clean 2>&1 | tee -a /data/$MY_ENV-apt.log
 		apt-get autopurge -y 2>&1 | tee -a /data/$MY_ENV-apt.log
@@ -167,8 +220,61 @@ if grep -q "^$MY_ENV - cloud-init complete" /data/reboot.log ; then
 		# start affected services again
 		/usr/sbin/service containerd start
 		/usr/sbin/service docker start
-		# this is straight from the paperless-ngx-dockerized installation instructions
-		bash -c "$(curl --location --silent --show-error https://raw.githubusercontent.com/paperless-ngx/paperless-ngx/main/install-paperless-ngx.sh)"
+		# install dockerized paperless-ngx
+		if hostname -f | grep -q "\." ; then
+			export PAPERLESS_HOSTNAME=$(hostname -f)
+		else
+			export PAPERLESS_HOSTNAME=$(host $(hostname -s) | awk '{print $1}' | head -n 1)
+			while ! echo "$PAPERLESS_HOSTNAME" | grep -q "\." ; do
+				echo "heartbeat" > /sys/class/leds/PWR/trigger
+				echo "No FQDN set for this IP. Please fix your DNS."
+				echo "Waiting here until your DNS change has propagated ..."
+				sleep 30
+				export PAPERLESS_HOSTNAME=$(host $(hostname -s) | awk '{print $1}' | head -n 1)
+			done
+			echo "default-on" > /sys/class/leds/PWR/trigger
+		fi
+		if [ -a /etc/timezone ]; then
+			export PAPERLESS_TZ=$(cat /etc/timezone)
+		elif [ -a /etc/localtime ]; then
+			export PAPERLESS_TZ=$(readlink /etc/localtime|sed -n 's|^.*zoneinfo/||p')
+		fi
+		mkdir -p "/data/${MY_ENV}/paperless-ngx" "/data/${MY_ENV}/paperless-ngx-media" "/data/${MY_ENV}/paperless-ngx-data" "/data/${MY_ENV}/paperless-ngx-db"
+		chown pi:pi -R "/data/${MY_ENV}/paperless-ngx" "/data/${MY_ENV}/paperless-ngx-media" "/data/${MY_ENV}/paperless-ngx-data" "/data/${MY_ENV}/paperless-ngx-db"
+		/usr/sbin/usermod -aG docker pi 2>&1 | tee /data/${MY_ENV}-paperless-ngx-usermod.log
+		sudo groups pi 2>&1 | tee -a /data/${MY_ENV}-paperless-ngx-usermod.log
+		ps aux 2>&1 | grep pi 2>&1 | tee -a /data/${MY_ENV}-paperless-ngx-usermod.log
+		[ -f /data/install-paperless-ngx.sh ] && rm /data/install-paperless-ngx.sh
+		sudo -i -u pi docker compose 2>&1 | tee /data/${MY_ENV}-paperless-ngx.log
+		wget -P /data https://raw.githubusercontent.com/paperless-ngx/paperless-ngx/main/install-paperless-ngx.sh
+		sed -i \
+			-e '/read.*PASSWORD.*$/d' \
+			-e '/^read.* -p.*$/d' \
+			-e 's/^\(\t*\)ask /\1#ask /' \
+			-e 's/^\(\t*\)ask_docker_folder /\1#ask_docker_folder /' \
+			-e "s%^\(\t*\)URL=.*$%\1URL=http://$PAPERLESS_HOSTNAME%" \
+			-e "s/^\(\t*\)PORT=.*$/\1PORT=8000/" \
+			-e "s:^\(\t*\)TIME_ZONE=.*$:\1TIME_ZONE=$PAPERLESS_TZ:" \
+			-e "s/^\(\t*\)DATABASE_BACKEND=.*$/\1DATABASE_BACKEND=sqlite/" \
+			-e "s/^\(\t*\)TIKA_ENABLED=.*$/\1TIKA_ENABLED=no/" \
+			-e "s/^\(\t*\)OCR_LANGUAGE=.*$/\1OCR_LANGUAGE=eng+deu+fra/" \
+			-e "s/^\(\t*\)USERMAP_UID=.*$/\1USERMAP_UID=$(id -u pi)/" \
+			-e "s/^\(\t*\)USERMAP_GID=.*$/\1USERMAP_GID=$(id -g pi)/" \
+			-e "s:^\(\t*\)TARGET_FOLDER=.*$:\1TARGET_FOLDER=/data/${MY_ENV}/paperless-ngx:" \
+			-e "s:^\(\t*\)CONSUME_FOLDER.*$:\1CONSUME_FOLDER=/data/${MY_ENV}/paperless-ngx-consume:" \
+			-e "s:^\(\t*\)MEDIA_FOLDER=.*$:\1MEDIA_FOLDER=/data/${MY_ENV}/paperless-ngx-media:" \
+			-e "s:^\(\t*\)DATA_FOLDER=.*$:\1DATA_FOLDER=/data/${MY_ENV}/paperless-ngx-data:" \
+			-e "s:^\(\t*\)DATABASE_FOLDER=.*$:\1DATABASE_FOLDER=/data/${MY_ENV}/paperless-ngx-db:" \
+			-e "s/^\(\t*\)USERNAME=.*$/\1USERNAME=pi/" \
+			-e '/^\t*USERNAME=.*$/a PASSWORD_REPEAT="Starten1"' \
+			-e '/^\t*USERNAME=.*$/a PASSWORD="Starten1"' \
+			-e "s/^\(\t*\)EMAIL=.*$/\1EMAIL='pi@localhost'/" \
+			/data/install-paperless-ngx.sh
+
+		chmod +x /data/install-paperless-ngx.sh
+
+		(sudo -i -u pi /bin/bash -xv /data/install-paperless-ngx.sh 2>&1 | tee -a /data/${MY_ENV}-paperless-ngx.log) && rm /data/install-paperless-ngx.sh
+
 		# now clean up apt, as we're done installing packages
 		apt-get clean 2>&1 | tee -a /data/$MY_ENV-apt.log
 		apt-get autopurge -y 2>&1 | tee -a /data/$MY_ENV-apt.log
