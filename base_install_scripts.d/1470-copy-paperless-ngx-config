@@ -1,0 +1,8 @@
+#!/bin/bash -e
+
+# create custom directory and copy conf file to destination
+if [ -s ./base_install_branch_specific_custom.conf ] ; then
+        rsync -aP ./base_install_branch_specific_custom.conf $MOUNTPOINT/root/paperless-ngx/
+else
+        rsync -aP ./base_install_branch_specific.conf $MOUNTPOINT/root/paperless-ngx/
+fi
