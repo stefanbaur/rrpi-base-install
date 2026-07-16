@@ -125,7 +125,7 @@ if grep -q "^$MY_ENV - cloud-init complete" /data/reboot.log ; then
 		# source config file
 		source /root/paperless-ngx/base_install_branch_specific.conf
 		# source custom config file to override default settings, if present
-		if [ -s /root/base_install_branch_specific_custom.conf ]; then
+		if [ -s /root/paperless-ngx/base_install_branch_specific_custom.conf ]; then
 			source /root/paperless-ngx/base_install_branch_specific_custom.conf
 		fi
 		if [ -z "$PAPERLESS_HOSTNAME" ]; then
@@ -273,7 +273,7 @@ if grep -q "^$MY_ENV - cloud-init complete" /data/reboot.log ; then
 		# source config file
 		source /root/paperless-ngx/base_install_branch_specific.conf
 		# source custom config file to override default settings, if present
-		if [ -s /root/base_install_branch_specific_custom.conf ]; then
+		if [ -s /root/paperless-ngx/base_install_branch_specific_custom.conf ]; then
 			source /root/paperless-ngx/base_install_branch_specific_custom.conf
 		fi
 		if [ -z "$PAPERLESS_HOSTNAME" ]; then
