@@ -153,7 +153,7 @@ if grep -q "^$MY_ENV - cloud-init complete" /data/reboot.log ; then
 		if grep -q '^\s*"max-concurrent-downloads"' /etc/docker/daemon.conf ; then
 				sed -e 's/\(\s*\)"max-concurrent-downloads":.*$/\1"max-concurrent-downloads": '${EURO_OFFICE_MAX_CONC_DL}'/' -i /etc/docker/daemon.conf
 		else
-			sed -e '/^{/a        "max-concurrent-downloads": '${EURO_OFFICE_MAX_CONC_DL}'/' -i /etc/docker/daemon.conf
+			sed -e '/^{/a        "max-concurrent-downloads": '${EURO_OFFICE_MAX_CONC_DL} -i /etc/docker/daemon.conf
 		fi
 
 		if [ -z "$EURO_OFFICE_JWT_SECRET" ]; then
@@ -248,7 +248,7 @@ if grep -q "^$MY_ENV - cloud-init complete" /data/reboot.log ; then
 		if grep -q '^\s*"max-concurrent-downloads"' /etc/docker/daemon.conf ; then
 				sed -e 's/\(\s*\)"max-concurrent-downloads":.*$/\1"max-concurrent-downloads": '${EURO_OFFICE_MAX_CONC_DL}'/' -i /etc/docker/daemon.conf
 		else
-			sed -e '/^{/a        "max-concurrent-downloads": '${EURO_OFFICE_MAX_CONC_DL}'/' -i /etc/docker/daemon.conf
+			sed -e '/^{/a        "max-concurrent-downloads": '${EURO_OFFICE_MAX_CONC_DL} -i /etc/docker/daemon.conf
 		fi
 
 		if [ -z "$EURO_OFFICE_JWT_SECRET" ]; then
