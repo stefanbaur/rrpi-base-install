@@ -155,6 +155,8 @@ if grep -q "^$MY_ENV - cloud-init complete" /data/reboot.log ; then
 		else
 			sed -e '/^{/a        "max-concurrent-downloads": '${EURO_OFFICE_MAX_CONC_DL} -i /etc/docker/daemon.conf
 		fi
+		# restart affected services
+		/usr/sbin/service docker restart
 
 		if [ -z "$EURO_OFFICE_JWT_SECRET" ]; then
 			uuid > /root/euro-office/euro_office_jwt_secret.txt
@@ -250,6 +252,8 @@ if grep -q "^$MY_ENV - cloud-init complete" /data/reboot.log ; then
 		else
 			sed -e '/^{/a        "max-concurrent-downloads": '${EURO_OFFICE_MAX_CONC_DL} -i /etc/docker/daemon.conf
 		fi
+		# restart affected services
+		/usr/sbin/service docker restart
 
 		if [ -z "$EURO_OFFICE_JWT_SECRET" ]; then
 			EURO_OFFICE_JWT_SECRET=$(cat /root/euro-office/euro_office_jwt_secret.txt)
