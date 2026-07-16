@@ -167,6 +167,7 @@ if grep -q "^$MY_ENV - cloud-init complete" /data/reboot.log ; then
 		DONE=0
 		while ! [ $DONE == 1 ]; do 
 			docker pull ghcr.io/euro-office/documentserver:latest && \
+			#docker --log-level debug pull ghcr.io/euro-office/documentserver:latest && \
 			docker run -i -t -d -p ${EURO_OFFICE_PORT}:80 --restart=always -e EXAMPLE_ENABLED=true -e JWT_SECRET=${EURO_OFFICE_JWT_SECRET} ghcr.io/euro-office/documentserver:latest && DONE=1
 		done
 
@@ -263,6 +264,7 @@ if grep -q "^$MY_ENV - cloud-init complete" /data/reboot.log ; then
 		DONE=0
 		while ! [ $DONE == 1 ]; do 
 			docker pull ghcr.io/euro-office/documentserver:latest && \
+			#docker --log-level debug pull ghcr.io/euro-office/documentserver:latest && \
 			docker run -i -t -d -p ${EURO_OFFICE_PORT}:80 --restart=always -e EXAMPLE_ENABLED=true -e JWT_SECRET=${EURO_OFFICE_JWT_SECRET} ghcr.io/euro-office/documentserver:latest && DONE=1
 		done
 
