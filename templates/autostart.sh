@@ -51,7 +51,7 @@ while ! [ -s /var/lib/cloud/instance/boot-finished ] ; do
 		cp /var/log/cloud-init.log /data/$MY_ENV-FAIL-$(date +%F_%T|tr ':' '-')-cloud-init.log
 		echo "" > /var/log/cloud-init.log
 		cp /var/log/cloud-init-output.log /data/$MY_ENV-FAIL-$(date +%F_%T|tr ':' '-')-cloud-init-output.log
-	        echo "" > /var/log/cloud-init-output.log
+		echo "" > /var/log/cloud-init-output.log
 		# ... log the error in our own logfile ...
 		echo "$MY_ENV - FAILURE TO RUN CLOUD-INIT, REBOOTING - $(date)" | tee -a /data/reboot.log
 		# ... and trigger an immediate reboot into current ENV, because rebooting and running cloud-init again seems to fix it
@@ -99,9 +99,65 @@ if grep -q "^$MY_ENV - cloud-init complete" /data/reboot.log ; then
 			touch /data/ENV1-could-not-perform-reboot
 		fi
 	elif grep -q "^ENV2" /etc/ssh/banner; then
+		# as we already downloaded the required packages during the chroot phase, we can install these without needing internet access
+		apt-get install -y hostapd bridge-utils rfkill 2>&1 | tee /data/$MY_ENV-apt.log
 		# now clean up apt, as we're done installing packages
 		apt-get clean 2>&1 | tee -a /data/$MY_ENV-apt.log
 		apt-get autopurge -y 2>&1 | tee -a /data/$MY_ENV-apt.log
+		# source config file
+		source /root/wifi-to-upstream-lan/base_install_branch_specific.conf
+		if [ -s /root/wifi-to-upstream-lan/base_install_branch_specific_custom.conf ]; then
+			source /root/wifi-to-upstream-lan/base_install_branch_specific_custom.conf
+		fi
+		cat <<ENV2WLAN0 >/etc/network/interfaces.d/wlan0
+# WLAN
+auto wlan0
+allow-hotplug wlan0
+iface wlan0 inet manual
+wireless-power off
+ENV2WLAN0
+		mkdir -p /data/ENV2/{hostapd,modprobe.d}
+		cat << HOSTAPDCONF_ENV2 > /data/hostapd/hostapd.conf
+# Bridge Mode
+bridge=br0
+
+# Interface and Driver
+interface=wlan0
+#driver=nl80211
+
+# WiFi Config
+ssid=${SSID}
+channel=${CHANNEL}
+hw_mode=g
+ieee80211n=1
+ieee80211d=1
+country_code=${COUNTRY}
+wmm_enabled=1
+
+# Wifi Encryption
+auth_algs=1
+wpa=2
+wpa_key_mgmt=WPA-PSK
+rsn_pairwise=CCMP
+wpa_passphrase=${PASSPHRASE}
+HOSTAPDCONF_ENV2
+		chmod 600 /data/ENV2/hostapd/hostapd.conf
+		cat << CFG80211ENV2 >/data/ENV2/modprobe.d/cfg80211.conf
+options cfg80211 ieee80211_regdom=${COUNTRY}
+CFG80211ENV2
+		ln -s /data/ENV3/modprobe.d/cfg80211.conf /etc/modprobe.d/cfg80211.conf
+		# disable hostapd autostart
+		if [ -d /run/systemd/system ] ; then
+			systemctl disable hostapd
+		else
+			update-rc.d hostapd disable
+		fi
+
+		# do the right things(TM) after the bridge is up
+		sed	-i \
+			-e '/^\s*bridge_ports/a \\tpost-up /usr/sbin/hostapd -B /data/ENV2/hostapd/hostapd.conf -P /run/hostapd.pid' \
+			-e '/^\s*bridge_ports/a \\tpost-up rfkill unblock wlan' \
+			/etc/network/interfaces
 		# set the boot partition for next boot 2->3 (as we're in ENV2, we need to mount ENV1's bootfs for that)
 		mount /dev/disk/by-label/bootfs /mnt
 		if grep -q "^\[default\]$" /mnt/autoboot.txt ; then
@@ -121,9 +177,65 @@ if grep -q "^$MY_ENV - cloud-init complete" /data/reboot.log ; then
 			touch /data/ENV2-could-not-perform-reboot
 		fi
 	elif grep -q "^ENV3" /etc/ssh/banner; then
+		# as we already downloaded the required packages during the chroot phase, we can install these without needing internet access
+		apt-get install -y hostapd bridge-utils rfkill 2>&1 | tee /data/$MY_ENV-apt.log
 		# now clean up apt, as we're done installing packages
 		apt-get clean 2>&1 | tee -a /data/$MY_ENV-apt.log
 		apt-get autopurge -y 2>&1 | tee -a /data/$MY_ENV-apt.log
+		# source config file
+		source /root/wifi-to-upstream-lan/base_install_branch_specific.conf
+		if [ -s /root/wifi-to-upstream-lan/base_install_branch_specific_custom.conf ]; then
+			source /root/wifi-to-upstream-lan/base_install_branch_specific_custom.conf
+		fi
+		cat <<ENV3WLAN0 >/etc/network/interfaces.d/wlan0
+# WLAN
+auto wlan0
+allow-hotplug wlan0
+iface wlan0 inet manual
+wireless-power off
+ENV3WLAN0
+		mkdir -p /data/ENV3/{hostapd,modprobe.d}
+		cat << HOSTAPDCONF_ENV3 > /data/ENV3/hostapd/hostapd.conf
+# Bridge Mode
+bridge=br0
+
+# Interface and Driver
+interface=wlan0
+#driver=nl80211
+
+# WiFi Config
+ssid=${SSID}
+channel=${CHANNEL}
+hw_mode=g
+ieee80211n=1
+ieee80211d=1
+country_code=${COUNTRY}
+wmm_enabled=1
+
+# Wifi Encryption
+auth_algs=1
+wpa=2
+wpa_key_mgmt=WPA-PSK
+rsn_pairwise=CCMP
+wpa_passphrase=${PASSPHRASE}
+HOSTAPDCONF_ENV3
+		chmod 600 /data/ENV3/hostapd/hostapd.conf
+		cat << CFG80211ENV3 >/data/ENV3/modprobe.d/cfg80211.conf
+options cfg80211 ieee80211_regdom=${COUNTRY}
+CFG80211ENV3
+		ln -s /data/ENV3/modprobe.d/cfg80211.conf /etc/modprobe.d/cfg80211.conf
+		# disable hostapd autostart
+		if [ -d /run/systemd/system ] ; then
+			systemctl disable hostapd
+		else
+			update-rc.d hostapd disable
+		fi
+
+		# do the right things(TM) after the bridge is up
+		sed	-i \
+			-e '/^\s*bridge_ports/a \\tpost-up /usr/sbin/hostapd -B /data/ENV3/hostapd/hostapd.conf -P /run/hostapd.pid' \
+			-e '/^\s*bridge_ports/a \\tpost-up rfkill unblock wlan' \
+			/etc/network/interfaces
 		# set the boot partition for next boot 3->2 (as we're in ENV3, we need to mount ENV1's bootfs for that)
 		mount /dev/disk/by-label/bootfs /mnt
 		if grep -q "^\[default\]$" /mnt/autoboot.txt ; then
