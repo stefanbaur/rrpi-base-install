@@ -147,8 +147,8 @@ ieee80211h=1  # 5 GHz only (Radar/DFS)
 ieee80211ac=1 # 5 GHz only (requires additional ieee80211n=1 to work)
 ieee80211ax=1 # 5 GHz only, works only on Pi5
 # enable 80 MHz wide channels for 5 GHz
-# vht_oper_chwidth=1
-# vht_oper_centr_freq_seg0_idx=42
+vht_oper_chwidth=1
+vht_oper_centr_freq_seg0_idx=42
 country_code=${COUNTRY}
 wmm_enabled=1
 
@@ -239,6 +239,9 @@ ieee80211d=1  # 2.4GHz and 5GHz
 ieee80211h=1  # 5 GHz only (Radar/DFS)
 ieee80211ac=1 # 5 GHz only (requires additional ieee80211n=1 to work)
 ieee80211ax=1 # 5 GHz only, works only on Pi5
+# enable 80 MHz wide channels for 5 GHz
+vht_oper_chwidth=1
+vht_oper_centr_freq_seg0_idx=42
 country_code=${COUNTRY}
 wmm_enabled=1
 
