@@ -140,9 +140,15 @@ interface=wlan0
 # WiFi Config
 ssid=${SSID}
 channel=${CHANNEL}
-hw_mode=g
-ieee80211n=1
-ieee80211d=1
+hw_mode=${HW_MODE}
+ieee80211n=1  # 2.4GHz and 5GHz
+ieee80211d=1  # 2.4GHz and 5GHz
+ieee80211h=1  # 5 GHz only (Radar/DFS)
+ieee80211ac=1 # 5 GHz only (requires additional ieee80211n=1 to work)
+ieee80211ax=1 # 5 GHz only, works only on Pi5
+# enable 80 MHz wide channels for 5 GHz
+# vht_oper_chwidth=1
+# vht_oper_centr_freq_seg0_idx=42
 country_code=${COUNTRY}
 wmm_enabled=1
 
@@ -154,6 +160,13 @@ rsn_pairwise=CCMP
 wpa_passphrase=${PASSPHRASE}
 HOSTAPDCONF_ENV2
 		chmod 600 /data/ENV2/hostapd/hostapd.conf
+		if [ "g" == "$HW_MODE" ] ; then
+			sed 	-i \
+				-e 's/^ieee80211h=1/ieee80211h=0/' \
+				-e 's/^ieee80211ac=1/ieee80211ac=0/' \
+				-e 's/^ieee80211ax=1/ieee80211ax=0/' \
+				/data/ENV2/hostapd/hostapd.conf
+		fi
 		cat << CFG80211ENV2 >/data/ENV2/modprobe.d/cfg80211.conf
 options cfg80211 ieee80211_regdom=${COUNTRY,,}
 CFG80211ENV2
@@ -220,9 +233,12 @@ interface=wlan0
 # WiFi Config
 ssid=${SSID}
 channel=${CHANNEL}
-hw_mode=g
-ieee80211n=1
-ieee80211d=1
+hw_mode=${HW_MODE}
+ieee80211n=1  # 2.4GHz and 5GHz
+ieee80211d=1  # 2.4GHz and 5GHz
+ieee80211h=1  # 5 GHz only (Radar/DFS)
+ieee80211ac=1 # 5 GHz only (requires additional ieee80211n=1 to work)
+ieee80211ax=1 # 5 GHz only, works only on Pi5
 country_code=${COUNTRY}
 wmm_enabled=1
 
@@ -234,6 +250,13 @@ rsn_pairwise=CCMP
 wpa_passphrase=${PASSPHRASE}
 HOSTAPDCONF_ENV3
 		chmod 600 /data/ENV3/hostapd/hostapd.conf
+		if [ "g" == "$HW_MODE" ] ; then
+			sed 	-i \
+				-e 's/^ieee80211h=1/ieee80211h=0/' \
+				-e 's/^ieee80211ac=1/ieee80211ac=0/' \
+				-e 's/^ieee80211ax=1/ieee80211ax=0/' \
+				/data/ENV3/hostapd/hostapd.conf
+		fi
 		cat << CFG80211ENV3 >/data/ENV3/modprobe.d/cfg80211.conf
 options cfg80211 ieee80211_regdom=${COUNTRY,,}
 CFG80211ENV3
