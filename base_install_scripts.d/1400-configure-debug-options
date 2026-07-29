@@ -51,3 +51,13 @@ if [ -n "$DEBUG_VIA_SPI" ] && ! [ "false" == "$DEBUG_VIA_SPI" ] ; then
 	sed -e 's/^dtoverlay=vc4-kms-v3d/# disabled due to SPI TouchScreen: dtoverlay=vc4-kms-v3d/' -i $MOUNTPOINT/boot/firmware/config.txt
 	sed -e 's/^max_framebuffers=2/# disabled due to SPI TouchScreen: max_framebuffers=2/' -i $MOUNTPOINT/boot/firmware/config.txt
 fi
+
+# change /etc/default/consoöe-setup to huge font
+if [ -n "$DEBUG_HUGE_CONSOLE_FONT" ] && ! [ "false" == "$DEBUG_HUGE_CONSOLE_FONT" ] ; then
+	echo "Debugging via huge console font requested."
+	echo "Changing configuration files accordingly ..."
+	sed 	-i \
+		-e 's/^\s*FONTFACE=.*$/FONTFACE="TerminusBold"/' \
+		-e 's/^\s*FONTSIZE=.*$/FONTSIZE="16x32"/' \
+		$MOUNTPOINT/etc/default/console-setup
+fi
