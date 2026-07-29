@@ -148,6 +148,8 @@ CFG80211ENV2
 		ln -s /data/ENV3/modprobe.d/cfg80211.conf /etc/modprobe.d/cfg80211.conf
 		# disable hostapd autostart
 		if [ -d /run/systemd/system ] ; then
+			# at the moment, the hostapd service is masked by default in systemd
+			systemctl unmask hostapd
 			systemctl disable hostapd
 		else
 			update-rc.d hostapd disable
@@ -226,6 +228,8 @@ CFG80211ENV3
 		ln -s /data/ENV3/modprobe.d/cfg80211.conf /etc/modprobe.d/cfg80211.conf
 		# disable hostapd autostart
 		if [ -d /run/systemd/system ] ; then
+			# at the moment, the hostapd service is masked by default in systemd
+			systemctl unmask hostapd
 			systemctl disable hostapd
 		else
 			update-rc.d hostapd disable
