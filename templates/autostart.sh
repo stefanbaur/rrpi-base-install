@@ -143,7 +143,7 @@ wpa_passphrase=${PASSPHRASE}
 HOSTAPDCONF_ENV2
 		chmod 600 /data/ENV2/hostapd/hostapd.conf
 		cat << CFG80211ENV2 >/data/ENV2/modprobe.d/cfg80211.conf
-options cfg80211 ieee80211_regdom=${COUNTRY}
+options cfg80211 ieee80211_regdom=${COUNTRY,,}
 CFG80211ENV2
 		ln -s /data/ENV3/modprobe.d/cfg80211.conf /etc/modprobe.d/cfg80211.conf
 		# disable hostapd autostart
@@ -223,7 +223,7 @@ wpa_passphrase=${PASSPHRASE}
 HOSTAPDCONF_ENV3
 		chmod 600 /data/ENV3/hostapd/hostapd.conf
 		cat << CFG80211ENV3 >/data/ENV3/modprobe.d/cfg80211.conf
-options cfg80211 ieee80211_regdom=${COUNTRY}
+options cfg80211 ieee80211_regdom=${COUNTRY,,}
 CFG80211ENV3
 		ln -s /data/ENV3/modprobe.d/cfg80211.conf /etc/modprobe.d/cfg80211.conf
 		# disable hostapd autostart
