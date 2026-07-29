@@ -72,6 +72,18 @@ if grep -q "^$MY_ENV - cloud-init complete" /data/reboot.log ; then
 	# remove cloud-init
 	apt-get purge cloud-init -y 2>&1 | tee -a /data/$MY_ENV-apt.log
 	# do not use apt-get autopurge -y or apt-get clean here, or you might wipe the overlayfs packages we already downloaded during the chroot phase
+        # install and configure watchdog
+        apt-get install watchdog -y | tee -a /data/$MY_ENV-apt.log
+        mkdir -p /etc/systemd/system.conf.d
+        echo '# enable hardware watchdog' > /etc/systemd/system.conf.d/sysdwatchdog.conf
+        echo '#' >> /etc/systemd/system.conf.d/sysdwatchdog.conf
+        echo '# [Manager]' >> /etc/systemd/system.conf.d/sysdwatchdog.conf
+        echo '# RuntimeWatchdogSec=15' >> /etc/systemd/system.conf.d/sysdwatchdog.conf
+        echo '# ShutdownWatchdogSec=5min' >> /etc/systemd/system.conf.d/sysdwatchdog.conf
+        sed     -e '/#watchdog-device/a watchdog-device=/dev/watchdog' \
+                -e '/#watchdog-timeout/a watchdog-timeout=15' \
+                -e '/#max-load-1\W/a max-load-1=24' \
+                -i /etc/watchdog.conf
 	# enable overlay file system
 	raspi-config nonint enable_overlayfs 2>&1 | tee -a /data/$MY_ENV-apt.log
 	# make sure /data is not affected by overlayfs
