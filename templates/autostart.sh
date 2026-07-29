@@ -117,7 +117,7 @@ iface wlan0 inet manual
 wireless-power off
 ENV2WLAN0
 		mkdir -p /data/ENV2/{hostapd,modprobe.d}
-		cat << HOSTAPDCONF_ENV2 > /data/hostapd/hostapd.conf
+		cat << HOSTAPDCONF_ENV2 > /data/ENV2/hostapd/hostapd.conf
 # Bridge Mode
 bridge=br0
 
