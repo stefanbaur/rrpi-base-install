@@ -169,8 +169,8 @@ CFG80211ENV2
 
 		# do the right things(TM) after the bridge is up
 		sed	-i \
-			-e '/^\s*bridge_ports/a \\tpost-up /usr/sbin/hostapd -B /data/ENV2/hostapd/hostapd.conf -P /run/hostapd.pid' \
 			-e '/^\s*bridge_ports/a \\tpost-up rfkill unblock wlan' \
+			-e '/^\s*bridge_ports/a \\tpost-up /usr/sbin/hostapd -B /data/ENV2/hostapd/hostapd.conf -P /run/hostapd.pid' \
 			/etc/network/interfaces
 		# set the boot partition for next boot 2->3 (as we're in ENV2, we need to mount ENV1's bootfs for that)
 		mount /dev/disk/by-label/bootfs /mnt
@@ -249,8 +249,8 @@ CFG80211ENV3
 
 		# do the right things(TM) after the bridge is up
 		sed	-i \
-			-e '/^\s*bridge_ports/a \\tpost-up /usr/sbin/hostapd -B /data/ENV3/hostapd/hostapd.conf -P /run/hostapd.pid' \
 			-e '/^\s*bridge_ports/a \\tpost-up rfkill unblock wlan' \
+			-e '/^\s*bridge_ports/a \\tpost-up /usr/sbin/hostapd -B /data/ENV3/hostapd/hostapd.conf -P /run/hostapd.pid' \
 			/etc/network/interfaces
 		# set the boot partition for next boot 3->2 (as we're in ENV3, we need to mount ENV1's bootfs for that)
 		mount /dev/disk/by-label/bootfs /mnt
