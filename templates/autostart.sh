@@ -69,21 +69,23 @@ if grep -q "^$MY_ENV - cloud-init complete" /data/reboot.log ; then
 	# this block gets executed in all ENVs
 	# make sure "PasswordAuthentication no" remains set even after cloud-init purge
 	mv /etc/ssh/sshd_config.d/50-cloud-init.conf /etc/ssh/sshd_config.d/50-disable-password-auth.conf
+	# add additional eth interfaces to bridge, if present
+	sed -e "s/bridge_ports eth0/bridge_ports $(ip a l | awk '$2~/eth/ && !/\@/ { print $2 }' | tr -s '\n:' '  ')/" -i /etc/network/interfaces
 	# remove cloud-init
 	apt-get purge cloud-init -y 2>&1 | tee -a /data/$MY_ENV-apt.log
 	# do not use apt-get autopurge -y or apt-get clean here, or you might wipe the overlayfs packages we already downloaded during the chroot phase
-        # install and configure watchdog
-        apt-get install watchdog -y | tee -a /data/$MY_ENV-apt.log
-        mkdir -p /etc/systemd/system.conf.d
-        echo '# enable hardware watchdog' > /etc/systemd/system.conf.d/sysdwatchdog.conf
-        echo '#' >> /etc/systemd/system.conf.d/sysdwatchdog.conf
-        echo '# [Manager]' >> /etc/systemd/system.conf.d/sysdwatchdog.conf
-        echo '# RuntimeWatchdogSec=15' >> /etc/systemd/system.conf.d/sysdwatchdog.conf
-        echo '# ShutdownWatchdogSec=5min' >> /etc/systemd/system.conf.d/sysdwatchdog.conf
-        sed     -e '/#watchdog-device/a watchdog-device=/dev/watchdog' \
-                -e '/#watchdog-timeout/a watchdog-timeout=15' \
-                -e '/#max-load-1\W/a max-load-1=24' \
-                -i /etc/watchdog.conf
+	# install and configure watchdog
+	apt-get install watchdog -y | tee -a /data/$MY_ENV-apt.log
+	mkdir -p /etc/systemd/system.conf.d
+	echo '# enable hardware watchdog' > /etc/systemd/system.conf.d/sysdwatchdog.conf
+	echo '#' >> /etc/systemd/system.conf.d/sysdwatchdog.conf
+	echo '# [Manager]' >> /etc/systemd/system.conf.d/sysdwatchdog.conf
+	echo '# RuntimeWatchdogSec=15' >> /etc/systemd/system.conf.d/sysdwatchdog.conf
+	echo '# ShutdownWatchdogSec=5min' >> /etc/systemd/system.conf.d/sysdwatchdog.conf
+	sed     -e '/#watchdog-device/a watchdog-device=/dev/watchdog' \
+		-e '/#watchdog-timeout/a watchdog-timeout=15' \
+		-e '/#max-load-1\W/a max-load-1=24' \
+		-i /etc/watchdog.conf
 	# enable overlay file system
 	raspi-config nonint enable_overlayfs 2>&1 | tee -a /data/$MY_ENV-apt.log
 	# make sure /data is not affected by overlayfs
