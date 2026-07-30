@@ -29,7 +29,7 @@
       - `sudo rpi-imager`
   - Follow our [imager setup instructions](./rpi-imager-2.0.x-manual/README.md "Instructions")
   - Remove the removable media and re-insert it after a good 10-15 seconds, if you haven't already done so (if you are using a CM with onboard eMMC flash, this means you need to re-run `sudo ./rpiboot`, as explained above)
-  - Review the default settings in `base_install.conf`, if you need to make any changes, save them as `base_install_custom.conf` so they won't get overwritten by a `git pull`
+  - Review the default settings in `base_install.conf`, if you need to make any changes, save them as `base_install_custom.conf`, placed either in `./custom/config/` (recommended), or in the base directory. so they won't get overwritten by a `git pull`
   - Review the templates in the `templates` folder; if you need to make any changes, save them in the `custom` folder so they won't get overwritten by a `git pull`
   - Run `sudo ./base_install.sh 2>&1 | tee base_install.log`
   - When `base_install.sh` has finished its work, remove the media (in case of a CM with onboard eMMC flash, remove the USB cable and don't forget to move the jumper/switch back to the default, non-flashing position) and boot your Pi from it (note that it will reboot several times until the installation is complete)
@@ -50,7 +50,8 @@
   - You will need to apply updates to ENV1 as well, but hopefully, due to the minimal installation there, updates should occur way less frequently than in the other two environments.
 
 # Branch-Specific Information
-Anything branch-specific will be documented in the [OVERVIEW.md](./OVERVIEW.md) file in the root directory (not all branches have one).
+ - Anything branch-specific will be documented in the [OVERVIEW.md](./OVERVIEW.md) file in the root directory (not all branches have one).
+ - Branch-specific settings are stored in `base_install_branch_specific.conf`, if you need to make any changes, save them as `base_install_branch_specific_<branchname>_custom.conf`, placed in `./custom/config/` (recommended), or as `base_install_branch_specific_custom.conf` in the base directory. so they won't get overwritten by a `git pull`
 
 # Customization
 Please see the `README.md` files in the folders `templates` and `custom` for details on how to add your own packages and scripts.
