@@ -25,7 +25,10 @@ done
 source ./base_install.conf
 
 # override settings with custom file if present
-if [ -s ./base_install_custom.conf ]; then
+if [ -s ./custom/config/base_install_custom.conf ]; then
+	echo "Custom base install config file found in './custom/config/', overriding default settings."
+	source ./custom/config/base_install_custom.conf
+elif [ -s ./base_install_custom.conf ]; then
 	echo "Custom base install config file found, overriding default settings."
 	source ./base_install_custom.conf
 fi
@@ -36,7 +39,11 @@ if [ -s ./base_install_branch_specific.conf ]; then
 fi
 
 # override branch-specific settings with custom file if present
-if [ -s ./base_install_branch_specific_custom.conf ]; then
+BRANCHNAME="$(git rev-parse --abbrev-ref HEAD)"
+if [ -s ./custom/config/base_install_branch_specific_${BRANCHNAME}_custom.conf ]; then
+	echo "Custom branch-specific base install config file found in './custom/config/', overriding default settings."
+	source ./custom/config/base_install_branch_specific_${BRANCHNAME}_custom.conf
+elif [ -s ./base_install_branch_specific_custom.conf ]; then
 	echo "Custom branch-specific base install config file found, overriding default settings."
 	source ./base_install_branch_specific_custom.conf
 fi
