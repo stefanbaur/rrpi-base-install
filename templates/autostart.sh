@@ -135,59 +135,70 @@ P910ND_TEMPLATE2
 			COUNT=$((COUNT+1))
 		done
 		cat > /etc/udev/rules.d/050_persistent_printer_mappings.rules <<UDEVRULES2
-# do not act upon removal
-ACTION=="remove", GOTO="persistent_printer_end"
-# get USB ID
-SUBSYSTEMS=="usb", IMPORT{builtin}="usb_id"
-# no printer, then no action required
-ENV{ID_TYPE}!="printer", GOTO="persistent_printer_end"
+# persistent printer mapping via udev rules
 
-# get PATH ID
-IMPORT{builtin}="path_id"
+# enable/disable debugging
+#ENV{UDEV_PPM_DEBUG}="true"
+ENV{UDEV_PPM_DEBUG}="false"
 
-## Pi 1 (untested)
-# upper
-ENV{ID_PATH}=="platform-20980000.usb-usb-0:1.2:1.0",SYMLINK+="persistent_lp/lp0"
-# lower
-ENV{ID_PATH}=="platform-20980000.usb-usb-0:1.3:1.0",SYMLINK+="persistent_lp/lp1"
+# skip everything if this ...
+# ... is a device removal
+ACTION=="remove", GOTO="persistent_printer_mappings_end"
 
-## Pi 3B
-# upper left
-ENV{ID_PATH}=="platform-3f980000.usb-usb-0:1.2:1.0",SYMLINK+="persistent_lp/lp0"
-# lower left
-ENV{ID_PATH}=="platform-3f980000.usb-usb-0:1.3:1.0",SYMLINK+="persistent_lp/lp1"
-# upper right
-ENV{ID_PATH}=="platform-3f980000.usb-usb-0:1.4:1.0",SYMLINK+="persistent_lp/lp2"
-# lower right
-ENV{ID_PATH}=="platform-3f980000.usb-usb-0:1.5:1.0",SYMLINK+="persistent_lp/lp3"
+# ... isn't a usbmisc (what used to be usblp) subsystem device
+SUBSYSTEM!="usbmisc", GOTO="persistent_printer_mappings_end"
 
-## Pi 3B+
-# reverse order due to conflict with regular Pi 3B (same IDs for lp0/lp1)
-# upper left
-ENV{ID_PATH}=="platform-3f980000.usb-usb-0:1.1.2:1.0",SYMLINK+="persistent_lp/lp2"
-# lower left
-ENV{ID_PATH}=="platform-3f980000.usb-usb-0:1.1.3:1.0",SYMLINK+="persistent_lp/lp3"
-# upper right
-ENV{ID_PATH}=="platform-3f980000.usb-usb-0:1.3:1.0",SYMLINK+="persistent_lp/lp1"
-# lower right
-ENV{ID_PATH}=="platform-3f980000.usb-usb-0:1.2:1.0",SYMLINK+="persistent_lp/lp0"
+# ... isn't a printer-type device
+SUBSYSTEMS=="usb", ATTRS{bInterfaceClass}!="07", GOTO="persistent_printer_mappings_end"
 
-## Pi 4B
-# USB2 and below only
-# upper left
-ENV{ID_PATH}=="platform-fd500000.pcie-pci-0000:01:00.0-usb-0:1.3:1.0",SYMLINK+="persistent_lp/lp0"
-# lower left
-ENV{ID_PATH}=="platform-fd500000.pcie-pci-0000:01:00.0-usb-0:1.4:1.0",SYMLINK+="persistent_lp/lp1"
-# USB3
-# upper right
-ENV{ID_PATH}=="platform-fd500000.pcie-pci-0000:01:00.0-usbv3-0:1:1.0",SYMLINK+="persistent_lp/lp2"
-# lower right
-ENV{ID_PATH}=="platform-fd500000.pcie-pci-0000:01:00.0-usbv3-0:2:1.0",SYMLINK+="persistent_lp/lp3"
-# USB2 and below
-# upper right
-ENV{ID_PATH}=="platform-fd500000.pcie-pci-0000:01:00.0-usb-0:1.1:1.0",SYMLINK+="persistent_lp/lp2"
-# lower right
-ENV{ID_PATH}=="platform-fd500000.pcie-pci-0000:01:00.0-usb-0:1.2:1.0",SYMLINK+="persistent_lp/lp3"
+ENV{UDEV_PPM_DEBUG}=="true", RUN+="/usr/bin/logger '[UDEV-PPM-DEBUG] Printer detected! Attempting to determine which Pi model we are are running on ...'"
+
+# Pi model detection starts here
+
+# Pi4B detected, as ...
+# ... this device has a PCIe platform of the 'fd500000.pcie' type
+KERNELS=="*fd500000.pcie*", GOTO="switch_pi4b"
+# ... has a 'scb' subsystem in its search path
+KERNELS=="*scb*", GOTO="switch_pi4b"
+
+# Pi3B+ detected, as it has a LAN7800 hub (vendor: 0424, product: 2514) in its USB tree
+SUBSYSTEMS=="usb", ATTRS{idVendor}=="0424", ATTRS{idProduct}=="2514", GOTO="switch_pi3b_plus"
+
+# no better matches, so we're likely on a Pi3B or Pi1
+GOTO="switch_pi3b"
+
+# actual port assignments start here
+
+# Pi4B
+LABEL="switch_pi4b"
+ENV{UDEV_PPM_DEBUG}=="true", RUN+="/usr/bin/logger '[UDEV-PPM-DEBUG] SWITCH: Pi4B detected!'"
+KERNELS=="1-1.3:1.0", SYMLINK+="persistent_lp/lp0", RUN+="/usr/bin/logger '[UDEV-PPM] Pi4B: assigned lp0'", GOTO="persistent_printer_mappings_end"
+KERNELS=="1-1.4:1.0", SYMLINK+="persistent_lp/lp1", RUN+="/usr/bin/logger '[UDEV-PPM] Pi4B: assigned lp1'", GOTO="persistent_printer_mappings_end"
+KERNELS=="2-1:1.0", SYMLINK+="persistent_lp/lp2", RUN+="/usr/bin/logger '[UDEV-PPM] Pi4B: assigned lp2 (USB3)'", GOTO="persistent_printer_mappings_end"
+KERNELS=="2-2:1.0", SYMLINK+="persistent_lp/lp3", RUN+="/usr/bin/logger '[UDEV-PPM] Pi4B: assigned lp3 (USB3)'", GOTO="persistent_printer_mappings_end"
+KERNELS=="1-1.1:1.0", SYMLINK+="persistent_lp/lp2", RUN+="/usr/bin/logger '[UDEV-PPM] Pi4B: assigned lp2 (USB2)'", GOTO="persistent_printer_mappings_end"
+KERNELS=="1-1.2:1.0", SYMLINK+="persistent_lp/lp3", RUN+="/usr/bin/logger '[UDEV-PPM] Pi4B: assigned lp3 (USB2)'", GOTO="persistent_printer_mappings_end"
+GOTO="persistent_printer_mappings_end"
+
+#Pi3B+
+LABEL="switch_pi3b_plus"
+ENV{UDEV_PPM_DEBUG}=="true", RUN+="/usr/bin/logger '[UDEV-PPM-DEBUG] SWITCH: Pi3B+ detected!'"
+KERNELS=="1-1.1.2:1.0", SYMLINK+="persistent_lp/lp2", RUN+="/usr/bin/logger '[UDEV-PPM] Pi3B+: assigned lp2'", GOTO="persistent_printer_mappings_end"
+KERNELS=="1-1.1.3:1.0", SYMLINK+="persistent_lp/lp3", RUN+="/usr/bin/logger '[UDEV-PPM] Pi3B+: assigned lp3'", GOTO="persistent_printer_mappings_end"
+KERNELS=="1-1.3:1.0", SYMLINK+="persistent_lp/lp1", RUN+="/usr/bin/logger '[UDEV-PPM] Pi3B+: assigned lp1'", GOTO="persistent_printer_mappings_end"
+KERNELS=="1-1.2:1.0", SYMLINK+="persistent_lp/lp0", RUN+="/usr/bin/logger '[UDEV-PPM] Pi3B+: assigned lp0'", GOTO="persistent_printer_mappings_end"
+GOTO="persistent_printer_mappings_end"
+
+#Pi3B/Pi1
+LABEL="switch_pi3b"
+ENV{UDEV_PPM_DEBUG}=="true", RUN="/usr/bin/logger '[UDEV-PPM-DEBUG] SWITCH: Pi3B/Pi1 detected!'"
+KERNELS=="1-1.2:1.0", SYMLINK+="persistent_lp/lp0", RUN+="/usr/bin/logger '[UDEV-PPM] Pi3B/Pi1: assigned lp0'", GOTO="persistent_printer_mappings_end"
+KERNELS=="1-1.3:1.0", SYMLINK+="persistent_lp/lp1", RUN+="/usr/bin/logger '[UDEV-PPM] Pi3B/Pi1: assigned lp1'", GOTO="persistent_printer_mappings_end"
+KERNELS=="1-1.4:1.0", SYMLINK+="persistent_lp/lp2", RUN+="/usr/bin/logger '[UDEV-PPM] Pi3B: assigned lp2'", GOTO="persistent_printer_mappings_end"
+KERNELS=="1-1.5:1.0", SYMLINK+="persistent_lp/lp3", RUN+="/usr/bin/logger '[UDEV-PPM] Pi3B: assigned lp3'", GOTO="persistent_printer_mappings_end"
+
+# end of ruleset marker
+LABEL="persistent_printer_mappings_end"
 UDEVRULES2
 		# as we already downloaded the required packages during the chroot phase, we can install p910nd without needing internet access
 		apt-get install -y p910nd xinetd 2>&1 | tee /data/$MY_ENV-apt.log
@@ -235,59 +246,70 @@ P910ND_TEMPLATE3
 			COUNT=$((COUNT+1))
 		done
 		cat > /etc/udev/rules.d/050_persistent_printer_mappings.rules <<UDEVRULES3
-# do not act upon removal
-ACTION=="remove", GOTO="persistent_printer_end"
-# get USB ID
-SUBSYSTEMS=="usb", IMPORT{builtin}="usb_id"
-# no printer, then no action required
-ENV{ID_TYPE}!="printer", GOTO="persistent_printer_end"
+# persistent printer mapping via udev rules
 
-# get PATH ID
-IMPORT{builtin}="path_id"
+# enable/disable debugging
+#ENV{UDEV_PPM_DEBUG}="true"
+ENV{UDEV_PPM_DEBUG}="false"
 
-## Pi 1 (untested)
-# upper
-ENV{ID_PATH}=="platform-20980000.usb-usb-0:1.2:1.0",SYMLINK+="persistent_lp/lp0"
-# lower
-ENV{ID_PATH}=="platform-20980000.usb-usb-0:1.3:1.0",SYMLINK+="persistent_lp/lp1"
+# skip everything if this ...
+# ... is a device removal
+ACTION=="remove", GOTO="persistent_printer_mappings_end"
 
-## Pi 3B
-# upper left
-ENV{ID_PATH}=="platform-3f980000.usb-usb-0:1.2:1.0",SYMLINK+="persistent_lp/lp0"
-# lower left
-ENV{ID_PATH}=="platform-3f980000.usb-usb-0:1.3:1.0",SYMLINK+="persistent_lp/lp1"
-# upper right
-ENV{ID_PATH}=="platform-3f980000.usb-usb-0:1.4:1.0",SYMLINK+="persistent_lp/lp2"
-# lower right
-ENV{ID_PATH}=="platform-3f980000.usb-usb-0:1.5:1.0",SYMLINK+="persistent_lp/lp3"
+# ... isn't a usbmisc (what used to be usblp) subsystem device
+SUBSYSTEM!="usbmisc", GOTO="persistent_printer_mappings_end"
 
-## Pi 3B+
-# reverse order due to conflict with regular Pi 3B (same IDs for lp0/lp1)
-# upper left
-ENV{ID_PATH}=="platform-3f980000.usb-usb-0:1.1.2:1.0",SYMLINK+="persistent_lp/lp2"
-# lower left
-ENV{ID_PATH}=="platform-3f980000.usb-usb-0:1.1.3:1.0",SYMLINK+="persistent_lp/lp3"
-# upper right
-ENV{ID_PATH}=="platform-3f980000.usb-usb-0:1.3:1.0",SYMLINK+="persistent_lp/lp1"
-# lower right
-ENV{ID_PATH}=="platform-3f980000.usb-usb-0:1.2:1.0",SYMLINK+="persistent_lp/lp0"
+# ... isn't a printer-type device
+SUBSYSTEMS=="usb", ATTRS{bInterfaceClass}!="07", GOTO="persistent_printer_mappings_end"
 
-## Pi 4B
-# USB2 and below only
-# upper left
-ENV{ID_PATH}=="platform-fd500000.pcie-pci-0000:01:00.0-usb-0:1.3:1.0",SYMLINK+="persistent_lp/lp0"
-# lower left
-ENV{ID_PATH}=="platform-fd500000.pcie-pci-0000:01:00.0-usb-0:1.4:1.0",SYMLINK+="persistent_lp/lp1"
-# USB3
-# upper right
-ENV{ID_PATH}=="platform-fd500000.pcie-pci-0000:01:00.0-usbv3-0:1:1.0",SYMLINK+="persistent_lp/lp2"
-# lower right
-ENV{ID_PATH}=="platform-fd500000.pcie-pci-0000:01:00.0-usbv3-0:2:1.0",SYMLINK+="persistent_lp/lp3"
-# USB2 and below
-# upper right
-ENV{ID_PATH}=="platform-fd500000.pcie-pci-0000:01:00.0-usb-0:1.1:1.0",SYMLINK+="persistent_lp/lp2"
-# lower right
-ENV{ID_PATH}=="platform-fd500000.pcie-pci-0000:01:00.0-usb-0:1.2:1.0",SYMLINK+="persistent_lp/lp3"
+ENV{UDEV_PPM_DEBUG}=="true", RUN+="/usr/bin/logger '[UDEV-PPM-DEBUG] Printer detected! Attempting to determine which Pi model we are are running on ...'"
+
+# Pi model detection starts here
+
+# Pi4B detected, as ...
+# ... this device has a PCIe platform of the 'fd500000.pcie' type
+KERNELS=="*fd500000.pcie*", GOTO="switch_pi4b"
+# ... has a 'scb' subsystem in its search path
+KERNELS=="*scb*", GOTO="switch_pi4b"
+
+# Pi3B+ detected, as it has a LAN7800 hub (vendor: 0424, product: 2514) in its USB tree
+SUBSYSTEMS=="usb", ATTRS{idVendor}=="0424", ATTRS{idProduct}=="2514", GOTO="switch_pi3b_plus"
+
+# no better matches, so we're likely on a Pi3B or Pi1
+GOTO="switch_pi3b"
+
+# actual port assignments start here
+
+# Pi4B
+LABEL="switch_pi4b"
+ENV{UDEV_PPM_DEBUG}=="true", RUN+="/usr/bin/logger '[UDEV-PPM-DEBUG] SWITCH: Pi4B detected!'"
+KERNELS=="1-1.3:1.0", SYMLINK+="persistent_lp/lp0", RUN+="/usr/bin/logger '[UDEV-PPM] Pi4B: assigned lp0'", GOTO="persistent_printer_mappings_end"
+KERNELS=="1-1.4:1.0", SYMLINK+="persistent_lp/lp1", RUN+="/usr/bin/logger '[UDEV-PPM] Pi4B: assigned lp1'", GOTO="persistent_printer_mappings_end"
+KERNELS=="2-1:1.0", SYMLINK+="persistent_lp/lp2", RUN+="/usr/bin/logger '[UDEV-PPM] Pi4B: assigned lp2 (USB3)'", GOTO="persistent_printer_mappings_end"
+KERNELS=="2-2:1.0", SYMLINK+="persistent_lp/lp3", RUN+="/usr/bin/logger '[UDEV-PPM] Pi4B: assigned lp3 (USB3)'", GOTO="persistent_printer_mappings_end"
+KERNELS=="1-1.1:1.0", SYMLINK+="persistent_lp/lp2", RUN+="/usr/bin/logger '[UDEV-PPM] Pi4B: assigned lp2 (USB2)'", GOTO="persistent_printer_mappings_end"
+KERNELS=="1-1.2:1.0", SYMLINK+="persistent_lp/lp3", RUN+="/usr/bin/logger '[UDEV-PPM] Pi4B: assigned lp3 (USB2)'", GOTO="persistent_printer_mappings_end"
+GOTO="persistent_printer_mappings_end"
+
+#Pi3B+
+LABEL="switch_pi3b_plus"
+ENV{UDEV_PPM_DEBUG}=="true", RUN+="/usr/bin/logger '[UDEV-PPM-DEBUG] SWITCH: Pi3B+ detected!'"
+KERNELS=="1-1.1.2:1.0", SYMLINK+="persistent_lp/lp2", RUN+="/usr/bin/logger '[UDEV-PPM] Pi3B+: assigned lp2'", GOTO="persistent_printer_mappings_end"
+KERNELS=="1-1.1.3:1.0", SYMLINK+="persistent_lp/lp3", RUN+="/usr/bin/logger '[UDEV-PPM] Pi3B+: assigned lp3'", GOTO="persistent_printer_mappings_end"
+KERNELS=="1-1.3:1.0", SYMLINK+="persistent_lp/lp1", RUN+="/usr/bin/logger '[UDEV-PPM] Pi3B+: assigned lp1'", GOTO="persistent_printer_mappings_end"
+KERNELS=="1-1.2:1.0", SYMLINK+="persistent_lp/lp0", RUN+="/usr/bin/logger '[UDEV-PPM] Pi3B+: assigned lp0'", GOTO="persistent_printer_mappings_end"
+GOTO="persistent_printer_mappings_end"
+
+#Pi3B/Pi1
+LABEL="switch_pi3b"
+ENV{UDEV_PPM_DEBUG}=="true", RUN="/usr/bin/logger '[UDEV-PPM-DEBUG] SWITCH: Pi3B/Pi1 detected!'"
+KERNELS=="1-1.2:1.0", SYMLINK+="persistent_lp/lp0", RUN+="/usr/bin/logger '[UDEV-PPM] Pi3B/Pi1: assigned lp0'", GOTO="persistent_printer_mappings_end"
+KERNELS=="1-1.3:1.0", SYMLINK+="persistent_lp/lp1", RUN+="/usr/bin/logger '[UDEV-PPM] Pi3B/Pi1: assigned lp1'", GOTO="persistent_printer_mappings_end"
+KERNELS=="1-1.4:1.0", SYMLINK+="persistent_lp/lp2", RUN+="/usr/bin/logger '[UDEV-PPM] Pi3B: assigned lp2'", GOTO="persistent_printer_mappings_end"
+KERNELS=="1-1.5:1.0", SYMLINK+="persistent_lp/lp3", RUN+="/usr/bin/logger '[UDEV-PPM] Pi3B: assigned lp3'", GOTO="persistent_printer_mappings_end"
+
+# end of ruleset marker
+LABEL="persistent_printer_mappings_end"
 UDEVRULES3
 		# as we already downloaded the required packages during the chroot phase, we can install p910nd without needing internet access
 		apt-get install -y p910nd xinetd 2>&1 | tee -a /data/$MY_ENV-apt.log
