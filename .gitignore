@@ -4,3 +4,4 @@ base_install.log
 custom/autostart.sh
 custom/ENV?-custom-install.sh
 custom/*/*
+presentation_slides/*.od*
