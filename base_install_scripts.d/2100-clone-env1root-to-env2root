@@ -12,6 +12,10 @@ else
 	exit 1
 fi
 
+echo "running file system check on rootfs2 ..."
+# ... or else tune2fs -U would complain and fail
+fsck.ext4 -f -y $PARTSIX
+
 echo "Changing partition label to rootfs2 and assigning new UUID ..."
 # to make sure we can tell our clones apart, we set a new LABEL and UUID
 tune2fs -L rootfs2 -U $(uuid) $PARTSIX
