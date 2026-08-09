@@ -4,7 +4,11 @@
 if [ -n "$OVERRIDE_ROOTFS_MAXSIZE" ]; then
 	ROOTFS_MAXSIZE="$OVERRIDE_ROOTFS_MAXSIZE"
 else
-	ROOTFS_MAXSIZE="8G"
+	if [ "$(git symbolic-ref --short HEAD)" == "x2goserver-kdrive-lxde" ]; then
+		ROOTFS_MAXSIZE="16G"
+	else
+		ROOTFS_MAXSIZE="8G"
+	fi
 fi
 
 if [ -n "$OVERRIDE_DATA_MAXSIZE" ]; then
