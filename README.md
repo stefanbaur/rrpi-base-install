@@ -61,10 +61,10 @@ The following scripts are located in `/usr/local/sbin` in each environment; as i
 
 ### Disabling/Enabling Overlay and Write-Protect Modes using `disable-bootro` and `enable-bootro`
 You can force `/boot/firmware` to be (persistently) writeable or completely readonly by passing `disable-bootro` or `enable-bootro` as the first parameter to the three scripts above (see above to see which one understands which). Using one of these parameters requires an additional reboot:
-    - call the script with the parameter to enable or block write access to `/boot/firmware` on next boot
-    - reboot
-    - run the script again without the parameter to activate the overlay-no-recurse mode on next boot
-    - reboot again
+  - call the script with the parameter to enable or block write access to `/boot/firmware` on next boot
+  - reboot
+  - run the script again without the parameter to activate the overlay-no-recurse mode on next boot
+  - reboot again
 
 ## Update-Related Tools
 The script `update-other-env.sh` accepts a number as first (mandatory) parameter, `full` as an (optional) second parameter, and `force` as an (optional) second or third parameter (not recommended). 
