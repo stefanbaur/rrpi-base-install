@@ -49,6 +49,36 @@
     - Once in the other environment, you can either set it to be the default until the next update, or apply the updates again to the now inactive environment.
   - You will need to apply updates to ENV1 as well, but hopefully, due to the minimal installation there, updates should occur way less frequently than in the other two environments.
 
+# Maintenance Tools
+The following scripts are located in `/usr/local/sbin` in each environment; as indicated by the directory name, they need to be run as `root` or using `sudo`.
+
+## Filesystem-Overlay-Related Tools
+
+### Scripts
+  - `disable-overlay.sh` - as the name suggests, this disables the overlay filesystem upon the next boot. It understands parameters `disable-bootro`, which you can use to enable (persistent) write access to `/boot/firmware` after a reboot (see below), and `force-remount-rw`, which will attempt a forced remount in persistently writable mode within the running session.
+  - `enable-overlay-no-recurse.sh` - this restores the default overlay mode that is set after installation has finished: while `/` is mounted readonly with the overlay on top, `/boot/firmware` and `/data` are set up for persistent writes. Similar to `disable-overlay.sh`'s `disable-bootro` parameter, it has a `enable-bootro` parameter. It also understands `force-remount-rw`, just like `disable-overlay.sh`. 
+  - `enable-overlay.sh` - this is included for completeness' sake, but using it is not recommended. Running this will activate the overlay mode for all mountpoints, so no writes will be persistent. This may seem tricky to undo, but calling `disable-overlay.sh` with parameter `force-remount-rw` should help.
+
+### Disabling/Enabling Overlay and Write-Protect Modes using `disable-bootro` and `enable-bootro`
+You can force `/boot/firmware` to be (persistently) writeable or completely readonly by passing `disable-bootro` or `enable-bootro` as the first parameter to this script. This requires an additional reboot:
+    - call the script with this parameter to block write access to `/boot/firmware` on next boot
+    - reboot
+    - run the script again without the parameter to activate the overlay-no-recurse mode on next boot
+    - reboot again
+
+## Update-Related Tools
+The script `update-other-env.sh` accepts a number as first (mandatory) parameter, `full` as an (optional) second parameter, and `force` as an (optional) second or third parameter (not recommended). 
+
+You should specify the number of a different environment that is currently booted, so assuming the post-install default of ENV2 being active, you could run `sudo update-other-env.sh 1` or `sudo update-other-env.sh 3`. 
+
+Without `full`, it will mount the specified environment in a changeroot and run `apt update`, followed by `apt upgrade -d -y`, `apt upgrade -y`, `apt clean` and `apt autopurge -y`.
+
+Adding the parameter `full`, will instead run `apt update`, followed by `apt full-upgrade -d -y`, `apt upgrade -y`, `apt full-upgrade -y`, `apt clean` and `apt autopurge -y` in the changeroot.
+
+## Boot-Related Tools
+  - The systemd `reboot` command, at least on Raspberry Pi OS, understands our environment numbers as a parameter. To reboot into another environment **once**, without permanently changing the setting, run `sudo reboot n`, where `n` is the number of the desired environment.
+  - To permanently switch the default boot environment, run `sudo permanent-boot-switch.sh n`, again with `n` being the number of the desired environment. This script also accepts a second (optional) parameter `reboot` to trigger an immediate reboot.
+
 # Branch-Specific Information
  - Anything branch-specific will be documented in the [OVERVIEW.md](./OVERVIEW.md) file in the root directory (not all branches have one).
  - Branch-specific settings are stored in `base_install_branch_specific.conf`, if you need to make any changes, save them as `base_install_branch_specific_<branchname>_custom.conf`, placed in `./custom/config/` (recommended), or as `base_install_branch_specific_custom.conf` in the base directory. so they won't get overwritten by a `git pull`
