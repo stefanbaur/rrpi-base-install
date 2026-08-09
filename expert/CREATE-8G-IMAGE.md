@@ -1,0 +1,40 @@
+
+# Expert Task: Create an image that works on as little as 8GB storage space
+  - With only 8GB in total, we need to shrink the rootfs partition from currently 2.somethingGB to less than 1900MB.
+  - The following was tested with `2026-06-18-raspios-trixie-arm64-lite.img.xz` - it may fail with newer images.
+  - Either use `rpi-imager` or manually download, unxzip, and write the image to your USB media. 
+  - WARNINGS:
+    - DO NOT USE A (MICRO)SD CARD.
+    - YOU CAN TRY TO USE eMMC FLASH VIA USBBOOT/RPIBOOT, BUT IT HAS A HIGHER RISK OF FAILING MID-INSTALL. CONSIDER YOURSELF WARNED.
+    - DO NOT TRY TO BOOT THIS IMAGE YET.
+    - DO NOT RUN THE RRPI `base_install.sh` SCRIPT JUST YET.
+  - Instead, leave the media plugged in on your PC, or plug it into an already running Raspberry Pi OS.
+  - If you're doing this on an Intel/AMD based PC, you will need to setup qemu-user so you can chroot into an arm64 environment.
+  - Prepare the chroot environment:
+    - Mount the USB media's partition 2 to a mount point of your choice, e.g. `sudo mount /dev/my-USB-media-2 /mymountpoint`
+    - Mount the USB media's partition 1 to the `./boot/firmware` subdirectory, e.g. `sudo mount /dev/my-USB-media-1 /mymountpoint/boot/firmware`
+    - Bind-Mount your actual `/dev` to the `./dev` subdirectory, e.g. `sudo mount --bind /dev /mymountpoint/dev`
+    - Bind-Mount your actual `/sys` to the `./sys` subdirectory, e.g. `sudo mount --bind /sys /mymountpoint/sys`
+    - Mount the `proc` pseudo-filesystem to the `./proc` subdirectory, e.g. `sudo mount -t proc none /mymountpoint/proc`
+    - Mount the `pts` pseudo-filesystem to the `./dev/pts` subdirectory, e.g. `sudo mount -t devpts none /mymountpoint/dev/pts`
+    - Chroot into the chroot environment, e.g. `sudo chroot /mymountpoint`, and run the following commands:
+      - `dpkg -l | grep '^linux-headers' | xargs --no-run-if-empty apt purge -y` (removes all Linux header files and packages)
+      - `apt autopurge -y` (purge all packages that were dependencies of the Linux header files)
+      - `apt install -y cloud-init cloud-guest-utils uuid rfkill` (mark these packages as manually installed so they don't get purged as easily)
+      - `apt purge -y alsa-topology-conf alsa-ucm-conf bluez bluez-firmware build-essential cifs-utils cpp cpp-14 cpp-14-aarch64-linux-gnu cpp-14-for-host:arm64 cpp-aarch64-linux-gnu device-tree-compiler dirmngr dpkg-dev eatmydata exfatprogs fakeroot flashrom fuse3 g++ g++-14 g++-14-aarch64-linux-gnu g++-aarch64-linux-gnu gcc gcc-14 gcc-14-aarch64-linux-gnu gcc-14-for-host:arm64 gcc-aarch64-linux-gnu gdb gnupg gnupg-l10n gnupg-utils gpg gpg-agent gpg-wks-client gpgconf gpgsm gpgv gpiod htop linux-kbuild-6.18.34+rpt linux-libc-dev lua5.1 luajit make manpages-dev mkvtoolnix ncdu ntfs-3g p7zip-full pahole pastebinit pinentry-curses pkg-config:arm64 pkgconf:arm64 pkgconf-bin python-babel-localedata python-is-python3 python3-arrow python3-babel python3-colorzero python3-dateutil python3-distro python3-fqdn python3-gpiozero python3-isoduration python3-lgpio python3-libgpiod python3-pip-whl python3-rfc3339-validator python3-rfc3986-validator python3-setuptools-whl python3-smbus2 python3-spidev python3-typeshed python3-venv python3-webcolors python3.13-venv rpcsvc-proto sq ssh-import-id strace udisks2 unzip v4l-utils zip` (remove all packages we have determined to be unnecessary)
+      - `apt autopurge -y` (purge all packages that were dependencies of the packages we just purged)
+      - `apt clean` (tell apt to remove files it can regenerate again later)
+      - `exit`
+    - Now outside the chroot, umount everything recursively: `sudo umount -R /mymountpoint`
+  - Next you need to run `gparted` - how you do that will depend on your distribution/individual setup. In some setups, simply running `gparted` at the command line is enough to trigger the prompt for your root/sudo password, some will need to run `sudo gparted`, others will need to start it from their GUI menu ("Start Button").
+    - In gparted, make sure you have selected your `/dev/my-USB-media` disk.
+    - You should now see two partitions, partition 1 is of type `FAT` and 512MB in size, partition 2 is of type `ext4` and should be something between 2GB and 2.5GB in size.
+    - Select partition 2, right-click it, and select `Resize/Move`.
+    - Make sure you grab the slider at the very right, and slide it as far left as possible, shrinking the partition to its absolute minimum size. This should show up as 1.86GiB (not GB) or less.
+    - Confirm your selections and apply the changes.
+    - Exit `gparted`
+  - Just for good measure, remove and reinsert your USB media. (If you are using eMMC flash, remember to re-run usbboot/rpiboot.)
+  - Remember that you need to also:
+      - Set `OVERRIDE_ROOTFS_MAXSIZE="1900M"` in `base_install.conf` or `base_install_custom.conf`
+      - Set `OVERRIDE_DATA_MAXSIZE="200M"` in `base_install.conf` or `base_install_custom.conf`
+  - Now you should be able to run `sudo base_install.sh`.
