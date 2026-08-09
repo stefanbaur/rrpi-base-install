@@ -43,11 +43,25 @@ fi
 # add config.txt parameters for SPI touchscreen
 if [ -n "$DEBUG_VIA_SPI" ] && ! [ "false" == "$DEBUG_VIA_SPI" ] ; then
 	echo "Debugging via SPI Touchscreen requested."
+	if [ -n "$DEBUG_VIA_SPI_DTO_DOWNLOAD" ]; then
+		echo "Downloading and unzipping Device Tree Overlay for SPI Touchscreen"
+		mkdir -p ./custom/spi_dtbo
+		wget -P ./custom/spi_dtbo/ "$DEBUG_VIA_SPI_DTO_DOWNLOAD"
+		(cd ./custom/spi_dtbo && unzip *.zip)
+		echo "Copying Device Tree Overlay for SPI Touchscreen to target's /boot/firmware/"
+		rsync -aPvH ./custom/spi_dtbo/*.dtbo /boot/firmware/
+	fi
 	echo "Changing configuration files accordingly ..."
 	tail -n 1 $MOUNTPOINT/boot/firmware/config.txt | grep -q '^\[all\]$' || echo "[all]" >> $MOUNTPOINT/boot/firmware/config.txt
 	echo "# for SPI TouchScreen" >> $MOUNTPOINT/boot/firmware/config.txt
 	echo "dtparam=spi=on" >> $MOUNTPOINT/boot/firmware/config.txt
-	echo "dtoverlay=piscreen,speed=16000000,rotate=270" >> $MOUNTPOINT/boot/firmware/config.txt
+	if [ -z "$DEBUG_VIA_SPI_CONFIG_PARAM" ]; then
+		export DEBUG_VIA_SPI_CONFIG_PARAM="dtoverlay=piscreen,speed=16000000,rotate=270"
+	fi
+	echo "$DEBUG_VIA_SPI_CONFIG_PARAM" >> $MOUNTPOINT/boot/firmware/config.txt
+	if [ -n "$DEBUG_VIA_SPI_CONFIG_ADD_PARAMS" ]; then
+		echo -e "$DEBUG_VIA_SPI_CONFIG_ADD_PARAMS" >> $MOUNTPOINT/boot/firmware/config.txt
+	fi
 	sed -e 's/^dtoverlay=vc4-kms-v3d/# disabled due to SPI TouchScreen: dtoverlay=vc4-kms-v3d/' -i $MOUNTPOINT/boot/firmware/config.txt
 	sed -e 's/^max_framebuffers=2/# disabled due to SPI TouchScreen: max_framebuffers=2/' -i $MOUNTPOINT/boot/firmware/config.txt
 fi
