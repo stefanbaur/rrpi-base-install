@@ -76,7 +76,7 @@ Without `full`, it will mount the specified environment in a changeroot and run 
 Adding the parameter `full`, will instead run `apt update`, followed by `apt full-upgrade -d -y`, `apt upgrade -y`, `apt full-upgrade -y`, `apt clean` and `apt autopurge -y` in the changeroot.
 
 ## Boot-Related Tools
-  - The systemd `reboot` command, at least on Raspberry Pi OS, understands our environment numbers as a parameter. To reboot into another environment **once**, without permanently changing the setting, run `sudo reboot n`, where `n` is the number of the desired environment.
+  - The systemd `reboot` command, at least on Raspberry Pi OS, understands our environment numbers as an optional parameter. To reboot into another environment **once**, without permanently changing the setting, run `sudo reboot n`, where `n` is the number of the desired environment.
   - To permanently switch the default boot environment, run `sudo permanent-boot-switch.sh n`, again with `n` being the number of the desired environment. This script also accepts a second (optional) parameter `reboot` to trigger an immediate reboot.
 
 # Branch-Specific Information
