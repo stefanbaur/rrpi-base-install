@@ -52,7 +52,7 @@ if [ -n "$DEBUG_VIA_SPI" ] && ! [ "false" == "$DEBUG_VIA_SPI" ] ; then
 	sed -e 's/^max_framebuffers=2/# disabled due to SPI TouchScreen: max_framebuffers=2/' -i $MOUNTPOINT/boot/firmware/config.txt
 fi
 
-# change /etc/default/consoöe-setup to huge font
+# change /etc/default/console-setup to huge font
 if [ -n "$DEBUG_HUGE_CONSOLE_FONT" ] && ! [ "false" == "$DEBUG_HUGE_CONSOLE_FONT" ] ; then
 	echo "Debugging via huge console font requested."
 	echo "Changing configuration files accordingly ..."
