@@ -48,8 +48,8 @@ if [ -n "$DEBUG_VIA_SPI" ] && ! [ "false" == "$DEBUG_VIA_SPI" ] ; then
 		mkdir -p ./custom/spi_dtbo
 		wget -P ./custom/spi_dtbo/ "$DEBUG_VIA_SPI_DTO_DOWNLOAD"
 		(cd ./custom/spi_dtbo && unzip *.zip)
-		echo "Copying Device Tree Overlay for SPI Touchscreen to target's /boot/firmware/"
-		rsync -aPvH ./custom/spi_dtbo/*.dtbo $MOUNTPOINT/boot/firmware/
+		echo "Copying Device Tree Overlay for SPI Touchscreen to target's /boot/firmware/overlays/"
+		rsync -aPvH ./custom/spi_dtbo/*.dtbo $MOUNTPOINT/boot/firmware/overlays/
 	fi
 	echo "Changing configuration files accordingly ..."
 	tail -n 1 $MOUNTPOINT/boot/firmware/config.txt | grep -q '^\[all\]$' || echo "[all]" >> $MOUNTPOINT/boot/firmware/config.txt
