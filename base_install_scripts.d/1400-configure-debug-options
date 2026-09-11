@@ -65,7 +65,7 @@ if [ -n "$DEBUG_VIA_SPI" ] && ! [ "false" == "$DEBUG_VIA_SPI" ] ; then
 	fi
 	if [ -n "$DEBUG_VIA_SPI_CMDLINE_ADD_PARAMS" ]; then
 		echo "Adding additional parameters to /boot/firmware/cmdline.txt ..."
-		sed 	-e 's/$/ '$DEBUG_VIA_SPI_CMDLINE_ADD_PARAMS'/' \
+		sed 	-e 's/$/ '"$DEBUG_VIA_SPI_CMDLINE_ADD_PARAMS"'/' \
 			-i $MOUNTPOINT/boot/firmware/cmdline.txt
 	fi
 	sed -e 's/^dtoverlay=vc4-kms-v3d/# disabled due to SPI TouchScreen: dtoverlay=vc4-kms-v3d/' -i $MOUNTPOINT/boot/firmware/config.txt
