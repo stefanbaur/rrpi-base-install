@@ -17,7 +17,11 @@ MY_ENV=$(cat /etc/ssh/banner)
 MY_ENV_NUMBER=$(sed -e 's/^ENV\([1-3]\).*$/\1/' /etc/ssh/banner)
 
 # show ENV1 has been booted by heartbeat-flashing the ACT LED
-[ "$MY_ENV_NUMBER" == "1" ] && echo heartbeat >/sys/devices/platform/leds/leds/ACT/trigger
+if [ "$MY_ENV_NUMBER" == "1" ] ; then
+	echo heartbeat >/sys/devices/platform/leds/leds/ACT/trigger
+else
+	echo timer >/sys/devices/platform/leds/leds/ACT/trigger
+fi
 
 
 # log our ENV and date
