@@ -4,7 +4,6 @@
 xset s off
 xset -dpms
 tint2 &
-x2goclient &
 
 # Launch Openbox
 exec openbox-session
