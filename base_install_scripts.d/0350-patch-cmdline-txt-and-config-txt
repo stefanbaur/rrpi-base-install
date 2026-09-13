@@ -1,0 +1,4 @@
+#!/bin/bash
+
+sed -e 's/ resize//g' -i $MOUNTPOINT/boot/firmware/cmdline.txt
+sed -e '/\[pi5\]/a dtparam=act_led_trigger=default-on' -e '/\[pi5\]/a dtparam=act_led_activelow=off' -e '/\[pi5\]/a dtoverlay=act-led' -i $MOUNTPOINT/boot/firmware/config.txt
