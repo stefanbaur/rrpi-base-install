@@ -1,0 +1,20 @@
+---
+all:
+  vars:
+    ansible_user: "vagrant"
+    ansible_ssh_private_key_file: "~/.ssh/ansiblepi"
+  children:
+    ungrouped:
+      hosts:
+        ansiblepi:
+    raspis:
+      children:
+        kioskpis:
+          hosts:
+            kiosk1:
+            kiosk2:
+        lamppis:
+          hosts:
+            lamppi1:
+            lamppi2:
+...
