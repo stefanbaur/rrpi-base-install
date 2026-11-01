@@ -1,0 +1,41 @@
+---
+- name: deploy ansible and install LAMP stack
+  # (requires vagrant@... account, proper sudo permissions, and pubkey already in authorized_keys)
+  hosts: lamppis
+  gather_facts: yes
+  become: true
+  vars:
+    lamp_packages:
+      - mariadb-client
+      - mariadb-server
+      - php
+      - apache2
+  tasks:
+    - name: using the dedicated apt module, make sure python3 is/gets installed, so ansible can use its full potential
+      ansible.builtin.apt:
+        state: latest
+        update_cache: true
+        name: python3
+
+    - name: install LAMP stack using the generic package module
+      ansible.builtin.package:
+        state: latest
+        name: "{{ item }}"
+      loop: "{{ lamp_packages }}"
+
+    - name: drop sample PHP info file
+      ansible.builtin.copy:
+        content: |
+          <?php
+          phpinfo();
+          ?>
+        dest: /var/www/html/index.php
+        owner: www-data
+        group: www-data
+        mode: '0644'
+
+    - name: remove static index.html file
+      ansible.builtin.file:
+        path: /var/www/html/index.html
+        state: absent
+...
